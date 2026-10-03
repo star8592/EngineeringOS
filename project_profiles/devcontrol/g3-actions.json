@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "project": "DevControl",
+  "actions": {
+    "run_main_static_qualification": {
+      "admission_action": "run_deterministic_checks",
+      "work_kinds": ["RESOLVE_MAIN_QUALIFICATION"],
+      "repository": "/mnt/disk1/Code/DevControl2",
+      "source_ref": "origin/main",
+      "argv": ["./scripts/release_gate.sh", "static"],
+      "timeout_seconds": 240,
+      "target_mutation": false,
+      "snapshot_mode": "git_archive"
+    }
+  }
+}

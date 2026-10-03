@@ -174,12 +174,13 @@ def run_cycle() -> dict:
         atomic_json(STATE / 'action-brief.json', brief)
         atomic_json(STATE / 'time-series-summary.json', summary)
         run_checked(['python3', 'src/engineeringos/action_details.py'], timeout=60)
+        run_checked(['python3', 'src/engineeringos/g3_controller.py'], timeout=300)
 
         completed_at = utcnow()
         status = {
             'schema_version': 1,
             'health': 'HEALTHY',
-            'mode': 'G2_SHADOW',
+            'mode': 'G2_SHADOW_G3_PILOT',
             'started_at': started_at,
             'completed_at': completed_at,
             'duration_seconds': round(time.monotonic() - started, 3),

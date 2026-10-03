@@ -8,6 +8,7 @@
 <h2>Control loop</h2><div class="flow"><span class="node">Evidence</span><span>→</span><span class="node">Reconciliation</span><span>→</span><span class="node">Policy</span><span>→</span><span class="node">Manager</span><span>→</span><span class="node">Queue</span><span>→</span><span class="node">Scheduler</span><span>→</span><span class="node">Command</span><span>→</span><span class="node">Evidence</span><span>→</span><span class="node">Closure</span></div>
 <h2>Shadow execution</h2><div class="grid" id="loop"></div>
 <h2>Convergence trend</h2><div class="grid" id="trend"></div>
+<h2>G3 bounded diagnostics</h2><div class="grid" id="g3"></div>
 <h2>Work queue</h2><table><thead><tr><th>P</th><th>State</th><th>Work</th><th>Assurance</th></tr></thead><tbody id="queue"></tbody></table>
 <script>
 const fmt=v=>v===undefined||v===null?'—':String(v);
@@ -16,8 +17,8 @@ Promise.all([
  fetch('./runtime/snapshot.json').then(r=>{if(!r.ok)throw new Error('snapshot '+r.status);return r.json()}),
  fetch('./runtime/control-loop.json').then(r=>{if(!r.ok)throw new Error('control loop '+r.status);return r.json()}),
  fetch('./runtime/queue.json').then(r=>{if(!r.ok)throw new Error('queue '+r.status);return r.json()}),
- opt('./runtime/supervisor.json'),opt('./runtime/action-brief.json'),opt('./runtime/action-details.json'),opt('./runtime/time-series.json')
-]).then(([d,c,q,s,b,ad,h])=>{
+ opt('./runtime/supervisor.json'),opt('./runtime/action-brief.json'),opt('./runtime/action-details.json'),opt('./runtime/time-series.json'),opt('./runtime/g3-controller.json'),opt('./runtime/g3-execution.json')
+]).then(([d,c,q,s,b,ad,h,g3c,g3e])=>{
  meta.textContent=`${d.target} · ${d.observed_at} · ${d.mode} · ${d.source_head.slice(0,12)}`;
  supervisor.innerHTML=[['Supervisor',s?.health||'STARTING'],['Last cycle',s?.completed_at||s?.failed_at||'—'],['Observations',h?.observations||0],['Active work',b?.active_work_items??'—']].map(x=>`<div class=card><small>${x[0]}</small><h2>${fmt(x[1])}</h2></div>`).join('');
  brief.innerHTML=(b?.actions||[]).map(x=>`<tr><td>P${x.priority}</td><td><strong>${x.kind}</strong><br><small>${x.reason}</small></td><td><span class=pill>${x.state}</span> <span class=pill>${x.schedule_state}</span></td><td>${fmt(x.lane)}<br><small>${x.required_assurance}</small></td></tr>`).join('')||'<tr><td colspan=4>No active advisory items.</td></tr>';
@@ -27,6 +28,7 @@ Promise.all([
  metrics.innerHTML=cards.map(x=>`<div class=card><small>${x[0]}</small><h2>${fmt(x[1])}</h2></div>`).join('');
  loop.innerHTML=[['Succeeded',c.summary.succeeded],['Blocked',c.summary.blocked],['Event-backed items',c.summary.items]].map(x=>`<div class=card><small>${x[0]}</small><h2>${fmt(x[1])}</h2></div>`).join('');
  const deltas=h?.debt_delta||{};trend.innerHTML=Object.keys(deltas).length?Object.entries(deltas).map(([k,v])=>`<div class=card><small>${k}</small><h2>${v>0?'+':''}${v}</h2></div>`).join(''):'<div class=card><small>Trend</small><h2>Collecting baseline…</h2></div>';
+ g3.innerHTML=(g3c?.decisions||[]).map(x=>`<div class=card><small>${x.kind}</small><h2>${x.decision}</h2><div>${fmt(x.reason)}</div>${x.check_result?`<small>check=${x.check_result} · ${(x.source_sha||'').slice(0,12)}</small>`:''}</div>`).join('')+(g3e?`<div class=card><small>Latest bounded execution</small><h2>${g3e.check_result}</h2><div>${g3e.latest.action}</div><small>${g3e.latest.source_sha.slice(0,12)} · target mutation OFF</small></div>`:'')||'<div class=card><small>G3 pilot</small><h2>No bounded action</h2></div>';
  queue.innerHTML=q.items.map(x=>`<tr><td>P${x.priority}</td><td>${x.state}</td><td>${x.kind}<br><small>${x.reason}</small></td><td>${x.required_assurance}</td></tr>`).join('');
 }).catch(e=>meta.textContent='Projection unavailable: '+e.message);
 </script>

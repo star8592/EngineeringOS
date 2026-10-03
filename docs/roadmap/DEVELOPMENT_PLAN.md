@@ -83,7 +83,7 @@ Current order:
 2. Use its action brief to reconcile the current DevControl queue, especially artifact/deployment provenance, dirty/overlap/divergence findings, and duplicate heads.
 3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
-5. Prove G3 entry criteria over sustained dogfood, then enable a very small bounded-action allowlist.
+5. Continue G3 pilot dogfood with the single deterministic-check allowlist; prove deferral, idempotency, evidence closure, and no target mutation before adding any second action class.
 6. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
 
 ## Definition of Done for a development change

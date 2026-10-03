@@ -29,6 +29,8 @@ def project():
     brief=optional_copy_json(runtime('action-brief.json'),'dashboard/runtime/action-brief.json')
     details=optional_copy_json(runtime('action-details.json'),'dashboard/runtime/action-details.json')
     history=optional_copy_json(runtime('time-series-summary.json'),'dashboard/runtime/time-series.json')
-    return {'snapshot':snap['content_sha256'],'queue_items':len(queue['items']),'loop_items':len(loop['items']),'supervisor_health':status['health'] if status else 'STARTING','action_count':len(brief['actions']) if brief else 0,'detail_count':len(details['items']) if details else 0,'observations':history['observations'] if history else 0}
+    g3=optional_copy_json(runtime('g3/controller.json'),'dashboard/runtime/g3-controller.json')
+    g3exec=optional_copy_json(runtime('g3/projection.json'),'dashboard/runtime/g3-execution.json')
+    return {'snapshot':snap['content_sha256'],'queue_items':len(queue['items']),'loop_items':len(loop['items']),'supervisor_health':status['health'] if status else 'STARTING','action_count':len(brief['actions']) if brief else 0,'detail_count':len(details['items']) if details else 0,'observations':history['observations'] if history else 0,'g3_decisions':len(g3['decisions']) if g3 else 0,'g3_check_result':g3exec.get('check_result') if g3exec else None}
 
 if __name__=='__main__': print(json.dumps(project(),indent=2))
