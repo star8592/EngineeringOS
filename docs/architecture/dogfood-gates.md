@@ -19,3 +19,6 @@ Permit selected branch/task convergence actions when dependency, lease, CI, prov
 
 ## G5 — Production-affecting automation
 Only after sustained dogfood evidence. Production actions require project policy, exact identity/provenance, post-action verification, and rollback evidence.
+
+## Collision gate
+Before any future target mutation, the dispatcher must compare planned mutation surface with active development state. Dirty state alone is not a collision; demonstrated overlap is. Exact-path checks are the minimum layer and must be extended with semantic/dependency overlap for contract-sensitive changes.
