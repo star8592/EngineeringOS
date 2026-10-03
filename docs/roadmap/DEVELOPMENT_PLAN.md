@@ -81,6 +81,7 @@ Completed:
 - First executable A3/A4 formal-assurance gates for command safety (EXP-040).
 - Executable System-One/Jev typed-decision contract with an explicit no-authorization boundary (EXP-041).
 - Local open Laya provider, shadow routing, and seed Engineering Decision Benchmark (EXP-042).
+- Evidence-gated System-One provider admission with sample-size, high-risk miss, and calibration thresholds (EXP-043).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
