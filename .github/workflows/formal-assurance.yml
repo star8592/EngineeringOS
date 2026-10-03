@@ -52,3 +52,11 @@ jobs:
           lint: false
           nanoda: true
           nanoda-allow-sorry: false
+
+
+  system-one-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify System-One remains advisory-only
+        run: python3 tests/test_system_one_contract.py
