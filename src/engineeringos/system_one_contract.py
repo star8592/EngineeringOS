@@ -5,12 +5,17 @@ from typing import Any
 
 
 QUESTION_TYPES = {"choice", "score", "noul"}
-ROUTES = {
+PROCESSING_LANES = {
     "DETERMINISTIC_CANDIDATE",
     "REASONING_REVIEW",
     "FORMAL_OR_HIGH_ASSURANCE",
-    "HUMAN_REVIEW",
 }
+AUTHORITY_CHOICES = {
+    "NO_HUMAN_AUTHORITY",
+    "HUMAN_AUTHORITY_REQUIRED",
+}
+# Backward-compatible legacy route domain for persisted evidence/readers.
+ROUTES = PROCESSING_LANES | {"HUMAN_REVIEW"}
 
 
 class SystemOneContractError(ValueError):
