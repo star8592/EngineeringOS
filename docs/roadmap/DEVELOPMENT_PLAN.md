@@ -79,6 +79,7 @@ Completed:
 - Evidence-backed action drill-down for dirty workspaces, overlapping lines, duplicate heads and provenance gaps (EXP-038).
 - First G3 bounded deterministic diagnostic with authoritative CI closure (EXP-039).
 - First executable A3/A4 formal-assurance gates for command safety (EXP-040).
+- Executable System-One/Jev typed-decision contract with an explicit no-authorization boundary (EXP-041).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
