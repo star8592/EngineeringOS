@@ -21,7 +21,12 @@ for b in p['branches']:
  if wt:
   q=subprocess.run(['git','-C',wt['path'],'status','--porcelain'],text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
   dirty=(q.returncode==0 and bool(q.stdout.strip()))
- items.append({**b,'workspace':wt,'role':r,'dirty':dirty})
+  dirty_lines=q.stdout.splitlines() if q.returncode==0 else []
+  dirty_paths=[]
+  for line in dirty_lines:
+   path=line[3:] if len(line)>=4 else line
+   dirty_paths.append(path.split(' -> ')[-1])
+ items.append({**b,'workspace':wt,'role':r,'dirty':dirty,'dirty_change_count':len(dirty_lines),'dirty_paths':dirty_paths[:30]})
 # dimensions preserve evidence; no automatic merge/delete recommendation.
 duplicate=[]
 for grp in p['exact_head_aliases']:
@@ -33,7 +38,7 @@ for b in items:
  if b['role']=='development' and not b['contained_in_origin_main'] and b['behind_origin_main']>=20:
   divergence.append({'branch':b['name'],'behind':b['behind_origin_main'],'ahead':b['ahead_origin_main'],'concern':b['concern']})
 role_debt=[{'branch':b['name'],'workspace':(b['workspace'] or {}).get('path')} for b in items if b['workspace'] and b['role']=='unknown']
-dirty=[{'branch':b['name'],'role':b['role'],'workspace':b['workspace']['path']} for b in items if b['dirty']]
+dirty=[{'branch':b['name'],'role':b['role'],'workspace':b['workspace']['path'],'change_count':b['dirty_change_count'],'changed_paths':b['dirty_paths']} for b in items if b['dirty']]
 # Verification debt cannot yet be asserted without CI/release/prod evidence graph. Track as UNKNOWN rather than zero.
 report={'dimensions':{
  'duplicate_state':{'count':len(duplicate),'evidence':duplicate},

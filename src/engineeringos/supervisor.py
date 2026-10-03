@@ -173,6 +173,7 @@ def run_cycle() -> dict:
         summary = make_timeseries_summary(series)
         atomic_json(STATE / 'action-brief.json', brief)
         atomic_json(STATE / 'time-series-summary.json', summary)
+        run_checked(['python3', 'src/engineeringos/action_details.py'], timeout=60)
 
         completed_at = utcnow()
         status = {

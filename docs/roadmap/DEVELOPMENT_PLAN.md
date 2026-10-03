@@ -75,12 +75,13 @@ Completed:
 - Official tool/approval baseline + machine-readable G3 admission contract.
 - First end-to-end Shadow Control Loop using durable command/event machinery (EXP-036).
 - First evidence-backed closure of a G2 semantic false-positive (EXP-034/035).
-- Continuous 5-minute G2 project supervisor with runtime/ repository-state separation and operator action brief (EXP-037).
+- Continuous 5-minute G2 project supervisor with runtime/repository-state separation and operator action brief (EXP-037).
+- Evidence-backed action drill-down for dirty workspaces, overlapping lines, duplicate heads and provenance gaps (EXP-038).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
 2. Use its action brief to reconcile the current DevControl queue, especially artifact/deployment provenance, dirty/overlap/divergence findings, and duplicate heads.
-3. Upgrade Control Room from action/runtime summary to event/receipt/evidence drill-down while preserving projection-only semantics.
+3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Prove G3 entry criteria over sustained dogfood, then enable a very small bounded-action allowlist.
 6. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
