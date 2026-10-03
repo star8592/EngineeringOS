@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "project": "DevControl",
+  "execution_backend": "DevControl",
+  "approval_authority": "HOST_PROTOCOL",
+  "actions": {
+    "refresh_evidence": {
+      "g3_allowed": true,
+      "side_effecting": false,
+      "destructive": false,
+      "idempotent": true,
+      "reversible": true,
+      "approval_mode": "AUTO"
+    },
+    "run_deterministic_checks": {
+      "g3_allowed": true,
+      "side_effecting": false,
+      "destructive": false,
+      "idempotent": true,
+      "reversible": true,
+      "approval_mode": "AUTO"
+    },
+    "create_isolated_worktree": {
+      "g3_allowed": true,
+      "side_effecting": true,
+      "destructive": false,
+      "idempotent": true,
+      "reversible": true,
+      "approval_mode": "AUTO",
+      "requires": ["lease", "collision_clear", "idempotency_key", "execution_receipt", "outcome_probe"]
+    },
+    "delete_branch": {
+      "g3_allowed": false,
+      "approval_mode": "REQUIRE_HOST_APPROVAL"
+    },
+    "merge_protected_branch": {
+      "g3_allowed": false,
+      "approval_mode": "REQUIRE_HOST_APPROVAL"
+    },
+    "deploy_production": {
+      "g3_allowed": false,
+      "approval_mode": "REQUIRE_HOST_APPROVAL"
+    }
+  }
+}
