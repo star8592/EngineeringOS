@@ -50,8 +50,9 @@ jobs:
           build: true
           test: false
           lint: false
-          nanoda: true
-          nanoda-allow-sorry: false
+          leanchecker: true
+          axiom-audit: true
+          axiom-audit-root: EngineeringOS
 
 
   system-one-contract:
