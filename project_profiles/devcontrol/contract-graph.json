@@ -2,13 +2,153 @@
   "schema_version": 2,
   "project": "DevControl",
   "components": {
-    "source_identity": {"paths": ["VERSION", "Cargo.toml", "Cargo.lock"], "contracts": ["release-source-identity"], "artifacts": []},
-    "server_packaging": {"paths": ["scripts/stage_server_package.sh"], "contracts": ["release-source-identity", "artifact-integrity"], "artifacts": ["server-package", "server-SHA256SUMS"]},
-    "agent_packaging": {"paths": ["scripts/stage_agent_package.sh"], "contracts": ["release-source-identity", "artifact-integrity"], "artifacts": ["agent-package", "agent-SHA256SUMS"]},
-    "release_orchestrator": {"paths": ["scripts/deploy_production.sh", "scripts/check_release_pipeline_contract.sh", "scripts/test_server_package.sh"], "contracts": ["release-qualification", "deployment-binding"], "artifacts": ["release-evidence"]}
+    "source_identity": {
+      "paths": [
+        "VERSION",
+        "Cargo.toml",
+        "Cargo.lock"
+      ],
+      "contracts": [
+        "release-source-identity"
+      ],
+      "artifacts": []
+    },
+    "server_packaging": {
+      "paths": [
+        "scripts/stage_server_package.sh"
+      ],
+      "contracts": [
+        "release-source-identity",
+        "artifact-integrity"
+      ],
+      "artifacts": [
+        "server-package",
+        "server-SHA256SUMS"
+      ]
+    },
+    "agent_packaging": {
+      "paths": [
+        "scripts/stage_agent_package.sh"
+      ],
+      "contracts": [
+        "release-source-identity",
+        "artifact-integrity"
+      ],
+      "artifacts": [
+        "agent-package",
+        "agent-SHA256SUMS"
+      ]
+    },
+    "release_orchestrator": {
+      "paths": [
+        "scripts/deploy_production.sh",
+        "scripts/check_release_pipeline_contract.sh",
+        "scripts/test_server_package.sh"
+      ],
+      "contracts": [
+        "release-qualification",
+        "deployment-binding"
+      ],
+      "artifacts": [
+        "release-evidence"
+      ]
+    }
   },
   "domains": {
-    "release_identity": {"components": ["source_identity", "server_packaging", "agent_packaging"], "contracts": ["release-source-identity", "artifact-integrity"], "artifacts": ["release-manifest"]},
-    "release_qualification": {"components": ["release_orchestrator"], "contracts": ["release-qualification", "deployment-binding"], "artifacts": ["release-evidence"]}
-  }
+    "release_identity": {
+      "components": [
+        "source_identity",
+        "server_packaging",
+        "agent_packaging"
+      ],
+      "contracts": [
+        "release-source-identity",
+        "artifact-integrity"
+      ],
+      "artifacts": [
+        "release-manifest"
+      ]
+    },
+    "release_qualification": {
+      "components": [
+        "release_orchestrator"
+      ],
+      "contracts": [
+        "release-qualification",
+        "deployment-binding"
+      ],
+      "artifacts": [
+        "release-evidence"
+      ]
+    }
+  },
+  "contracts": {
+    "release-source-identity": {},
+    "artifact-integrity": {},
+    "release-qualification": {},
+    "deployment-binding": {}
+  },
+  "artifacts": {
+    "server-package": {},
+    "server-SHA256SUMS": {},
+    "agent-package": {},
+    "agent-SHA256SUMS": {},
+    "release-manifest": {},
+    "release-evidence": {}
+  },
+  "runtime_bindings": {
+    "production-release": {}
+  },
+  "edges": [
+    {
+      "from": "component:source_identity",
+      "relation": "implements",
+      "to": "contract:release-source-identity"
+    },
+    {
+      "from": "component:server_packaging",
+      "relation": "generates",
+      "to": "artifact:server-package"
+    },
+    {
+      "from": "component:server_packaging",
+      "relation": "generates",
+      "to": "artifact:server-SHA256SUMS"
+    },
+    {
+      "from": "component:agent_packaging",
+      "relation": "generates",
+      "to": "artifact:agent-package"
+    },
+    {
+      "from": "component:agent_packaging",
+      "relation": "generates",
+      "to": "artifact:agent-SHA256SUMS"
+    },
+    {
+      "from": "component:release_orchestrator",
+      "relation": "implements",
+      "to": "contract:release-qualification"
+    },
+    {
+      "from": "component:release_orchestrator",
+      "relation": "generates",
+      "to": "artifact:release-evidence"
+    },
+    {
+      "from": "artifact:release-manifest",
+      "relation": "runtime_binding",
+      "to": "runtime_binding:production-release"
+    },
+    {
+      "from": "artifact:server-package",
+      "relation": "consumes",
+      "to": "contract:artifact-integrity"
+    },
+    {
+      "from": "artifact:agent-package",
+      "relation": "consumes",
+      "to": "contract:artifact-integrity"
+    }
+  ]
 }
