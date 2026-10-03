@@ -3,6 +3,7 @@ from __future__ import annotations
 import json,pathlib,hashlib,tempfile,os
 from command_processor import Command,record_intent,append_command_event,replay_command
 from event_store import read_events,current_version
+from state_paths import runtime
 
 
 def _atomic_json(path,obj):
@@ -74,6 +75,6 @@ def run_loop(*,queue_path,dispatch_path,snapshot_path,event_path,evidence_dir,pr
 
 
 def main():
-    out=run_loop(queue_path='.engineeringos/work-queue.json',dispatch_path='artifacts/dispatch-plan.json',snapshot_path='.engineeringos/shadow/latest.json',event_path='.engineeringos/control-loop/events.jsonl',evidence_dir='.engineeringos/control-loop/evidence',projection_path='.engineeringos/control-loop/projection.json')
+    out=run_loop(queue_path=runtime('work-queue.json'),dispatch_path='artifacts/dispatch-plan.json',snapshot_path=runtime('shadow/latest.json'),event_path=runtime('control-loop/events.jsonl'),evidence_dir=runtime('control-loop/evidence'),projection_path=runtime('control-loop/projection.json'))
     print(json.dumps(out,indent=2,ensure_ascii=False))
 if __name__=='__main__':main()

@@ -28,8 +28,8 @@ Second-repository generic Git/workspace ingestion is proven. Generic CI/release/
 
 ### G2 — Shadow DevControl — ACTIVE
 
-Mechanical end-to-end loop status: **PASS (EXP-036)**. Sustained outcome evaluation and queue convergence remain active.
-Current priority: complete an end-to-end shadow control loop and measure decisions against outcomes. No target mutation is authorized by G2.
+Mechanical end-to-end loop status: **PASS (EXP-036)**. Continuous project supervision: **OPERATIONAL (EXP-037)**. Sustained outcome evaluation and queue convergence remain active.
+Current priority: use the continuous supervisor time-series and action brief to reduce real DevControl convergence debt and accumulate G3 admission evidence. No target mutation is authorized by G2.
 
 Exit criteria:
 - one complete durable shadow loop from work item -> scheduling -> policy -> command intent -> simulated/read-only executor -> outcome evidence -> event commit -> replay -> Control Room;
@@ -75,11 +75,12 @@ Completed:
 - Official tool/approval baseline + machine-readable G3 admission contract.
 - First end-to-end Shadow Control Loop using durable command/event machinery (EXP-036).
 - First evidence-backed closure of a G2 semantic false-positive (EXP-034/035).
+- Continuous 5-minute G2 project supervisor with runtime/ repository-state separation and operator action brief (EXP-037).
 
 Current order:
-1. Build repeated G2 time-series runs and outcome labels; measure false-positive/false-negative/churn behavior.
-2. Reconcile the current DevControl queue, especially dirty/overlap/divergence findings and provenance identity gaps.
-3. Upgrade Control Room from runtime summary to event/receipt/evidence drill-down while preserving projection-only semantics.
+1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
+2. Use its action brief to reconcile the current DevControl queue, especially artifact/deployment provenance, dirty/overlap/divergence findings, and duplicate heads.
+3. Upgrade Control Room from action/runtime summary to event/receipt/evidence drill-down while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Prove G3 entry criteria over sustained dogfood, then enable a very small bounded-action allowlist.
 6. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.

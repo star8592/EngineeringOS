@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import json,pathlib
+import json
 from queue_model import resolve
 from outcome_ledger import read_outcomes
-Q=pathlib.Path('.engineeringos/work-queue.json');L=pathlib.Path('.engineeringos/outcomes.jsonl')
+from state_paths import runtime,OUTCOME_LEDGER
+Q=runtime('work-queue.json');L=OUTCOME_LEDGER
 q=json.load(open(Q)); outcomes=read_outcomes(L); by={x['item_id']:x for x in outcomes}
 changed=[]
 for item in q['items']:

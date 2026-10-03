@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import json,pathlib,tempfile,os
-
+from state_paths import runtime
 
 def atomic_copy_json(src,dst):
     obj=json.load(open(src));p=pathlib.Path(dst);p.parent.mkdir(parents=True,exist_ok=True)
@@ -17,11 +17,17 @@ def atomic_copy_json(src,dst):
         if os.path.exists(tmp):os.unlink(tmp)
     return obj
 
+def optional_copy_json(src,dst):
+    if not pathlib.Path(src).exists(): return None
+    return atomic_copy_json(src,dst)
 
 def project():
-    snap=atomic_copy_json('.engineeringos/shadow/latest.json','dashboard/runtime/snapshot.json')
-    queue=atomic_copy_json('.engineeringos/work-queue.json','dashboard/runtime/queue.json')
-    loop=atomic_copy_json('.engineeringos/control-loop/projection.json','dashboard/runtime/control-loop.json')
-    return {'snapshot':snap['content_sha256'],'queue_items':len(queue['items']),'loop_items':len(loop['items'])}
+    snap=atomic_copy_json(runtime('shadow/latest.json'),'dashboard/runtime/snapshot.json')
+    queue=atomic_copy_json(runtime('work-queue.json'),'dashboard/runtime/queue.json')
+    loop=atomic_copy_json(runtime('control-loop/projection.json'),'dashboard/runtime/control-loop.json')
+    status=optional_copy_json(runtime('supervisor/status.json'),'dashboard/runtime/supervisor.json')
+    brief=optional_copy_json(runtime('action-brief.json'),'dashboard/runtime/action-brief.json')
+    history=optional_copy_json(runtime('time-series-summary.json'),'dashboard/runtime/time-series.json')
+    return {'snapshot':snap['content_sha256'],'queue_items':len(queue['items']),'loop_items':len(loop['items']),'supervisor_health':status['health'] if status else 'STARTING','action_count':len(brief['actions']) if brief else 0,'observations':history['observations'] if history else 0}
 
 if __name__=='__main__': print(json.dumps(project(),indent=2))

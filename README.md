@@ -18,3 +18,14 @@ DevControl is the first real system under management. Milestone 0 reconstructs i
 ## Engineering memory
 
 Important discussions must converge into durable project state; conversation history is not the authoritative engineering memory. See `docs/principles/engineering-memory.md` and ADR-004.
+
+## Continuous supervisor
+
+EngineeringOS can continuously supervise DevControl in G2 shadow mode without mutating the target project:
+
+```bash
+./scripts/engineeringos_service.sh install
+python3 scripts/engineeringos_status.py
+```
+
+The supervisor refreshes live engineering evidence, reconciliation, queue, scheduling, shadow command evidence, convergence time-series, and the read-only Control Room every five minutes. Mutable state lives under `.engineeringos/runtime/`; committed `.engineeringos/**` content remains historical engineering evidence.

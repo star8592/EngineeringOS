@@ -14,5 +14,5 @@ rust/*/target/
 # EngineeringOS Control Room runtime projection
 dashboard/runtime/
 
-# Local EngineeringOS runtime logs
-.engineeringos/*.log
+# Mutable live EngineeringOS state. Repository .engineeringos files are historical baselines/evidence.
+.engineeringos/runtime/

@@ -1,21 +1,30 @@
 <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EngineeringOS Control Room</title>
-<style>body{font-family:system-ui;margin:24px;background:#0b0d10;color:#e8eaed}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{background:#15191f;border:1px solid #29313b;border-radius:12px;padding:16px}.ok{color:#73d99b}.warn{color:#f3c969}.bad{color:#ff7b7b}table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #29313b;text-align:left}code{color:#9cc3ff}.flow{display:flex;gap:8px;flex-wrap:wrap}.node{padding:8px 12px;border:1px solid #3b4654;border-radius:999px}small{color:#aeb7c2}</style>
-<h1>EngineeringOS · Control Room</h1><p id="meta">Loading durable projection…</p><div class="grid" id="metrics"></div>
+<style>body{font-family:system-ui;margin:24px;background:#0b0d10;color:#e8eaed}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{background:#15191f;border:1px solid #29313b;border-radius:12px;padding:16px}.ok{color:#73d99b}.warn{color:#f3c969}.bad{color:#ff7b7b}table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #29313b;text-align:left;vertical-align:top}code{color:#9cc3ff}.flow{display:flex;gap:8px;flex-wrap:wrap}.node{padding:8px 12px;border:1px solid #3b4654;border-radius:999px}small,.muted{color:#aeb7c2}.pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #3b4654;font-size:12px}.section-note{margin-top:-10px;color:#aeb7c2}</style>
+<h1>EngineeringOS · Control Room</h1><p id="meta">Loading durable projection…</p>
+<div class="grid" id="supervisor"></div>
+<h2>What needs attention now</h2><p class="section-note">Deterministic advisory brief from the same durable queue. G2 never authorizes target mutation.</p><table><thead><tr><th>P</th><th>Work</th><th>State</th><th>Lane</th></tr></thead><tbody id="brief"></tbody></table>
+<h2>Project state</h2><div class="grid" id="metrics"></div>
 <h2>Control loop</h2><div class="flow"><span class="node">Evidence</span><span>→</span><span class="node">Reconciliation</span><span>→</span><span class="node">Policy</span><span>→</span><span class="node">Manager</span><span>→</span><span class="node">Queue</span><span>→</span><span class="node">Scheduler</span><span>→</span><span class="node">Command</span><span>→</span><span class="node">Evidence</span><span>→</span><span class="node">Closure</span></div>
 <h2>Shadow execution</h2><div class="grid" id="loop"></div>
+<h2>Convergence trend</h2><div class="grid" id="trend"></div>
 <h2>Work queue</h2><table><thead><tr><th>P</th><th>State</th><th>Work</th><th>Assurance</th></tr></thead><tbody id="queue"></tbody></table>
 <script>
 const fmt=v=>v===undefined||v===null?'—':String(v);
+const opt=async p=>{try{const r=await fetch(p);return r.ok?await r.json():null}catch{return null}};
 Promise.all([
  fetch('./runtime/snapshot.json').then(r=>{if(!r.ok)throw new Error('snapshot '+r.status);return r.json()}),
  fetch('./runtime/control-loop.json').then(r=>{if(!r.ok)throw new Error('control loop '+r.status);return r.json()}),
- fetch('./runtime/queue.json').then(r=>{if(!r.ok)throw new Error('queue '+r.status);return r.json()})
-]).then(([d,c,q])=>{
+ fetch('./runtime/queue.json').then(r=>{if(!r.ok)throw new Error('queue '+r.status);return r.json()}),
+ opt('./runtime/supervisor.json'),opt('./runtime/action-brief.json'),opt('./runtime/time-series.json')
+]).then(([d,c,q,s,b,h])=>{
  meta.textContent=`${d.target} · ${d.observed_at} · ${d.mode} · ${d.source_head.slice(0,12)}`;
+ supervisor.innerHTML=[['Supervisor',s?.health||'STARTING'],['Last cycle',s?.completed_at||s?.failed_at||'—'],['Observations',h?.observations||0],['Active work',b?.active_work_items??'—']].map(x=>`<div class=card><small>${x[0]}</small><h2>${fmt(x[1])}</h2></div>`).join('');
+ brief.innerHTML=(b?.actions||[]).map(x=>`<tr><td>P${x.priority}</td><td><strong>${x.kind}</strong><br><small>${x.reason}</small></td><td><span class=pill>${x.state}</span> <span class=pill>${x.schedule_state}</span></td><td>${fmt(x.lane)}<br><small>${x.required_assurance}</small></td></tr>`).join('')||'<tr><td colspan=4>No active advisory items.</td></tr>';
  const m=d.manager_summary;
  const cards=[['Source qualification',m.qualification],['Live production qualification',m.live_production_qualification],['Source-head prod verify',m.source_head_production_verification],['Deployment identity',m.deployment_identity],['Artifact identity',m.artifact_identity],['Target mutation',c.target_mutation_authorized]];
  metrics.innerHTML=cards.map(x=>`<div class=card><small>${x[0]}</small><h2>${fmt(x[1])}</h2></div>`).join('');
  loop.innerHTML=[['Succeeded',c.summary.succeeded],['Blocked',c.summary.blocked],['Event-backed items',c.summary.items]].map(x=>`<div class=card><small>${x[0]}</small><h2>${fmt(x[1])}</h2></div>`).join('');
+ const deltas=h?.debt_delta||{};trend.innerHTML=Object.keys(deltas).length?Object.entries(deltas).map(([k,v])=>`<div class=card><small>${k}</small><h2>${v>0?'+':''}${v}</h2></div>`).join(''):'<div class=card><small>Trend</small><h2>Collecting baseline…</h2></div>';
  queue.innerHTML=q.items.map(x=>`<tr><td>P${x.priority}</td><td>${x.state}</td><td>${x.kind}<br><small>${x.reason}</small></td><td>${x.required_assurance}</td></tr>`).join('');
 }).catch(e=>meta.textContent='Projection unavailable: '+e.message);
 </script>

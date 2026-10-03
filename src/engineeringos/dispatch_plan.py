@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import json,pathlib,subprocess
+import json,pathlib
 from scheduler import schedule
-Q=pathlib.Path('.engineeringos/work-queue.json'); OUT=pathlib.Path('artifacts/dispatch-plan.json')
+from state_paths import runtime
+Q=runtime('work-queue.json'); OUT=pathlib.Path('artifacts/dispatch-plan.json')
 q=json.load(open(Q)); sched=schedule(q['items']); by={x['id']:x for x in q['items']}
 plan=[]
 for s in sched:
