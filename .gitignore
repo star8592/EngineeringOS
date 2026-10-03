@@ -13,3 +13,6 @@ rust/*/target/
 
 # EngineeringOS Control Room runtime projection
 dashboard/runtime/
+
+# Local EngineeringOS runtime logs
+.engineeringos/*.log
