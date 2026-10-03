@@ -15,3 +15,6 @@ Each item carries stable identity, project, priority, reason, required assurance
 ## Safety boundary
 
 Queue membership is not execution authorization. Policy and assurance gates remain separate from action execution.
+
+## Collision-aware readiness
+Execution readiness is stricter than dependency readiness. Before mutation, a work item may transition from `READY`/`DISPATCHABLE` to `BLOCKED_BY_ACTIVE_LINE` or `BLOCKED_BY_SEMANTIC_COLLISION`. The latter covers shared contracts even when exact paths differ. Isolation does not automatically clear a semantic collision; dependency/contract compatibility must also be established.
