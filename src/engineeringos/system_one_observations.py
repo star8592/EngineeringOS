@@ -66,6 +66,10 @@ def make_observation(snapshot: dict, action: dict, item: dict, revision: str | N
         "advisory_route":item.get("advisory_route"),
         "answer_confidence":item.get("answer_confidence"),
         "probabilities":item.get("probabilities"),
+        "human_authority_recommendation":item.get("human_authority_recommendation"),
+        "human_authority_required":item.get("human_authority_required"),
+        "human_authority_confidence":item.get("human_authority_confidence"),
+        "human_authority_probabilities":item.get("human_authority_probabilities"),
         "latency_ms":item.get("latency_ms"),
         "model":item.get("model"),
         "model_revision":revision,
@@ -83,6 +87,8 @@ def summarize(rows: list[dict]) -> dict:
     high_disagree=[r for r in high if r.get("agrees_with_scheduler") is False]
     conf=[float(r["answer_confidence"]) for r in rows if r.get("answer_confidence") is not None]
     lat=[float(r["latency_ms"]) for r in rows if r.get("latency_ms") is not None]
+    authority_conf=[float(r["human_authority_confidence"]) for r in rows if r.get("human_authority_confidence") is not None]
+    authority_required=[r for r in rows if r.get("human_authority_required") is True]
     return {
         "schema_version":1,
         "generated_at":utcnow(),
@@ -93,6 +99,8 @@ def summarize(rows: list[dict]) -> dict:
         "high_assurance_disagreements":len(high_disagree),
         "median_answer_confidence":statistics.median(conf) if conf else None,
         "median_latency_ms":statistics.median(lat) if lat else None,
+        "median_human_authority_confidence":statistics.median(authority_conf) if authority_conf else None,
+        "human_authority_required_recommendations":len(authority_required),
         "label_strength":"WEAK_SCHEDULER_REFERENCE",
         "edb_gold_observations":0,
     }
