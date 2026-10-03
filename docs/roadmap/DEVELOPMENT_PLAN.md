@@ -77,6 +77,9 @@ Completed:
 - First evidence-backed closure of a G2 semantic false-positive (EXP-034/035).
 - Continuous 5-minute G2 project supervisor with runtime/repository-state separation and operator action brief (EXP-037).
 - Evidence-backed action drill-down for dirty workspaces, overlapping lines, duplicate heads and provenance gaps (EXP-038).
+- First G3 bounded deterministic diagnostic with authoritative CI closure (EXP-039).
+- First executable A3/A4 formal-assurance gates for command safety (EXP-040).
+- Executable System-One/Jev typed-decision contract with an explicit no-authorization boundary (EXP-041).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
@@ -84,7 +87,8 @@ Current order:
 3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Continue G3 pilot dogfood with the single deterministic-check allowlist; prove deferral, idempotency, evidence closure, and no target mutation before adding any second action class.
-6. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
+6. Extend executable assurance from command safety to lease exclusivity and convergence/release state machines; activate a benchmarked System-One/Jev-compatible judge only as advisory routing evidence.
+7. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
 
 ## Definition of Done for a development change
 

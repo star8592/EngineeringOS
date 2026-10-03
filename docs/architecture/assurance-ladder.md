@@ -16,3 +16,15 @@ Higher is not automatically better. UI changes may need A1/A2. Approval semantic
 ## Principle
 
 AI may propose invariants, specifications, proofs, tests, and counterexample explanations. Deterministic verifiers own PASS/FAIL for formal claims.
+
+
+## Activation status
+
+- A0: routing contract exists; the Jev/OpenJev-class System-One backend is not yet production-active.
+- A1: active through deterministic unit/integration/E2E tests.
+- A2: active through contract, schema, parity and conformance gates.
+- A3: first executable gate added in EXP-040 for command transaction safety using TLA+/TLC.
+- A4: first executable Lean proof package added in EXP-040 for stable command retry/evidence semantics, gated by Lean build, bundled `leanchecker`, and `axiom-audit`; nanoda remains an optional independent checker pending upstream compatibility with the current Lean export format.
+- A5: partially active through production evidence/replay/provenance work; exact artifact/deployment identity remains an open gap.
+
+An assurance label is earned only by a successful verifier/evidence path. Merely routing an item to `FORMAL_OR_HIGH_ASSURANCE` does not grant A3/A4.

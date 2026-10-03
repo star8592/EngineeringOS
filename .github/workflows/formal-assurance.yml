@@ -1,0 +1,63 @@
+name: Formal Assurance
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "formal/**"
+      - ".github/workflows/formal-assurance.yml"
+      - "src/engineeringos/command_processor.py"
+      - "src/engineeringos/queue_model.py"
+      - "src/engineeringos/execution_receipt.py"
+  push:
+    branches: [main]
+    paths:
+      - "formal/**"
+      - ".github/workflows/formal-assurance.yml"
+      - "src/engineeringos/command_processor.py"
+      - "src/engineeringos/queue_model.py"
+      - "src/engineeringos/execution_receipt.py"
+  workflow_dispatch:
+
+jobs:
+  tla-model-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Download pinned TLA+ tools
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/tla2tools.jar             https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar
+          echo "bee4a54f3ee3d4afc347c3240ec2d9e93b075104  /tmp/tla2tools.jar" | sha1sum -c -
+      - name: Model-check command transaction safety
+        run: |
+          set -euo pipefail
+          java -XX:+UseParallelGC -jar /tmp/tla2tools.jar             -config formal/tla/CommandTransaction.cfg             formal/tla/CommandTransaction.tla
+
+  lean-proof-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/lean
+          auto-config: false
+          use-github-cache: false
+          build: true
+          test: false
+          lint: false
+          leanchecker: true
+          axiom-audit: true
+          axiom-audit-root: EngineeringOS
+
+
+  system-one-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify System-One remains advisory-only
+        run: python3 tests/test_system_one_contract.py
