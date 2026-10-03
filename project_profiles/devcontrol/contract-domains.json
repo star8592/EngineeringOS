@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "project": "DevControl",
+  "domains": {
+    "release_identity": {
+      "paths": ["VERSION", "Cargo.toml", "Cargo.lock", "scripts/deploy_production.sh", "scripts/stage_server_package.sh", "scripts/stage_agent_package.sh"],
+      "description": "Source/version/build identity participating in a release."
+    },
+    "release_qualification": {
+      "paths": ["scripts/deploy_production.sh", "scripts/check_release_pipeline_contract.sh", "scripts/test_server_package.sh"],
+      "description": "Release qualification and deployment gate contract."
+    }
+  }
+}
