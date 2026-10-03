@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "run_id": "20261003T103147Z",
+  "observed_at": "2026-10-03T10:31:47.866669+00:00",
+  "mode": "SHADOW",
+  "target": "DevControl",
+  "source_head": "277448d3d04383c395ff733ed0bea4dbf836605a",
+  "manager_summary": {
+    "qualification": "PASS",
+    "production_verification": "UNKNOWN",
+    "source_production_policy": "ACCEPTABLE_DRIFT",
+    "convergence_debt": {
+      "duplicate_state": 3,
+      "divergence": 17,
+      "overlap": 4,
+      "role": 0,
+      "dirty_workspace": 10,
+      "verification": "UNKNOWN"
+    }
+  },
+  "work_queue_count": 5,
+  "dispatchable_count": 5,
+  "execution_authorized": false,
+  "evidence_interpretation": {
+    "qualification": "PASS",
+    "production_verification": "UNKNOWN",
+    "deployment_identity": "UNKNOWN",
+    "artifact_identity": "UNKNOWN"
+  },
+  "reconciliation": [
+    {
+      "predicate": "runtime_endpoint_consistency",
+      "state": "RESOLVED",
+      "evidence": {
+        "readyz": {
+          "status": "ready",
+          "mode": "normal",
+          "version": "3.1.14",
+          "release_id": "3a51151"
+        },
+        "livez": {
+          "status": "ok",
+          "mode": "normal",
+          "version": "3.1.14",
+          "release_id": "3a51151"
+        }
+      }
+    },
+    {
+      "predicate": "source_vs_production_version",
+      "state": "DRIFT",
+      "source": "3.1.17",
+      "production": "3.1.14"
+    },
+    {
+      "predicate": "production_release_to_source",
+      "state": "RESOLVED",
+      "release_id": "3a51151",
+      "full_source_sha": "3a51151b8ae2dd56bfabcad680d7c23df19a5e0c",
+      "is_ancestor_of_origin_main": true
+    }
+  ],
+  "debt_counts": {
+    "duplicate_state": 3,
+    "divergence": 17,
+    "overlap": 4,
+    "role": 0,
+    "dirty_workspace": 10,
+    "verification": "UNKNOWN"
+  },
+  "content_sha256": "c137afb6091ea06c5b40e79fd7a9b00bcd31c94a86809d0346c64b324422835e"
+}
