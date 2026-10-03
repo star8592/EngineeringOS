@@ -13,3 +13,7 @@ This experiment activates the first deterministic formal-assurance path:
 - **Authority:** AI may draft the specification/proof, but TLC/Lean/nanoda own PASS/FAIL.
 
 The next A3 candidates are lease exclusivity, dependency/closure transitions, and convergence/release state machines. Lean expansion remains deliberately narrower and follows only after semantics stabilize.
+
+## First TLC feedback
+
+The first TLC execution reached `SUCCEEDED` and reported a deadlock. That was not a safety counterexample: `SUCCEEDED` is intentionally terminal and no command transition is enabled after confirmed application. The model configuration now sets `CHECK_DEADLOCK FALSE` so TLC treats terminal command states as valid while continuing to check the declared safety invariants. The state machine itself was not weakened to manufacture a successor transition.
