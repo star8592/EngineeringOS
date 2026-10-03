@@ -692,3 +692,205 @@ mod event_replay_tests {
         );
     }
 }
+
+// --- Command transaction boundary parity core ---
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CommandReplayState {
+    pub command_id: String,
+    pub idempotency_key: String,
+    pub action_kind: String,
+    pub side_effecting: bool,
+    pub state: String,
+    pub attempts: u64,
+    #[serde(default)]
+    pub evidence_refs: Vec<String>,
+    pub outcome: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CommandReplayError {
+    CommandAlreadyExists,
+    CommandNotFound,
+    OutcomeEvidenceRequired,
+    UnknownCommandEvent,
+}
+
+pub fn replay_command_events(
+    events: &[EventEnvelope],
+    command_id: &str,
+) -> Result<Option<CommandReplayState>, CommandReplayError> {
+    let mut s: Option<CommandReplayState> = None;
+    for e in events {
+        let p = &e.payload;
+        if payload_str(p, "command_id") != command_id {
+            continue;
+        }
+        match e.event_type.as_str() {
+            "COMMAND_INTENT_RECORDED" => {
+                if s.is_some() {
+                    return Err(CommandReplayError::CommandAlreadyExists);
+                }
+                s = Some(CommandReplayState {
+                    command_id: command_id.to_string(),
+                    idempotency_key: payload_str(p, "idempotency_key").into(),
+                    action_kind: payload_str(p, "action_kind").into(),
+                    side_effecting: p
+                        .get("side_effecting")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(true),
+                    state: "INTENT_RECORDED".into(),
+                    attempts: 0,
+                    evidence_refs: vec![],
+                    outcome: None,
+                });
+            }
+            _ if s.is_none() => return Err(CommandReplayError::CommandNotFound),
+            "COMMAND_DISPATCHED" => {
+                let x = s.as_mut().unwrap();
+                x.state = "DISPATCHED".into();
+                x.attempts += 1;
+            }
+            "COMMAND_COMPLETION_UNKNOWN" => s.as_mut().unwrap().state = "UNKNOWN_COMPLETION".into(),
+            "COMMAND_EFFECT_CONFIRMED" => {
+                let refs = payload_strings(p, "evidence_refs");
+                if refs.is_empty() {
+                    return Err(CommandReplayError::OutcomeEvidenceRequired);
+                }
+                let x = s.as_mut().unwrap();
+                for r in refs {
+                    if !x.evidence_refs.contains(&r) {
+                        x.evidence_refs.push(r);
+                    }
+                }
+                x.state = "SUCCEEDED".into();
+                x.outcome = Some("APPLIED".into());
+            }
+            "COMMAND_EFFECT_NOT_APPLIED" => {
+                let refs = payload_strings(p, "evidence_refs");
+                if refs.is_empty() {
+                    return Err(CommandReplayError::OutcomeEvidenceRequired);
+                }
+                let x = s.as_mut().unwrap();
+                for r in refs {
+                    if !x.evidence_refs.contains(&r) {
+                        x.evidence_refs.push(r);
+                    }
+                }
+                x.state = "NOT_APPLIED".into();
+                x.outcome = Some("NOT_APPLIED".into());
+            }
+            "COMMAND_FAILED_PRE_EFFECT" => s.as_mut().unwrap().state = "FAILED_PRE_EFFECT".into(),
+            _ => return Err(CommandReplayError::UnknownCommandEvent),
+        }
+    }
+    Ok(s)
+}
+
+pub fn command_retry_decision(state: Option<&CommandReplayState>) -> &'static str {
+    let Some(s) = state else {
+        return "NO_COMMAND";
+    };
+    if !s.side_effecting {
+        return if s.state == "SUCCEEDED" {
+            "DO_NOT_RETRY"
+        } else {
+            "RETRY_ALLOWED"
+        };
+    }
+    match s.state.as_str() {
+        "INTENT_RECORDED" | "FAILED_PRE_EFFECT" | "NOT_APPLIED" => "RETRY_ALLOWED",
+        "SUCCEEDED" => "DO_NOT_RETRY",
+        "DISPATCHED" | "UNKNOWN_COMPLETION" => "PROBE_REQUIRED",
+        _ => "PROBE_REQUIRED",
+    }
+}
+
+#[cfg(test)]
+mod command_replay_tests {
+    use super::*;
+    use serde_json::json;
+    fn ev(seq: u64, id: &str, t: &str, p: serde_json::Value) -> EventEnvelope {
+        EventEnvelope {
+            seq,
+            event_id: id.into(),
+            event_type: t.into(),
+            payload: p,
+        }
+    }
+    #[test]
+    fn dispatched_side_effect_requires_probe() {
+        let e = vec![
+            ev(
+                1,
+                "e1",
+                "COMMAND_INTENT_RECORDED",
+                json!({"command_id":"c1","idempotency_key":"k1","action_kind":"DEPLOY","side_effecting":true}),
+            ),
+            ev(2, "e2", "COMMAND_DISPATCHED", json!({"command_id":"c1"})),
+        ];
+        let s = replay_command_events(&e, "c1").unwrap().unwrap();
+        assert_eq!(command_retry_decision(Some(&s)), "PROBE_REQUIRED");
+    }
+    #[test]
+    fn proven_not_applied_allows_retry() {
+        let e = vec![
+            ev(
+                1,
+                "e1",
+                "COMMAND_INTENT_RECORDED",
+                json!({"command_id":"c1","idempotency_key":"k1","action_kind":"DEPLOY","side_effecting":true}),
+            ),
+            ev(2, "e2", "COMMAND_DISPATCHED", json!({"command_id":"c1"})),
+            ev(
+                3,
+                "e3",
+                "COMMAND_EFFECT_NOT_APPLIED",
+                json!({"command_id":"c1","evidence_refs":["probe:none"]}),
+            ),
+        ];
+        let s = replay_command_events(&e, "c1").unwrap().unwrap();
+        assert_eq!(command_retry_decision(Some(&s)), "RETRY_ALLOWED");
+    }
+    #[test]
+    fn confirmed_applied_never_retries() {
+        let e = vec![
+            ev(
+                1,
+                "e1",
+                "COMMAND_INTENT_RECORDED",
+                json!({"command_id":"c1","idempotency_key":"k1","action_kind":"DEPLOY","side_effecting":true}),
+            ),
+            ev(2, "e2", "COMMAND_DISPATCHED", json!({"command_id":"c1"})),
+            ev(
+                3,
+                "e3",
+                "COMMAND_EFFECT_CONFIRMED",
+                json!({"command_id":"c1","evidence_refs":["runtime:r1"]}),
+            ),
+        ];
+        let s = replay_command_events(&e, "c1").unwrap().unwrap();
+        assert_eq!(s.outcome.as_deref(), Some("APPLIED"));
+        assert_eq!(command_retry_decision(Some(&s)), "DO_NOT_RETRY");
+    }
+    #[test]
+    fn outcome_requires_evidence() {
+        let e = vec![
+            ev(
+                1,
+                "e1",
+                "COMMAND_INTENT_RECORDED",
+                json!({"command_id":"c1","idempotency_key":"k1","action_kind":"DEPLOY","side_effecting":true}),
+            ),
+            ev(
+                2,
+                "e2",
+                "COMMAND_EFFECT_CONFIRMED",
+                json!({"command_id":"c1","evidence_refs":[]}),
+            ),
+        ];
+        assert_eq!(
+            replay_command_events(&e, "c1"),
+            Err(CommandReplayError::OutcomeEvidenceRequired)
+        );
+    }
+}

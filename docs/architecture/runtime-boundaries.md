@@ -46,3 +46,5 @@ Python and Rust share the EventEnvelope JSONL and snapshot contract. Runtime mig
 
 ## Command boundary
 The production control plane must persist command intent before any external side effect. External execution and the local event log are not treated as one transaction. Unknown completion is reconciled through outcome probes before retry.
+
+The Command Processor now has Python↔Rust semantic parity for intent, dispatch, unknown completion, probe-gated retry, and evidence-confirmed outcome. Production authority remains shadow-only until the integrated loop passes dogfood gates.
