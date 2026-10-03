@@ -57,12 +57,16 @@ jobs:
           p=pathlib.Path("benchmarks/edb/system_one_routes.jsonl")
           rows=[json.loads(x) for x in p.read_text().splitlines() if x.strip()]
           assert len(rows) >= 10
-          assert {x["expected_route"] for x in rows} == {
+          assert {x["expected_lane"] for x in rows} == {
               "DETERMINISTIC_CANDIDATE",
               "REASONING_REVIEW",
               "FORMAL_OR_HIGH_ASSURANCE",
-              "HUMAN_REVIEW",
+          }
+          assert {x["expected_human_authority"] for x in rows} == {
+              "NO_HUMAN_AUTHORITY",
+              "HUMAN_AUTHORITY_REQUIRED",
           }
           assert any(x["high_risk"] for x in rows)
+          assert any(x["expected_human_authority"] == "HUMAN_AUTHORITY_REQUIRED" for x in rows)
           print(f"EDB_CORPUS_OK cases={len(rows)}")
           PY
