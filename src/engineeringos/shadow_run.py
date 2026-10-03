@@ -21,4 +21,6 @@ snap={'schema_version':1,'run_id':rid,'observed_at':now.isoformat(),'mode':'SHAD
 stable={k:v for k,v in snap.items() if k not in ('run_id','observed_at')};snap['content_sha256']=hashlib.sha256(json.dumps(stable,sort_keys=True).encode()).hexdigest()
 p=S/f'{rid}.json'; p.write_text(json.dumps(snap,indent=2,ensure_ascii=False)+'\n')
 latest=S/'latest.json'; latest.write_text(json.dumps(snap,indent=2,ensure_ascii=False)+'\n')
+run(['python3','src/engineeringos/shadow_control_loop.py'])
+run(['python3','src/engineeringos/dashboard_projector.py'])
 print(json.dumps(snap,indent=2,ensure_ascii=False))

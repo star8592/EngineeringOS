@@ -1,0 +1,37 @@
+{
+  "command_id": "4e5c2f3112510e831b3f1436",
+  "mode": "SHADOW",
+  "policy": {
+    "decision": "ALLOW",
+    "reason": "SHADOW_EVALUATION_ONLY",
+    "target_mutation_authorized": false
+  },
+  "schedule_decision": {
+    "automation": "REVIEW",
+    "execution_authorized": false,
+    "id": "9692752e6186bf53",
+    "kind": "TRIAGE_DIRTY_WORKSPACES",
+    "lane": "REASONING_REVIEW",
+    "next_step": "produce lane-specific review/evidence; no target mutation",
+    "priority": 2,
+    "reason": "10 branch-attached worktrees contain uncommitted state",
+    "required_assurance": "A1",
+    "schedule_state": "DISPATCHABLE"
+  },
+  "schema_version": 1,
+  "snapshot_content_sha256": "39ce16927340fae6eda19135191ea27a1c64946d1d56a6658f00d5028303d773",
+  "target_mutation_authorized": false,
+  "work_item": {
+    "automation": "REVIEW",
+    "evidence_refs": [],
+    "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+    "id": "9692752e6186bf53",
+    "kind": "TRIAGE_DIRTY_WORKSPACES",
+    "last_seen_at": "2026-10-03T14:41:37.820870+00:00",
+    "priority": 2,
+    "project": "DevControl",
+    "reason": "10 branch-attached worktrees contain uncommitted state",
+    "required_assurance": "A1",
+    "state": "DISCOVERED"
+  }
+}

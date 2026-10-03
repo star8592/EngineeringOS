@@ -1,0 +1,37 @@
+{
+  "command_id": "6e52cd202c1998ddd6ffe75a",
+  "mode": "SHADOW",
+  "policy": {
+    "decision": "ALLOW",
+    "reason": "SHADOW_EVALUATION_ONLY",
+    "target_mutation_authorized": false
+  },
+  "schedule_decision": {
+    "automation": "REVIEW",
+    "execution_authorized": false,
+    "id": "efa266d45751caef",
+    "kind": "REVIEW_OVERLAPPING_LINES",
+    "lane": "REASONING_REVIEW",
+    "next_step": "produce lane-specific review/evidence; no target mutation",
+    "priority": 2,
+    "reason": "4 independent branch pairs have high changed-surface overlap",
+    "required_assurance": "A1",
+    "schedule_state": "DISPATCHABLE"
+  },
+  "schema_version": 1,
+  "snapshot_content_sha256": "39ce16927340fae6eda19135191ea27a1c64946d1d56a6658f00d5028303d773",
+  "target_mutation_authorized": false,
+  "work_item": {
+    "automation": "REVIEW",
+    "evidence_refs": [],
+    "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+    "id": "efa266d45751caef",
+    "kind": "REVIEW_OVERLAPPING_LINES",
+    "last_seen_at": "2026-10-03T14:41:37.820870+00:00",
+    "priority": 2,
+    "project": "DevControl",
+    "reason": "4 independent branch pairs have high changed-surface overlap",
+    "required_assurance": "A1",
+    "state": "DISCOVERED"
+  }
+}

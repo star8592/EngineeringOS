@@ -27,6 +27,8 @@ Facts, evidence reconciliation, policy, queue, leases, dependencies, scheduler, 
 Second-repository generic Git/workspace ingestion is proven. Generic CI/release/runtime adapters remain incomplete.
 
 ### G2 — Shadow DevControl — ACTIVE
+
+Mechanical end-to-end loop status: **PASS (EXP-036)**. Sustained outcome evaluation and queue convergence remain active.
 Current priority: complete an end-to-end shadow control loop and measure decisions against outcomes. No target mutation is authorized by G2.
 
 Exit criteria:
@@ -69,13 +71,18 @@ Requires sustained dogfood plus exact release/artifact/runtime identity, project
 
 ## Immediate execution order
 
-1. Official tool/approval baseline + machine-readable G3 admission contract.
-2. Complete Shadow Control Loop using the existing durable command/event machinery.
-3. Refresh DevControl G2 evidence and queue; close stale/false-positive findings with evidence.
-4. Upgrade Control Room from static projection to live event/receipt/evidence views.
-5. Run G2 time-series until G3 entry criteria are evidenced.
-6. Enable a very small G3 bounded-action allowlist; expand only from observed evidence.
-7. After G3 stability, begin G4 convergence actions.
+Completed:
+- Official tool/approval baseline + machine-readable G3 admission contract.
+- First end-to-end Shadow Control Loop using durable command/event machinery (EXP-036).
+- First evidence-backed closure of a G2 semantic false-positive (EXP-034/035).
+
+Current order:
+1. Build repeated G2 time-series runs and outcome labels; measure false-positive/false-negative/churn behavior.
+2. Reconcile the current DevControl queue, especially dirty/overlap/divergence findings and provenance identity gaps.
+3. Upgrade Control Room from runtime summary to event/receipt/evidence drill-down while preserving projection-only semantics.
+4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
+5. Prove G3 entry criteria over sustained dogfood, then enable a very small bounded-action allowlist.
+6. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
 
 ## Definition of Done for a development change
 

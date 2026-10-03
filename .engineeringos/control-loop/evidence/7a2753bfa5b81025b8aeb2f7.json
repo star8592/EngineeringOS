@@ -1,0 +1,37 @@
+{
+  "command_id": "7a2753bfa5b81025b8aeb2f7",
+  "mode": "SHADOW",
+  "policy": {
+    "decision": "ALLOW",
+    "reason": "SHADOW_EVALUATION_ONLY",
+    "target_mutation_authorized": false
+  },
+  "schedule_decision": {
+    "automation": "REVIEW",
+    "execution_authorized": false,
+    "id": "83ea8e17b34b0303",
+    "kind": "REVIEW_DIVERGENT_DEVELOPMENT",
+    "lane": "REASONING_REVIEW",
+    "next_step": "produce lane-specific review/evidence; no target mutation",
+    "priority": 3,
+    "reason": "17 development lines are materially behind origin/main",
+    "required_assurance": "A1",
+    "schedule_state": "DISPATCHABLE"
+  },
+  "schema_version": 1,
+  "snapshot_content_sha256": "39ce16927340fae6eda19135191ea27a1c64946d1d56a6658f00d5028303d773",
+  "target_mutation_authorized": false,
+  "work_item": {
+    "automation": "REVIEW",
+    "evidence_refs": [],
+    "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+    "id": "83ea8e17b34b0303",
+    "kind": "REVIEW_DIVERGENT_DEVELOPMENT",
+    "last_seen_at": "2026-10-03T14:41:37.820870+00:00",
+    "priority": 3,
+    "project": "DevControl",
+    "reason": "17 development lines are materially behind origin/main",
+    "required_assurance": "A1",
+    "state": "DISCOVERED"
+  }
+}

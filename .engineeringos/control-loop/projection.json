@@ -1,0 +1,101 @@
+{
+  "items": [
+    {
+      "command_state": null,
+      "evidence_refs": [],
+      "item_id": "88c2db791daacae9",
+      "kind": "RESOLVE_PRODUCTION_VERIFICATION",
+      "policy": "DENY",
+      "schedule_state": "RESOLVED",
+      "target_mutation_authorized": false
+    },
+    {
+      "attempts": 1,
+      "command_id": "cef2344d89060cedcbb74d05",
+      "command_state": "SUCCEEDED",
+      "evidence_refs": [
+        "file:.engineeringos/control-loop/evidence/cef2344d89060cedcbb74d05.json#sha256:e5512b06f9483d327c1d3c932b6f07377f426b3749469be00d4af3b729be15bb"
+      ],
+      "item_id": "7ff06cb62cc3c2a6",
+      "kind": "CLOSE_ARTIFACT_IDENTITY_GAP",
+      "policy": "ALLOW",
+      "schedule_state": "DISPATCHABLE",
+      "target_mutation_authorized": false
+    },
+    {
+      "attempts": 1,
+      "command_id": "b957249e34b014da95ae83f5",
+      "command_state": "SUCCEEDED",
+      "evidence_refs": [
+        "file:.engineeringos/control-loop/evidence/b957249e34b014da95ae83f5.json#sha256:ce58daa00c83d542290af77070bb0cd24b7e2809c36b1524b2204ada3500436e"
+      ],
+      "item_id": "78fd0b7907540acd",
+      "kind": "CLOSE_DEPLOYMENT_IDENTITY_GAP",
+      "policy": "ALLOW",
+      "schedule_state": "DISPATCHABLE",
+      "target_mutation_authorized": false
+    },
+    {
+      "attempts": 1,
+      "command_id": "6e52cd202c1998ddd6ffe75a",
+      "command_state": "SUCCEEDED",
+      "evidence_refs": [
+        "file:.engineeringos/control-loop/evidence/6e52cd202c1998ddd6ffe75a.json#sha256:dda19c4ec88a1adc458c6ea441fcb2bfc12e014ebcf88f331f2b5be3022f256b"
+      ],
+      "item_id": "efa266d45751caef",
+      "kind": "REVIEW_OVERLAPPING_LINES",
+      "policy": "ALLOW",
+      "schedule_state": "DISPATCHABLE",
+      "target_mutation_authorized": false
+    },
+    {
+      "attempts": 1,
+      "command_id": "4e5c2f3112510e831b3f1436",
+      "command_state": "SUCCEEDED",
+      "evidence_refs": [
+        "file:.engineeringos/control-loop/evidence/4e5c2f3112510e831b3f1436.json#sha256:10d67bb647b1d9f36c3b026a6c8a7a4cccd18c260536c50a7fc7920a9135af5b"
+      ],
+      "item_id": "9692752e6186bf53",
+      "kind": "TRIAGE_DIRTY_WORKSPACES",
+      "policy": "ALLOW",
+      "schedule_state": "DISPATCHABLE",
+      "target_mutation_authorized": false
+    },
+    {
+      "attempts": 1,
+      "command_id": "ed5fe482d1f0b68a45ca3128",
+      "command_state": "SUCCEEDED",
+      "evidence_refs": [
+        "file:.engineeringos/control-loop/evidence/ed5fe482d1f0b68a45ca3128.json#sha256:78f0871998913e11f2c2348f2a85cc2a8dbc5c7ca9ff4206df620c248df0993b"
+      ],
+      "item_id": "bc04655312b2ada0",
+      "kind": "RECONCILE_DUPLICATE_STATE",
+      "policy": "ALLOW",
+      "schedule_state": "DISPATCHABLE",
+      "target_mutation_authorized": false
+    },
+    {
+      "attempts": 1,
+      "command_id": "7a2753bfa5b81025b8aeb2f7",
+      "command_state": "SUCCEEDED",
+      "evidence_refs": [
+        "file:.engineeringos/control-loop/evidence/7a2753bfa5b81025b8aeb2f7.json#sha256:42f28140d7d9b553b5dd6921c409713264e451d1f8d0433e4739010e3287e97f"
+      ],
+      "item_id": "83ea8e17b34b0303",
+      "kind": "REVIEW_DIVERGENT_DEVELOPMENT",
+      "policy": "ALLOW",
+      "schedule_state": "DISPATCHABLE",
+      "target_mutation_authorized": false
+    }
+  ],
+  "mode": "SHADOW",
+  "schema_version": 1,
+  "snapshot_content_sha256": "39ce16927340fae6eda19135191ea27a1c64946d1d56a6658f00d5028303d773",
+  "summary": {
+    "blocked": 1,
+    "items": 7,
+    "succeeded": 6
+  },
+  "target": "DevControl",
+  "target_mutation_authorized": false
+}
