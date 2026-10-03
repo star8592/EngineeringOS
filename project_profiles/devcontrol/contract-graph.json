@@ -1,0 +1,14 @@
+{
+  "schema_version": 2,
+  "project": "DevControl",
+  "components": {
+    "source_identity": {"paths": ["VERSION", "Cargo.toml", "Cargo.lock"], "contracts": ["release-source-identity"], "artifacts": []},
+    "server_packaging": {"paths": ["scripts/stage_server_package.sh"], "contracts": ["release-source-identity", "artifact-integrity"], "artifacts": ["server-package", "server-SHA256SUMS"]},
+    "agent_packaging": {"paths": ["scripts/stage_agent_package.sh"], "contracts": ["release-source-identity", "artifact-integrity"], "artifacts": ["agent-package", "agent-SHA256SUMS"]},
+    "release_orchestrator": {"paths": ["scripts/deploy_production.sh", "scripts/check_release_pipeline_contract.sh", "scripts/test_server_package.sh"], "contracts": ["release-qualification", "deployment-binding"], "artifacts": ["release-evidence"]}
+  },
+  "domains": {
+    "release_identity": {"components": ["source_identity", "server_packaging", "agent_packaging"], "contracts": ["release-source-identity", "artifact-integrity"], "artifacts": ["release-manifest"]},
+    "release_qualification": {"components": ["release_orchestrator"], "contracts": ["release-qualification", "deployment-binding"], "artifacts": ["release-evidence"]}
+  }
+}
