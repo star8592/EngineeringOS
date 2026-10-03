@@ -7,7 +7,7 @@ venv="$state_root/venv"
 unit_dir="$HOME/.config/systemd/user"
 unit="$unit_dir/engineeringos-laya.service"
 port="${ENGINEERINGOS_LAYA_PORT:-8017}"
-device="${ENGINEERINGOS_LAYA_DEVICE:-auto}"
+device="${ENGINEERINGOS_LAYA_DEVICE:-}"
 python_bin="${ENGINEERINGOS_LAYA_PYTHON:-}"
 if [ -z "$python_bin" ]; then
   if command -v python3.12 >/dev/null 2>&1; then
@@ -26,7 +26,22 @@ PY
 mkdir -p "$state_root" "$unit_dir"
 "$python_bin" -m venv "$venv"
 "$venv/bin/python" -m pip install --upgrade pip
-"$venv/bin/python" -m pip install "laya[serve]==0.3.24"
+if "$venv/bin/python" - <<'PY'
+from importlib.metadata import version
+raise SystemExit(0 if version("laya") == "0.3.24" else 1)
+PY
+then
+  if [ ! -x "$venv/bin/laya-serve" ]; then
+    "$venv/bin/python" -m pip install "laya[serve]==0.3.24"
+  fi
+else
+  "$venv/bin/python" -m pip install "laya[serve]==0.3.24"
+fi
+
+device_env=""
+if [ -n "$device" ]; then
+  device_env="Environment=LAYA_DEVICE=$device"
+fi
 
 cat > "$unit" <<EOF
 [Unit]
@@ -37,7 +52,7 @@ After=default.target
 Type=simple
 Environment=LAYA_HOST=127.0.0.1
 Environment=LAYA_PORT=$port
-Environment=LAYA_DEVICE=$device
+$device_env
 Environment=LAYA_PRELOAD=1
 Environment=LAYA_MODELS=typed-decisions
 Environment=LAYA_AUTO_TASK=0
