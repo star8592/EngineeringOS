@@ -43,3 +43,6 @@ The durable core is event-sourced at the semantic boundary. Commands are evaluat
 
 ## Stable persistence boundary
 Python and Rust share the EventEnvelope JSONL and snapshot contract. Runtime migration must not require reinterpretation or rewriting of historical control-plane state. CAS/version semantics are part of the durable contract, not an implementation detail of either language.
+
+## Command boundary
+The production control plane must persist command intent before any external side effect. External execution and the local event log are not treated as one transaction. Unknown completion is reconciled through outcome probes before retry.
