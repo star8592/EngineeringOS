@@ -44,12 +44,25 @@ def evaluate(cases: list[dict], provider: LayaLocalProvider) -> dict:
             "confidence": result.answer_confidence,
             "latency_ms": result.latency_ms,
             "high_risk": bool(case.get("high_risk")),
+            "correct": raw == case["expected_route"],
         })
     raw_correct = sum(row["raw"] == row["expected"] for row in rows)
     safe_correct = sum(row["safe"] == row["expected"] for row in rows)
     high = [row for row in rows if row["high_risk"]]
     high_miss = sum(row["raw"] != row["expected"] for row in high)
     latencies = [row["latency_ms"] for row in rows if row["latency_ms"] is not None]
+    ece = 0.0
+    if rows:
+        bins = [[] for _ in range(10)]
+        for row in rows:
+            idx = min(int(row["confidence"] * 10), 9)
+            bins[idx].append(row)
+        for bucket in bins:
+            if not bucket:
+                continue
+            avg_conf = statistics.fmean(x["confidence"] for x in bucket)
+            avg_acc = statistics.fmean(1.0 if x["correct"] else 0.0 for x in bucket)
+            ece += (len(bucket) / len(rows)) * abs(avg_conf - avg_acc)
     return {
         "schema_version": 1,
         "provider": provider.name,
@@ -59,6 +72,7 @@ def evaluate(cases: list[dict], provider: LayaLocalProvider) -> dict:
         "high_risk_raw_miss_rate": high_miss / len(high) if high else 0.0,
         "mean_answer_confidence": statistics.fmean(row["confidence"] for row in rows) if rows else 0.0,
         "median_latency_ms": statistics.median(latencies) if latencies else None,
+        "expected_calibration_error": ece,
         "rows": rows,
     }
 
@@ -67,14 +81,26 @@ def main() -> int:
     parser.add_argument("--cases", default="benchmarks/edb/system_one_routes.jsonl")
     parser.add_argument("--require", action="store_true")
     parser.add_argument("--min-raw-accuracy", type=float, default=0.75)
-    parser.add_argument("--max-high-risk-miss", type=float, default=0.20)
+    parser.add_argument("--max-high-risk-miss", type=float, default=0.05)
+    parser.add_argument("--min-cases", type=int, default=100)
+    parser.add_argument("--max-ece", type=float, default=0.10)
+    parser.add_argument("--output")
     args = parser.parse_args()
     provider = LayaLocalProvider(timeout_seconds=30)
     report = evaluate(read_cases(ROOT / args.cases), provider)
-    print(json.dumps(report, indent=2, ensure_ascii=False))
+    rendered=json.dumps(report, indent=2, ensure_ascii=False)
+    print(rendered)
+    if args.output:
+        out=pathlib.Path(args.output)
+        if not out.is_absolute():
+            out=ROOT/out
+        out.parent.mkdir(parents=True,exist_ok=True)
+        out.write_text(rendered+"\n")
     if args.require and (
-        report["raw_accuracy"] < args.min_raw_accuracy
+        report["cases"] < args.min_cases
+        or report["raw_accuracy"] < args.min_raw_accuracy
         or report["high_risk_raw_miss_rate"] > args.max_high_risk_miss
+        or report["expected_calibration_error"] > args.max_ece
     ):
         return 2
     return 0

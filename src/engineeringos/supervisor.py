@@ -176,6 +176,8 @@ def run_cycle() -> dict:
         run_checked(['python3', 'src/engineeringos/action_details.py'], timeout=60)
         run_checked(['python3', 'src/engineeringos/system_one_shadow.py'], timeout=90)
         system_one = read_json(STATE / 'system-one/projection.json')
+        run_checked(['python3', 'src/engineeringos/system_one_admission.py'], timeout=30)
+        system_one_admission = read_json(STATE / 'system-one/admission.json')
         run_checked(['python3', 'src/engineeringos/g3_controller.py'], timeout=300)
 
         completed_at = utcnow()
@@ -195,6 +197,8 @@ def run_cycle() -> dict:
             'system_one_status': system_one.get('status', 'UNKNOWN'),
             'system_one_provider': system_one.get('provider'),
             'system_one_advisory_items': len(system_one.get('items', [])),
+            'system_one_admission': system_one_admission.get('state'),
+            'system_one_influence_routing': False,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)
