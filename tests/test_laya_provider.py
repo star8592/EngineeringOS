@@ -28,27 +28,36 @@ class Handler(BaseHTTPRequestHandler):
         assert self.path == "/v1/systemone"
         n = int(self.headers["content-length"])
         request = json.loads(self.rfile.read(n))
-        qid, question = next(iter(request["questions"].items()))
-        assert question["type"] == "choice"
-        assert "criteria" in question
+        answers = {}
+        for qid, question in request["questions"].items():
+            assert question["type"] == "choice"
+            assert "criteria" in question
+            if qid == "human_authority":
+                choice = "HUMAN_AUTHORITY_REQUIRED"
+                probs = {
+                    "HUMAN_AUTHORITY_REQUIRED": 0.88,
+                    "NO_HUMAN_AUTHORITY": 0.12,
+                }
+            else:
+                choice = "REASONING_REVIEW"
+                probs = {
+                    "DETERMINISTIC_CANDIDATE": 0.04,
+                    "REASONING_REVIEW": 0.91,
+                    "FORMAL_OR_HIGH_ASSURANCE": 0.05,
+                }
+            answers[qid] = {
+                "type": "choice",
+                "choice": choice,
+                "probabilities": probs,
+                "confidence": 0.71,
+                "answer_confidence": probs[choice],
+            }
+
         body = json.dumps({
             "model": "laya-rl-agent",
-            "answers": {
-                qid: {
-                    "type": "choice",
-                    "choice": "REASONING_REVIEW",
-                    "probabilities": {
-                        "DETERMINISTIC_CANDIDATE": 0.04,
-                        "REASONING_REVIEW": 0.91,
-                        "FORMAL_OR_HIGH_ASSURANCE": 0.03,
-                        "HUMAN_REVIEW": 0.02
-                    },
-                    "confidence": 0.71,
-                    "answer_confidence": 0.91
-                }
-            },
+            "answers": answers,
             "usage": {"input_tokens": 12, "output_tokens": 0},
-            "routing": {"model": "typed-decisions"}
+            "routing": {"model": "typed-decisions"},
         }).encode()
         self.send_response(200)
         self.send_header("content-type", "application/json")
@@ -61,29 +70,69 @@ server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
 thread = threading.Thread(target=server.serve_forever, daemon=True)
 thread.start()
 try:
-    provider = LayaLocalProvider(base_url=f"http://127.0.0.1:{server.server_port}")
+    provider = LayaLocalProvider(
+        base_url=f"http://127.0.0.1:{server.server_port}"
+    )
     assert provider.health()["available"] is True
-    q = TypedQuestion(
-        question_id="lane",
+
+    lane = TypedQuestion(
+        question_id="engineering_lane",
         kind="choice",
         instructions="Choose lane",
         options=(
             "DETERMINISTIC_CANDIDATE",
             "REASONING_REVIEW",
             "FORMAL_OR_HIGH_ASSURANCE",
-            "HUMAN_REVIEW"
-        )
+        ),
     )
-    result = provider.decide(state={"kind": "semantic-change"}, question=q)
-    assert result.decision.recommended_route == "REASONING_REVIEW"
-    assert result.answer_confidence == 0.91
-    assert result.latency_ms == 7.5
-    assert result.model == "typed-decisions"
+    authority = TypedQuestion(
+        question_id="human_authority",
+        kind="choice",
+        instructions="Human authority?",
+        options=(
+            "HUMAN_AUTHORITY_REQUIRED",
+            "NO_HUMAN_AUTHORITY",
+        ),
+    )
+    batch = provider.decide_many(
+        state={"kind": "semantic-change"},
+        questions=(lane, authority),
+    )
+    assert set(batch.answers) == {
+        "engineering_lane",
+        "human_authority",
+    }
+    assert (
+        batch.answers["engineering_lane"].choice
+        == "REASONING_REVIEW"
+    )
+    assert (
+        batch.answers["human_authority"].choice
+        == "HUMAN_AUTHORITY_REQUIRED"
+    )
+    assert (
+        batch.answers["engineering_lane"].answer_confidence
+        == 0.91
+    )
+    assert batch.latency_ms == 7.5
+    assert batch.model == "typed-decisions"
+
+    single = provider.decide(
+        state={"kind": "semantic-change"},
+        question=lane,
+    )
+    assert (
+        single.decision.recommended_route
+        == "REASONING_REVIEW"
+    )
 finally:
     server.shutdown()
     thread.join(timeout=2)
 
-unavailable = LayaLocalProvider(base_url="http://127.0.0.1:1", timeout_seconds=0.1)
+unavailable = LayaLocalProvider(
+    base_url="http://127.0.0.1:1",
+    timeout_seconds=0.1,
+)
 assert unavailable.health()["available"] is False
 
-print("6 Laya provider invariants passed")
+print("9 Laya provider invariants passed")
