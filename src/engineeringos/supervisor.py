@@ -174,6 +174,8 @@ def run_cycle() -> dict:
         atomic_json(STATE / 'action-brief.json', brief)
         atomic_json(STATE / 'time-series-summary.json', summary)
         run_checked(['python3', 'src/engineeringos/action_details.py'], timeout=60)
+        run_checked(['python3', 'src/engineeringos/system_one_shadow.py'], timeout=90)
+        system_one = read_json(STATE / 'system-one/projection.json')
         run_checked(['python3', 'src/engineeringos/g3_controller.py'], timeout=300)
 
         completed_at = utcnow()
@@ -190,6 +192,9 @@ def run_cycle() -> dict:
             'observations': len(series),
             'active_work_items': brief['active_work_items'],
             'top_action_count': len(brief['actions']),
+            'system_one_status': system_one.get('status', 'UNKNOWN'),
+            'system_one_provider': system_one.get('provider'),
+            'system_one_advisory_items': len(system_one.get('items', [])),
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)

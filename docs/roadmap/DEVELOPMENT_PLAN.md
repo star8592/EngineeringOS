@@ -80,6 +80,7 @@ Completed:
 - First G3 bounded deterministic diagnostic with authoritative CI closure (EXP-039).
 - First executable A3/A4 formal-assurance gates for command safety (EXP-040).
 - Executable System-One/Jev typed-decision contract with an explicit no-authorization boundary (EXP-041).
+- Local open Laya provider, shadow routing, and seed Engineering Decision Benchmark (EXP-042).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
@@ -87,8 +88,9 @@ Current order:
 3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Continue G3 pilot dogfood with the single deterministic-check allowlist; prove deferral, idempotency, evidence closure, and no target mutation before adding any second action class.
-6. Extend executable assurance from command safety to lease exclusivity and convergence/release state machines; activate a benchmarked System-One/Jev-compatible judge only as advisory routing evidence.
-7. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
+6. Run Laya continuously in shadow advisory mode, expand EDB from real outcomes, and only allow its recommendations to influence routing after measured accuracy/calibration thresholds pass.
+7. Extend executable assurance from command safety to lease exclusivity and convergence/release state machines.
+8. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
 
 ## Definition of Done for a development change
 
