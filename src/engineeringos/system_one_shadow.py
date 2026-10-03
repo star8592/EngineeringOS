@@ -180,6 +180,7 @@ def run() -> dict:
         "provider": provider.name,
         "mode": "SHADOW_ADVISORY",
         "provider_health": health,
+        "routing_contract": "processing-lane+human-authority/v2",
         "routing_axes": [
             "PROCESSING_LANE",
             "HUMAN_AUTHORITY",
