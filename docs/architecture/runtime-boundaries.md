@@ -40,3 +40,6 @@ This is migration eligibility, not cutover authorization. Persistence, event rep
 ## Durable state boundary
 
 The durable core is event-sourced at the semantic boundary. Commands are evaluated against an observed stream version and committed with compare-and-swap semantics. Materialized state and snapshots are projections; they may accelerate reads/recovery but cannot silently override the authoritative event sequence.
+
+## Stable persistence boundary
+Python and Rust share the EventEnvelope JSONL and snapshot contract. Runtime migration must not require reinterpretation or rewriting of historical control-plane state. CAS/version semantics are part of the durable contract, not an implementation detail of either language.
