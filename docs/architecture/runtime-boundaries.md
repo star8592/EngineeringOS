@@ -36,3 +36,7 @@ As of EXP-027, the following stable semantics have executable Python↔Rust pari
 - scheduler dispatch-lane selection.
 
 This is migration eligibility, not cutover authorization. Persistence, event replay, recovery, and integration with the existing Python manager remain outside the current Rust authority boundary.
+
+## Durable state boundary
+
+The durable core is event-sourced at the semantic boundary. Commands are evaluated against an observed stream version and committed with compare-and-swap semantics. Materialized state and snapshots are projections; they may accelerate reads/recovery but cannot silently override the authoritative event sequence.
