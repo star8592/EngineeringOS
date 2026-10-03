@@ -14,3 +14,7 @@ EngineeringOS manages the causal chain from human intent to architecture, agent 
 
 ## First proving ground
 DevControl is the first real system under management. Milestone 0 reconstructs its engineering state before any automated merging is attempted.
+
+## Engineering memory
+
+Important discussions must converge into durable project state; conversation history is not the authoritative engineering memory. See `docs/principles/engineering-memory.md` and ADR-004.
