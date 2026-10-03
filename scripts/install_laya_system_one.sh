@@ -12,7 +12,7 @@ device="${ENGINEERINGOS_LAYA_DEVICE:-auto}"
 mkdir -p "$state_root" "$unit_dir"
 python3 -m venv "$venv"
 "$venv/bin/python" -m pip install --upgrade pip
-"$venv/bin/python" -m pip install "laya[serve]"
+"$venv/bin/python" -m pip install "laya[serve]==0.3.24"
 
 cat > "$unit" <<EOF
 [Unit]
