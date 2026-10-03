@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "src/engineeringos/system_one_*.py"
+      - "src/engineeringos/system_one_admission.py"
       - "src/engineeringos/laya_provider.py"
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
@@ -21,11 +22,19 @@ on:
     branches: [main]
     paths:
       - "src/engineeringos/system_one_*.py"
+      - "src/engineeringos/system_one_admission.py"
       - "src/engineeringos/laya_provider.py"
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
       - "benchmarks/edb/**"
       - "scripts/run_system_one_edb.py"
+      - "scripts/install_laya_system_one.sh"
+      - "src/engineeringos/supervisor.py"
+      - "src/engineeringos/dashboard_projector.py"
+      - "dashboard/index.html"
+      - "tests/test_system_one_shadow.py"
+      - "tests/test_system_one_admission.py"
+      - "tests/test_control_room_system_one.py"
       - ".github/workflows/system-one.yml"
 
 jobs:
@@ -36,6 +45,7 @@ jobs:
       - run: python3 tests/test_system_one_contract.py
       - run: python3 tests/test_laya_provider.py
       - run: python3 tests/test_system_one_shadow.py
+      - run: python3 tests/test_system_one_admission.py
       - run: python3 tests/test_control_room_system_one.py
       - run: bash -n scripts/install_laya_system_one.sh
       - name: Validate EDB corpus
