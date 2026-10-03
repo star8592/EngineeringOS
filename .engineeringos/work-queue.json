@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-03T10:22:12.772961+00:00",
+  "items": [
+    {
+      "id": "88c2db791daacae9",
+      "project": "DevControl",
+      "priority": 1,
+      "kind": "RESOLVE_PRODUCTION_VERIFICATION",
+      "reason": "current source head is not bound to current production verification evidence",
+      "required_assurance": "A2",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "evidence_refs": []
+    },
+    {
+      "id": "efa266d45751caef",
+      "project": "DevControl",
+      "priority": 2,
+      "kind": "REVIEW_OVERLAPPING_LINES",
+      "reason": "4 independent branch pairs have high changed-surface overlap",
+      "required_assurance": "A1",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "evidence_refs": []
+    },
+    {
+      "id": "9692752e6186bf53",
+      "project": "DevControl",
+      "priority": 2,
+      "kind": "TRIAGE_DIRTY_WORKSPACES",
+      "reason": "10 branch-attached worktrees contain uncommitted state",
+      "required_assurance": "A1",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "evidence_refs": []
+    },
+    {
+      "id": "bc04655312b2ada0",
+      "project": "DevControl",
+      "priority": 3,
+      "kind": "RECONCILE_DUPLICATE_STATE",
+      "reason": "3 exact-head alias groups need role/ownership reconciliation",
+      "required_assurance": "A1",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "evidence_refs": []
+    },
+    {
+      "id": "83ea8e17b34b0303",
+      "project": "DevControl",
+      "priority": 3,
+      "kind": "REVIEW_DIVERGENT_DEVELOPMENT",
+      "reason": "17 development lines are materially behind origin/main",
+      "required_assurance": "A1",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "evidence_refs": []
+    }
+  ]
+}
