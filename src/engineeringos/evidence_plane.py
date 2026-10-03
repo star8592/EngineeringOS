@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json, subprocess, pathlib, datetime
+from production_evidence_semantics import interpret
 TARGET='/mnt/disk1/Code/DevControl2'; OUT=pathlib.Path('artifacts/evidence-plane.json')
 def cmd(args):
  p=subprocess.run(args,text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL); return p.stdout.strip(),p.returncode
@@ -24,7 +25,9 @@ latest_smoke=sorted(success_smokes,key=lambda x:x['createdAt'],reverse=True)[0] 
 smoke_reachable=None
 if latest_smoke:
  smoke_reachable=(subprocess.run(['git','-C',TARGET,'merge-base','--is-ancestor',latest_smoke['headSha'],'origin/main']).returncode==0)
-report={'generated_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'repository':'star8592/DevControl2','origin_main':origin,'version':version,'current_head_evidence':{'ci':state(ci),'production_smoke':state(smoke),'external_spec_drift':state(spec),'runs':head_runs},'latest_successful_production_smoke':latest_smoke,'latest_smoke_reachable_from_current_main':smoke_reachable,'release_api':{'status':'EMPTY' if not gh('release','list','--repo','star8592/DevControl2','--limit','5') else 'PRESENT'},'interpretation':{'qualification':'FAIL' if state(ci)=='FAILURE' else ('PASS' if state(ci)=='SUCCESS' else 'UNKNOWN'),'production_verification':'PASS' if state(smoke)=='SUCCESS' else 'UNKNOWN','deployment_identity':'UNKNOWN','artifact_identity':'UNKNOWN'},'guardrail':'A successful smoke on an older SHA does not prove current origin/main is deployed or production-verified.'}
+release_path=pathlib.Path('artifacts/devcontrol-release-evidence.json'); release_evidence=json.load(open(release_path)) if release_path.exists() else {}
+interp=interpret(source_ci=state(ci),source_head_smoke=state(smoke),release_evidence=release_evidence)
+report={'generated_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'repository':'star8592/DevControl2','origin_main':origin,'version':version,'current_head_evidence':{'ci':state(ci),'production_smoke':state(smoke),'external_spec_drift':state(spec),'runs':head_runs},'latest_successful_production_smoke':latest_smoke,'latest_smoke_reachable_from_current_main':smoke_reachable,'live_release_evidence':release_evidence,'release_api':{'status':'EMPTY' if not gh('release','list','--repo','star8592/DevControl2','--limit','5') else 'PRESENT'},'interpretation':interp,'guardrail':'Source-head production smoke and live-production qualification are distinct. An older/live deployed release may be qualified while current origin/main is not deployed.'}
 OUT.write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
 print(json.dumps(report['current_head_evidence'],indent=2))
 print('interpretation',report['interpretation'])

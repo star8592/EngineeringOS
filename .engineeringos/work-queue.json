@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-03T10:22:12.772961+00:00",
+  "updated_at": "2026-10-03T14:36:06.051153+00:00",
   "items": [
     {
       "id": "88c2db791daacae9",
@@ -10,9 +10,36 @@
       "reason": "current source head is not bound to current production verification evidence",
       "required_assurance": "A2",
       "automation": "REVIEW",
-      "state": "DISCOVERED",
+      "state": "PENDING_RESOLUTION",
       "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
       "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "evidence_refs": [],
+      "last_missing_at": "2026-10-03T14:36:06.051153+00:00"
+    },
+    {
+      "id": "7ff06cb62cc3c2a6",
+      "project": "DevControl",
+      "priority": 2,
+      "kind": "CLOSE_ARTIFACT_IDENTITY_GAP",
+      "reason": "artifact identity is UNKNOWN",
+      "required_assurance": "A2",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T14:36:06.051153+00:00",
+      "last_seen_at": "2026-10-03T14:36:06.051153+00:00",
+      "evidence_refs": []
+    },
+    {
+      "id": "78fd0b7907540acd",
+      "project": "DevControl",
+      "priority": 2,
+      "kind": "CLOSE_DEPLOYMENT_IDENTITY_GAP",
+      "reason": "deployment identity is PARTIAL",
+      "required_assurance": "A2",
+      "automation": "REVIEW",
+      "state": "DISCOVERED",
+      "first_seen_at": "2026-10-03T14:36:06.051153+00:00",
+      "last_seen_at": "2026-10-03T14:36:06.051153+00:00",
       "evidence_refs": []
     },
     {
@@ -25,7 +52,7 @@
       "automation": "REVIEW",
       "state": "DISCOVERED",
       "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
-      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T14:36:06.051153+00:00",
       "evidence_refs": []
     },
     {
@@ -38,7 +65,7 @@
       "automation": "REVIEW",
       "state": "DISCOVERED",
       "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
-      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T14:36:06.051153+00:00",
       "evidence_refs": []
     },
     {
@@ -51,7 +78,7 @@
       "automation": "REVIEW",
       "state": "DISCOVERED",
       "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
-      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T14:36:06.051153+00:00",
       "evidence_refs": []
     },
     {
@@ -64,7 +91,7 @@
       "automation": "REVIEW",
       "state": "DISCOVERED",
       "first_seen_at": "2026-10-03T10:22:12.772961+00:00",
-      "last_seen_at": "2026-10-03T10:22:12.772961+00:00",
+      "last_seen_at": "2026-10-03T14:36:06.051153+00:00",
       "evidence_refs": []
     }
   ]

@@ -7,6 +7,7 @@ for cmd in [
  ['python3','src/engineeringos/devcontrol_inventory.py'],
  ['python3','src/engineeringos/devcontrol_lineage.py'],
  ['python3','src/engineeringos/convergence_debt.py'],
+ ['python3','src/engineeringos/devcontrol_release_evidence.py'],
  ['python3','src/engineeringos/evidence_plane.py'],
  ['python3','src/engineeringos/reconcile_devcontrol.py'],
  ['python3','src/engineeringos/policy_devcontrol.py'],
