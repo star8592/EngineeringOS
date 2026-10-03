@@ -472,3 +472,106 @@ mod scheduler_tests {
         );
     }
 }
+
+// --- Append-only event replay parity core ---
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EventEnvelope {
+    pub seq: u64,
+    pub event_id: String,
+    #[serde(rename = "type")]
+    pub event_type: String,
+    #[serde(default)]
+    pub payload: serde_json::Value,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct ReplayLease {
+    pub owner: String,
+    pub acquired_at: String,
+    pub expires_at: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct ReplayState {
+    pub id: Option<String>,
+    pub state: Option<String>,
+    pub owner: Option<String>,
+    pub lease: Option<ReplayLease>,
+    #[serde(default)]
+    pub closure_evidence_refs: Vec<String>,
+    #[serde(default)]
+    pub resolution_evidence_refs: Vec<String>,
+    pub resolved_by: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ReplayError {
+    DuplicateEventId,
+    SequenceGapOrReorder,
+    WorkAlreadyExists,
+    WorkNotCreated,
+    LeaseNotOwned,
+    EvidenceRequired,
+    UnknownEventType,
+}
+
+fn payload_str<'a>(p: &'a serde_json::Value, k: &str) -> &'a str {
+    p.get(k).and_then(|v| v.as_str()).unwrap_or("")
+}
+fn payload_strings(p: &serde_json::Value, k: &str) -> Vec<String> {
+    p.get(k).and_then(|v| v.as_array()).map(|a| a.iter().filter_map(|v| v.as_str().map(str::to_string)).collect()).unwrap_or_default()
+}
+
+pub fn replay_events(events: &[EventEnvelope]) -> Result<ReplayState, ReplayError> {
+    let mut s = ReplayState::default();
+    let mut expected = 1u64;
+    let mut seen = HashSet::new();
+    for e in events {
+        if !seen.insert(e.event_id.clone()) { return Err(ReplayError::DuplicateEventId); }
+        if e.seq != expected { return Err(ReplayError::SequenceGapOrReorder); }
+        expected += 1;
+        match e.event_type.as_str() {
+            "WORK_DISCOVERED" => {
+                if s.id.is_some() { return Err(ReplayError::WorkAlreadyExists); }
+                s.id = Some(payload_str(&e.payload,"id").to_string());
+                s.state = Some("DISCOVERED".into());
+            }
+            _ if s.id.is_none() => return Err(ReplayError::WorkNotCreated),
+            "LEASE_CLAIMED" => {
+                let owner=payload_str(&e.payload,"owner").to_string();
+                s.state=Some("IN_PROGRESS".into()); s.owner=Some(owner.clone());
+                s.lease=Some(ReplayLease{owner,acquired_at:payload_str(&e.payload,"acquired_at").into(),expires_at:payload_str(&e.payload,"expires_at").into()});
+            }
+            "LEASE_RENEWED" => {
+                let owner=payload_str(&e.payload,"owner");
+                match &mut s.lease { Some(l) if l.owner==owner => l.expires_at=payload_str(&e.payload,"expires_at").into(), _ => return Err(ReplayError::LeaseNotOwned) }
+            }
+            "RESOLUTION_REQUESTED" => {
+                let refs=payload_strings(&e.payload,"evidence_refs"); if refs.is_empty(){return Err(ReplayError::EvidenceRequired)}
+                s.state=Some("PENDING_RESOLUTION".into()); s.closure_evidence_refs=refs;
+            }
+            "WORK_RESOLVED" => {
+                let mut refs=s.closure_evidence_refs.clone(); refs.extend(payload_strings(&e.payload,"evidence_refs"));
+                let mut dedup=Vec::new(); for r in refs { if !dedup.contains(&r){dedup.push(r)} }
+                if dedup.is_empty(){return Err(ReplayError::EvidenceRequired)}
+                s.state=Some("RESOLVED".into()); s.resolved_by=Some(payload_str(&e.payload,"verifier").into()); s.resolution_evidence_refs=dedup; s.lease=None;
+            }
+            "WORK_REOPENED" => {
+                s.state=Some("REOPENED".into()); s.resolved_by=None; s.resolution_evidence_refs.clear();
+            }
+            _ => return Err(ReplayError::UnknownEventType),
+        }
+    }
+    Ok(s)
+}
+
+#[cfg(test)]
+mod event_replay_tests {
+    use super::*;
+    use serde_json::json;
+    fn ev(seq:u64,id:&str,t:&str,p:serde_json::Value)->EventEnvelope{EventEnvelope{seq,event_id:id.into(),event_type:t.into(),payload:p}}
+    #[test] fn replay_recovers_resolved_state(){let e=vec![ev(1,"e1","WORK_DISCOVERED",json!({"id":"w1"})),ev(2,"e2","LEASE_CLAIMED",json!({"owner":"a","acquired_at":"t0","expires_at":"t1"})),ev(3,"e3","RESOLUTION_REQUESTED",json!({"evidence_refs":["ci:1"]})),ev(4,"e4","WORK_RESOLVED",json!({"verifier":"manager","evidence_refs":["runtime:2"]}))];let s=replay_events(&e).unwrap();assert_eq!(s.state.as_deref(),Some("RESOLVED"));assert!(s.lease.is_none());assert_eq!(s.resolution_evidence_refs,vec!["ci:1","runtime:2"]);}
+    #[test] fn sequence_gap_is_rejected(){let e=vec![ev(1,"e1","WORK_DISCOVERED",json!({"id":"w1"})),ev(3,"e3","WORK_REOPENED",json!({}))];assert_eq!(replay_events(&e),Err(ReplayError::SequenceGapOrReorder));}
+    #[test] fn duplicate_event_is_rejected(){let e=vec![ev(1,"e1","WORK_DISCOVERED",json!({"id":"w1"})),ev(2,"e1","WORK_REOPENED",json!({}))];assert_eq!(replay_events(&e),Err(ReplayError::DuplicateEventId));}
+    #[test] fn resolved_work_can_reopen(){let e=vec![ev(1,"e1","WORK_DISCOVERED",json!({"id":"w1"})),ev(2,"e2","LEASE_CLAIMED",json!({"owner":"a","acquired_at":"t0","expires_at":"t1"})),ev(3,"e3","RESOLUTION_REQUESTED",json!({"evidence_refs":["ci:1"]})),ev(4,"e4","WORK_RESOLVED",json!({"verifier":"m","evidence_refs":[]})),ev(5,"e5","WORK_REOPENED",json!({}))];assert_eq!(replay_events(&e).unwrap().state.as_deref(),Some("REOPENED"));}
+}
