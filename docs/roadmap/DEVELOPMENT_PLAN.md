@@ -82,6 +82,7 @@ Completed:
 - Executable System-One/Jev typed-decision contract with an explicit no-authorization boundary (EXP-041).
 - Local open Laya provider, shadow routing, and seed Engineering Decision Benchmark (EXP-042).
 - Evidence-gated System-One provider admission with sample-size, high-risk miss, and calibration thresholds (EXP-043).
+- Durable Laya shadow observation ledger for real dogfood data collection without treating weak Scheduler references as EDB gold (EXP-044).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
