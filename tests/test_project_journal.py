@@ -13,5 +13,8 @@ with tempfile.TemporaryDirectory() as td:
  s=replay_project(events(p));assert s["last_seq"]==5;assert s["intents"]["i"]["generation"]==2;assert s["intents"]["i"]["statement"]=="voice first";assert s["work_items"]["gap-a"]["state"]=="SUPERSEDED"
  try: append(p,project="P",typ="WORK_DISCOVERED",key="x",payload={},expected_version=2);raise AssertionError()
  except EventStoreError as e: assert str(e)=="VERSION_CONFLICT"
- s2=replay_project(events(p));assert s2==s
- print("8 project-journal invariants passed")
+ append(p,project="P",typ="WORK_REOPENED",key="gap-a",generation=2,payload={"reason":"same"})
+ append(p,project="P",typ="WORK_REOPENED",key="gap-a",generation=2,payload={"reason":"same"})
+ assert len(events(p))==7
+ s2=replay_project(events(p));assert s2["work_items"]["gap-a"]["state"]=="REOPENED"
+ print("10 project-journal invariants passed")

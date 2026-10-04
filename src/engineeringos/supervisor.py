@@ -15,6 +15,7 @@ from collections import Counter
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 from state_paths import runtime
 from autopilot_supervision import supervisor_decision, bounded_history
+from registered_autopilot_runner import run_registered_once
 STATE = runtime()
 
 
@@ -162,10 +163,20 @@ def run_checked(args: list[str], timeout: int = 240) -> None:
     subprocess.run(args, cwd=ROOT, check=True, timeout=timeout, stdout=subprocess.DEVNULL)
 
 
+def run_project_autopilot_lane() -> dict:
+    registry = STATE / 'projects/registry.json'
+    try:
+        results = run_registered_once(registry, STATE, now=time.time())
+        return {'health': 'HEALTHY', 'projects': results}
+    except Exception as exc:
+        return {'health': 'DEGRADED', 'error_type': type(exc).__name__, 'error': str(exc), 'projects': []}
+
+
 def run_cycle() -> dict:
     started = time.monotonic()
     started_at = utcnow()
     status_path = STATE / 'supervisor/status.json'
+    project_autopilot = run_project_autopilot_lane()
     try:
         run_checked(['python3', 'src/engineeringos/shadow_run.py'])
         snapshot = read_json(STATE / 'shadow/latest.json')
@@ -240,6 +251,7 @@ def run_cycle() -> dict:
             'autopilot_action': autopilot_decision.get('action'),
             'autopilot_reason': autopilot_decision.get('reason'),
             'autopilot_should_notify': autopilot_decision.get('should_notify', False),
+            'project_autopilot': project_autopilot,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)
@@ -255,6 +267,7 @@ def run_cycle() -> dict:
             'duration_seconds': round(time.monotonic() - started, 3),
             'error_type': type(exc).__name__,
             'error': str(exc),
+            'project_autopilot': project_autopilot,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)

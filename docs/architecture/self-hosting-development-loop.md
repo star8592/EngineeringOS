@@ -117,3 +117,7 @@ A dispatchable work item is not executable merely because an agent can reason ab
 ## Durable project journal
 
 Autopilot durable truth is an append-only per-project event journal with compare-and-swap sequencing. Intent revisions and Work lifecycle transitions are replayed from that journal; projections may be regenerated and therefore are not authoritative. Restart recovery must require no conversational memory. A local verified commit can close only work whose required assurance is A1/A2 and whose completion predicate explicitly accepts capability evidence. Higher-assurance work requires the corresponding runtime, CI, release, or production evidence before resolution.
+
+## Continuous runtime and explicit project authority
+
+Continuous Autopilot runs inside the existing singleton Supervisor rather than a competing daemon. Project discovery never grants mutation authority: autonomous execution requires an explicit runtime registry entry and a bounded assurance ceiling. Machine failures are retried with persisted bounded exponential backoff; stable state sleeps; unchanged human-intent waits are deduplicated. A project lane failure must not widen permissions or disable unrelated supervision lanes.
