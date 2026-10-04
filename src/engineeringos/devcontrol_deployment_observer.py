@@ -107,6 +107,11 @@ def _run(
         ) from exc
 
 
+def _remote_python_command(script: str, *args: str) -> str:
+    parts = ["python3", "-c", script, *args]
+    return " ".join(shlex.quote(part) for part in parts)
+
+
 def _release_from_link(target: str) -> str | None:
     if not target:
         return None
