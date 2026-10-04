@@ -10,10 +10,6 @@ PROCESSING_LANES = {
     "REASONING_REVIEW",
     "FORMAL_OR_HIGH_ASSURANCE",
 }
-AUTHORITY_CHOICES = {
-    "NO_HUMAN_AUTHORITY",
-    "HUMAN_AUTHORITY_REQUIRED",
-}
 # Backward-compatible legacy route domain for persisted evidence/readers.
 ROUTES = PROCESSING_LANES | {"HUMAN_REVIEW"}
 
