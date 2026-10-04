@@ -32,7 +32,7 @@ git reset --hard "$revision"
 
 export UV_LINK_MODE=copy
 uv sync --frozen --python "$python_bin" --extra dev --extra kev
-uv run decis download --engine kev-0.8b --dest "$models"
+"$src/.venv/bin/decis" download --engine kev-0.8b --dest "$models"
 
 adapter="$models/kev-0.8b"
 for required in adapter_config.json adapter_model.safetensors head.pt; do
@@ -100,6 +100,12 @@ RestartSec=5
 [Install]
 WantedBy=default.target
 EOF
+
+if [ -n "$(git status --short --untracked-files=no)" ]; then
+  echo "managed Decis checkout is dirty after install:" >&2
+  git status --short --untracked-files=no >&2
+  exit 1
+fi
 
 systemctl --user daemon-reload
 systemctl --user enable --now engineeringos-decis-kev.service
