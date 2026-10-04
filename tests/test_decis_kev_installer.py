@@ -11,7 +11,9 @@ assert "DECIS_DEVICE=cuda" in installer
 assert "DECIS_DTYPE=bf16" in installer
 assert "HF_HUB_OFFLINE=1" in installer
 assert "HF_HUB_CACHE" in installer
-assert "snapshot_download" not in installer\nassert "uv run decis download" not in installer\nassert "git status --short --untracked-files=no" in installer
+assert "snapshot_download" not in installer
+assert "uv run decis download" not in installer
+assert "git status --short --untracked-files=no" in installer
 assert "--model-path kev-0.8b=" in installer
 assert "engineeringos-decis-kev.service" in installer
 assert "127.0.0.1:8019" in provider
