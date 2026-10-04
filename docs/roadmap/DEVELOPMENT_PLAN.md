@@ -83,7 +83,7 @@ Completed:
 - Local open Laya provider, shadow routing, and seed Engineering Decision Benchmark (EXP-042).
 - Evidence-gated System-One provider admission with sample-size, high-risk miss, and calibration thresholds (EXP-043).
 - Durable Laya shadow observation ledger for real dogfood data collection without treating weak Scheduler references as EDB gold (EXP-044).
-- Two-axis System-One routing that separates processing assurance from human authority, with EDB schema v2 and contract-aware observation identity (EXP-045).
+- Two-axis System-One routing where Laya is advisory only for processing assurance and human authority is deterministic project policy; EDB v2 rejects unresolved/mismatched authority rules (EXP-045).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
