@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
 import pathlib
+import shlex
 import subprocess
 from typing import Any
 
@@ -150,6 +152,22 @@ def observe_local_agent(
     }
 
 
+def remote_tree_command(path: str) -> str:
+    encoded = base64.b64encode(
+        _REMOTE_TREE_SCRIPT.encode()
+    ).decode()
+    runner = (
+        "import base64;"
+        f"exec(base64.b64decode({encoded!r}))"
+    )
+    return (
+        "python3 -c "
+        + shlex.quote(runner)
+        + " "
+        + shlex.quote(path)
+    )
+
+
 def observe_remote_server(
     release_id: str,
     *,
@@ -175,10 +193,9 @@ def observe_remote_server(
         tree_raw = _run(
             ssh
             + [
-                "python3",
-                "-c",
-                _REMOTE_TREE_SCRIPT,
-                f"{server_root}/releases/{release_id}",
+                remote_tree_command(
+                    f"{server_root}/releases/{release_id}"
+                )
             ],
             timeout=20,
         )
