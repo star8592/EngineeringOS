@@ -85,6 +85,7 @@ Completed:
 - Durable Laya shadow observation ledger for real dogfood data collection without treating weak Scheduler references as EDB gold (EXP-044).
 - Two-axis System-One routing where the model is advisory only for processing assurance and human authority is deterministic project policy; EDB v2 rejects unresolved/mismatched authority rules (EXP-045).
 - Provider-neutral Jev-compatible backend matrix with live Laya vs Decis/kev evidence; no backend promoted because admission gates remain unmet (EXP-046).
+- Native CUDA kev deployment at pinned Decis 0.4.0 revision: 91.7% seed lane accuracy, 0% high-risk misses, ~22ms median; admitted only as a parallel shadow candidate because EDB size/calibration gates still fail (EXP-047).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
@@ -92,7 +93,7 @@ Current order:
 3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Continue G3 pilot dogfood with the single deterministic-check allowlist; prove deferral, idempotency, evidence closure, and no target mutation before adding any second action class.
-6. Run the active open System-One backend continuously in shadow advisory mode, expand EDB from real outcomes, and benchmark alternative open backends through the same contract; only allow model recommendations to influence routing after measured admission thresholds pass.
+6. Run Laya plus the GPU kev candidate in parallel shadow, accumulate side-by-side real-work observations, expand adjudicated EDB from reviewed outcomes, and only allow any model recommendation to influence routing after the unchanged admission thresholds pass.
 7. Extend executable assurance from command safety to lease exclusivity and convergence/release state machines.
 8. Expand G3 only from observed evidence; after stability, begin G4 convergence actions.
 
