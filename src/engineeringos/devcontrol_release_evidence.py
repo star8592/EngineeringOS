@@ -122,6 +122,7 @@ def build_release_evidence(
 
 
 def run() -> dict:
+    OUT.parent.mkdir(parents=True, exist_ok=True)
     ready = fetch("https://mcp.devcontrol.dev/readyz")
     release_id = ready["release_id"]
     evidence_file = EVIDENCE_DIR / f"{release_id}.json"
