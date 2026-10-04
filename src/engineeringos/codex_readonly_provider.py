@@ -7,7 +7,7 @@ class CodexReadOnlyProvider:
  def __init__(self, *, binary:str="codex", model:str|None=None, timeout:int=180):
   self.binary=binary;self.model=model;self.timeout=timeout
  def propose(self, *, task:TaskEnvelope, files:dict[str,str])->AgentCandidate:
-  schema={"type":"object","properties":{"changes":{"type":"object","additionalProperties":{"type":"string"}},"rationale":{"type":"string"},"confidence":{"type":"number","minimum":0,"maximum":1}},"required":["changes","rationale","confidence"],"additionalProperties":False}
+  schema={"type":"object","properties":{"changes":{"type":"object","properties":{path:{"type":"string"} for path in task.allowed_paths},"required":list(task.allowed_paths),"additionalProperties":False},"rationale":{"type":"string"},"confidence":{"type":"number","minimum":0,"maximum":1}},"required":["changes","rationale","confidence"],"additionalProperties":False}
   prompt=("You are a coding implementation worker, not an authority. Return a candidate implementation only. "
           "Do not request permissions, do not modify files, do not run commands, and do not broaden scope. "
           f"Goal: {task.goal}\nExact allowed paths: {list(task.allowed_paths)}\n"
