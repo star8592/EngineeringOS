@@ -23,7 +23,7 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
   if decision["action"]=="ADVANCE":
    planning=plan_one(cfg["repo"],runtime_root,cfg["name"],planner_factory(cfg))
    if planning["state"]=="CONTRACT_ADMITTED":
-    decision["last_result"]="SUCCESS";out.append({"project":cfg["name"],"action":"PLAN","result":planning})
+    decision["last_result"]="SUCCESS";decision["failures"]=0;out.append({"project":cfg["name"],"action":"PLAN","result":planning})
    elif planning["state"]=="PLANNER_FAILED":
     decision["last_result"]="MACHINE_FAILURE";out.append({"project":cfg["name"],"action":"PLAN_FAILED","result":planning})
    else:
