@@ -15,8 +15,8 @@ WorkingDirectory=$repo
 ExecStart=/usr/bin/python3 $repo/src/engineeringos/supervisor.py --interval 300
 Restart=always
 RestartSec=5
-StandardOutput=append:$repo/.engineeringos/runtime/supervisor.log
-StandardError=append:$repo/.engineeringos/runtime/supervisor.log
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=default.target

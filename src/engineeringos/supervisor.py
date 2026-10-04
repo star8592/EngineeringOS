@@ -14,6 +14,7 @@ from collections import Counter
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 from state_paths import runtime
+from autopilot_supervision import supervisor_decision, bounded_history
 STATE = runtime()
 
 
@@ -45,7 +46,7 @@ def read_json(path: pathlib.Path) -> dict:
     return json.loads(path.read_text())
 
 
-def append_jsonl_once(path: pathlib.Path, row: dict, unique_key: str) -> bool:
+def append_jsonl_once(path: pathlib.Path, row: dict, unique_key: str, max_rows: int = 500) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'a+', encoding='utf-8') as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
@@ -61,6 +62,13 @@ def append_jsonl_once(path: pathlib.Path, row: dict, unique_key: str) -> bool:
         handle.write(json.dumps(row, sort_keys=True, ensure_ascii=False) + '\n')
         handle.flush()
         os.fsync(handle.fileno())
+        if max_rows > 0:
+            handle.seek(0)
+            lines = [line for line in handle if line.strip()]
+            if len(lines) > max_rows:
+                handle.seek(0); handle.truncate()
+                handle.writelines(lines[-max_rows:])
+                handle.flush(); os.fsync(handle.fileno())
         fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
     return True
 
@@ -188,6 +196,17 @@ def run_cycle() -> dict:
         system_one_admission = read_json(STATE / 'system-one/admission.json')
         run_checked(['python3', 'src/engineeringos/g3_controller.py'], timeout=300)
 
+        # Autopilot projection is optional during migration. Its decision is advisory here;
+        # execution authority remains with existing G2/G3 policy gates.
+        autopilot_projection_path = STATE / 'autopilot/EngineeringOS/self-hosting.json'
+        autopilot_decision = {'action':'NOT_CONFIGURED','reason':'NO_AUTOPILOT_PROJECTION'}
+        if autopilot_projection_path.exists():
+            ap = read_json(autopilot_projection_path)
+            prev_path = STATE / 'supervisor/autopilot-decision.json'
+            prev = read_json(prev_path) if prev_path.exists() else {}
+            autopilot_decision = supervisor_decision(ap, prev.get('fingerprint'))
+            atomic_json(prev_path, autopilot_decision)
+
         completed_at = utcnow()
         status = {
             'schema_version': 1,
@@ -218,6 +237,9 @@ def run_cycle() -> dict:
             'system_one_edb_review_records': edb_adjudication.get('adjudication_records', 0),
             'system_one_edb_invalid_reviews': edb_adjudication.get('invalid_count', 0),
             'system_one_influence_routing': False,
+            'autopilot_action': autopilot_decision.get('action'),
+            'autopilot_reason': autopilot_decision.get('reason'),
+            'autopilot_should_notify': autopilot_decision.get('should_notify', False),
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)

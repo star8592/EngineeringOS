@@ -1,0 +1,71 @@
+# Self-Hosting Work Plan
+
+Status: ACTIVE
+
+## SH-01 Conversation → Intent Ledger
+Outcome: natural chat/voice turns persist as DESIRE / FEEDBACK / CORRECTION / REVERSAL / APPROVAL / QUESTION / ARTIFACT / INTERRUPTION.
+Evidence: conversation-intent invariants.
+State: IMPLEMENTED_BASELINE.
+
+## SH-02 Intent → Capability Reconciliation
+Outcome: desired outcomes reconcile against observed capabilities without model self-certification.
+Evidence: VERIFIED / DISCOVERED / UNKNOWN / NEEDS_INTENT invariants.
+State: IMPLEMENTED_BASELINE.
+
+## SH-03 Capability Gap → Work Graph
+Outcome: UNKNOWN gaps that are machine-resolvable become work items automatically; NEEDS_INTENT alone may interrupt the human.
+Evidence: deterministic mapping tests and dependency graph.
+State: IMPLEMENTED_BASELINE — UNKNOWN gaps deterministically become work items; NEEDS_INTENT is excluded from machine work.
+
+## SH-04 Work Graph → Scheduler
+Outcome: work is assigned to deterministic/reasoning/high-assurance lanes from policy and assurance requirements.
+Evidence: scheduler tests; no user agent-selection burden.
+State: INTEGRATED_BASELINE — generated work items now pass through the existing dependency graph and scheduler.
+
+## SH-05 Execution → Evidence → Capability
+Outcome: agent/tool claims become evidence only after declared verification; successful evidence upgrades capability state.
+State: INTEGRATED_BASELINE — first bounded self-hosting verification produced an evidence-backed execution receipt and closed a capability gap.
+
+## SH-06 Preview Feedback Binding
+Outcome: screenshot/live-preview feedback is bound to the artifact and active intent, then creates revision work.
+State: INTEGRATED_BASELINE — feedback binds to artifact/context, increments intent generation, supersedes safe obsolete work, protects unsafe in-flight work, and reschedules revision work.
+
+## SH-06A Autopilot Control Loop
+Outcome: one deterministic tick consumes durable conversational intent, reconciles capabilities and obsolete work, creates/reschedules work, and emits a durable runtime projection.
+State: IMPLEMENTED_BASELINE — pure tick plus atomic runtime projection; execution authority remains policy/assurance gated.
+
+## SH-07 Self Project Supervisor
+Outcome: EngineeringOS continuously supervises its own canonical repository and detects drift, incomplete work, stale claims, and convergence debt.
+State: INTEGRATED_ADVISORY — continuous Supervisor now consumes Autopilot projections, deduplicates unchanged states, waits on genuine intent, and exposes ADVANCE/SLEEP/WAIT decisions while execution remains policy-gated.
+
+## SH-08 Conversation-first Shell
+Outcome: minimal UI is conversation + voice + artifact/result cards + passive status; engineering details are secondary.
+State: PLANNED AFTER CONTROL LOOP.
+
+## SH-09 Durable Voice Session Handoff
+Outcome: audio session can disconnect/reconnect while backend tasks and intent survive.
+State: PLANNED.
+
+## SH-10 Verified Self-Release
+Outcome: EngineeringOS can prepare, verify, release, verify production, and clean up its own bounded releases under policy.
+State: LATER AUTONOMY GATE.
+
+## SH-07A Safe Autopilot Execution
+Outcome: Supervisor ADVANCE decisions pass through an explicit admission boundary before any command exists.
+State: IMPLEMENTED_BASELINE — safe non-side-effecting actions (verification, project-state reads, preview builds) are allowlisted through A2; PROTECT, blocked, unknown, higher-assurance, or unmapped actions are denied. Deterministic command/idempotency identity includes project, work item, action and subject SHA. First real self-hosting verification closed the Autopilot Control Loop capability with PASS evidence bound to source SHA.
+
+Mutation authority is intentionally not implied by ADVANCE or by model reasoning. Write-code, Git mutation, release and production actions require later explicit policy lanes and stronger assurance.
+
+## First user-visible self-hosting acceptance — 2026-10-05
+
+Intent: “给 EngineeringOS 做一个可以看到当前开发状态的简单页面”。
+
+Observed outcome:
+- Control Room exposes an ordinary-user home surface before engineering details.
+- It shows current development state, what the system is doing, and whether the human must decide anything.
+- Engineering detail remains available under a secondary disclosure surface.
+- Real headless-browser rendering verified the user-facing state and text.
+- After verification evidence was supplied, durable Autopilot projection converged from WORKING to VERIFIED with zero remaining work items and zero dispatch items.
+- Supervisor time-series retention is bounded and systemd output uses journald rather than an unbounded append log.
+
+This is the first acceptance where the self-hosting loop produced a visible product result and then stopped automatically after evidence-backed completion.

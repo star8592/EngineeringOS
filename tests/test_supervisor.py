@@ -22,4 +22,7 @@ with tempfile.TemporaryDirectory() as d:
  assert append_jsonl_once(p,row,'run_id') is True
  assert append_jsonl_once(p,row,'run_id') is False
  assert len(p.read_text().splitlines())==1
+ for i in range(6):
+  r=dict(row);r['run_id']=f'cap-{i}';append_jsonl_once(p,r,'run_id',max_rows=3)
+ assert len(p.read_text().splitlines())==3
 print('8 supervisor invariants passed')

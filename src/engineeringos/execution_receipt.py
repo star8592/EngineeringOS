@@ -36,6 +36,7 @@ def transition(r:ExecutionReceipt,new_state:str,evidence_refs=(),transport_state
     if new_state not in TRANSITIONS.get(r.state,set()): raise ExecutionError('INVALID_EXECUTION_TRANSITION')
     refs=list(evidence_refs)
     if new_state=='SUCCEEDED' and not (r.evidence_refs or refs): raise ExecutionError('SUCCESS_EVIDENCE_REQUIRED')
+    # Validate the entire transition before mutating durable state.
     r.state=new_state
     for ref in refs:
         if ref not in r.evidence_refs:r.evidence_refs.append(ref)

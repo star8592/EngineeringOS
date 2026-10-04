@@ -1,6 +1,14 @@
 <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EngineeringOS Control Room</title>
-<style>body{font-family:system-ui;margin:24px;background:#0b0d10;color:#e8eaed}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{background:#15191f;border:1px solid #29313b;border-radius:12px;padding:16px}.ok{color:#73d99b}.warn{color:#f3c969}.bad{color:#ff7b7b}table{width:100%;border-collapse:collapse}pre{white-space:pre-wrap;word-break:break-word;background:#0f1318;border:1px solid #29313b;border-radius:8px;padding:10px;max-height:320px;overflow:auto}details{margin:8px 0;background:#15191f;border:1px solid #29313b;border-radius:10px;padding:10px}summary{cursor:pointer;font-weight:650}td,th{padding:9px;border-bottom:1px solid #29313b;text-align:left;vertical-align:top}code{color:#9cc3ff}.flow{display:flex;gap:8px;flex-wrap:wrap}.node{padding:8px 12px;border:1px solid #3b4654;border-radius:999px}small,.muted{color:#aeb7c2}.pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #3b4654;font-size:12px}.section-note{margin-top:-10px;color:#aeb7c2}</style>
-<h1>EngineeringOS · Control Room</h1><p id="meta">Loading durable projection…</p>
+<style>body{font-family:system-ui;margin:24px;background:#0b0d10;color:#e8eaed}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{background:#15191f;border:1px solid #29313b;border-radius:12px;padding:16px}.ok{color:#73d99b}.warn{color:#f3c969}.bad{color:#ff7b7b}table{width:100%;border-collapse:collapse}pre{white-space:pre-wrap;word-break:break-word;background:#0f1318;border:1px solid #29313b;border-radius:8px;padding:10px;max-height:320px;overflow:auto}details{margin:8px 0;background:#15191f;border:1px solid #29313b;border-radius:10px;padding:10px}summary{cursor:pointer;font-weight:650}td,th{padding:9px;border-bottom:1px solid #29313b;text-align:left;vertical-align:top}code{color:#9cc3ff}.flow{display:flex;gap:8px;flex-wrap:wrap}.node{padding:8px 12px;border:1px solid #3b4654;border-radius:999px}small,.muted{color:#aeb7c2}.pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #3b4654;font-size:12px}.section-note{margin-top:-10px;color:#aeb7c2}.user-home{margin:22px 0 26px;padding:22px;border:1px solid #354252;border-radius:16px;background:#11161c}.user-home h2{margin:0 0 8px;font-size:28px}.statusline{font-size:18px;margin:8px 0}.now{font-size:17px;line-height:1.6}.decision{margin-top:14px;padding:12px;border:1px solid #3b4654;border-radius:10px}.engineering-shell{margin-top:24px}.engineering-shell>summary{font-size:18px;padding:12px 0}</style>
+<h1>EngineeringOS</h1><p id="meta">Loading durable projection…</p>
+<section class="user-home">
+  <small>你的软件开发状态</small>
+  <h2 id="humanStatus">正在读取…</h2>
+  <div class="statusline" id="humanSummary">EngineeringOS 正在检查当前工作。</div>
+  <div class="now"><strong>正在做什么</strong><div id="humanNow" class="muted">读取中…</div></div>
+  <div class="decision" id="humanDecision"><strong>需要你做什么</strong><div>目前无需操作。</div></div>
+</section>
+<details class="engineering-shell"><summary>工程细节</summary>
 <div class="grid" id="supervisor"></div>
 <h2>What needs attention now</h2><p class="section-note">Deterministic advisory brief from the same durable queue. G2 never authorizes target mutation.</p><table><thead><tr><th>P</th><th>Work</th><th>State</th><th>Lane</th></tr></thead><tbody id="brief"></tbody></table>
 <h2>Evidence drill-down</h2><div id="details"><span class="muted">Loading evidence…</span></div>
@@ -39,3 +47,19 @@ Promise.all([
  queue.innerHTML=q.items.map(x=>`<tr><td>P${x.priority}</td><td>${x.state}</td><td>${x.kind}<br><small>${x.reason}</small></td><td>${x.required_assurance}</td></tr>`).join('');
 }).catch(e=>meta.textContent='Projection unavailable: '+e.message);
 </script>
+<script>
+(async()=>{try{
+ const [ap,sup,brief]=await Promise.all([opt('./runtime/autopilot-self-hosting.json'),opt('./runtime/supervisor.json'),opt('./runtime/action-brief.json')]);
+ const action=sup?.autopilot_action;
+ const status=ap?.status || (action==='WAIT_FOR_INTENT'?'NEEDS_INTENT':action==='ADVANCE'?'WORKING':sup?.health==='HEALTHY'?'HEALTHY':'STARTING');
+ const labels={HEALTHY:'状态良好',VERIFIED:'已经验证',WORKING:'正在开发',NEEDS_INTENT:'需要你的决定',UPDATED:'已更新',STARTING:'正在启动'};
+ humanStatus.textContent=labels[status]||status;
+ humanSummary.textContent=status==='NEEDS_INTENT'?'有一个产品方向需要你决定，机器不会替你猜。':status==='WORKING'?'系统正在自己推进明确的开发工作。':status==='VERIFIED'||status==='HEALTHY'?'当前没有需要你处理的工程问题。':'系统正在建立当前状态。';
+ const works=(ap?.work_items||[]);
+ const top=works[0] || (brief?.actions||[])[0];
+ humanNow.textContent=top?(top.expected_outcome||top.reason||top.kind||'正在推进当前工作'):'目前没有未完成的自动开发任务。';
+ const hi=(ap?.human_interruptions||[])[0];
+ humanDecision.innerHTML='<strong>需要你做什么</strong><div>'+(hi?(hi.question||'需要你确认目标。'):'目前无需操作。')+'</div>';
+}catch(e){humanStatus.textContent='状态暂不可用';humanSummary.textContent=e.message}})();
+</script>
+</details>
