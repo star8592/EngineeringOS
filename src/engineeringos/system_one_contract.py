@@ -28,6 +28,7 @@ class TypedQuestion:
     kind: str
     instructions: str
     options: tuple[str, ...] = ()
+    criteria: tuple[tuple[str, str], ...] = ()
 
     def validate(self) -> None:
         if not self.question_id:
@@ -38,6 +39,12 @@ class TypedQuestion:
             raise SystemOneContractError("QUESTION_INSTRUCTIONS_REQUIRED")
         if self.kind == "choice" and len(self.options) < 2:
             raise SystemOneContractError("CHOICE_OPTIONS_REQUIRED")
+        if self.criteria:
+            criteria = dict(self.criteria)
+            if set(criteria) != set(self.options):
+                raise SystemOneContractError("CHOICE_CRITERIA_KEYS_MUST_MATCH_OPTIONS")
+            if any(not str(value).strip() for value in criteria.values()):
+                raise SystemOneContractError("CHOICE_CRITERIA_REQUIRED")
 
 
 @dataclass(frozen=True)
@@ -63,7 +70,10 @@ def build_jev_request(*, state: Any, model: str, questions: tuple[TypedQuestion,
         q.validate()
         body: dict[str, Any] = {"type": q.kind, "instructions": q.instructions}
         if q.kind == "choice":
-            body["options"] = list(q.options)
+            if q.criteria:
+                body["criteria"] = dict(q.criteria)
+            else:
+                body["options"] = list(q.options)
         payload_questions[q.question_id] = body
     return {"state": state, "model": model, "questions": payload_questions}
 
