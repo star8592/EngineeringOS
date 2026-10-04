@@ -36,13 +36,15 @@ For routing thresholds, EngineeringOS uses `answer_confidence`, not Laya's type-
 
 ## Two-axis routing contract
 
-System-One routing is intentionally split into two independent typed decisions:
+System-One routing has two axes with **different authorities**:
 
-1. **Processing lane** — `DETERMINISTIC_CANDIDATE`, `REASONING_REVIEW`, or `FORMAL_OR_HIGH_ASSURANCE`.
-2. **Human authority** — `NO_HUMAN_AUTHORITY` or `HUMAN_AUTHORITY_REQUIRED`.
+1. **Processing lane** — `DETERMINISTIC_CANDIDATE`, `REASONING_REVIEW`, or `FORMAL_OR_HIGH_ASSURANCE`. Laya may provide shadow advisory evidence for this axis.
+2. **Human authority** — `NO_HUMAN_AUTHORITY`, `HUMAN_AUTHORITY_REQUIRED`, or `AUTHORITY_POLICY_UNRESOLVED`. This axis is decided only by deterministic project policy.
 
-`HUMAN_REVIEW` remains readable as a legacy single-axis route in persisted evidence, but it is not part of the v2 processing-lane domain.
+`HUMAN_REVIEW` remains readable as a legacy single-axis route in persisted evidence, but it is not part of the current processing-lane domain.
 
-This separation prevents approval semantics from being collapsed into engineering-assurance semantics. A work item may simultaneously require `FORMAL_OR_HIGH_ASSURANCE` processing and `HUMAN_AUTHORITY_REQUIRED`; neither dimension substitutes for the other. System-One still cannot authorize execution.
+This separation prevents approval semantics from being collapsed into engineering-assurance semantics. A work item may require high-assurance engineering treatment and also require final human authority; neither dimension substitutes for the other. The model is never allowed to create, remove, or satisfy human authority.
 
-The routing contract identifier `processing-lane+human-authority/v2` is persisted with shadow projections and observation identities. Changing routing semantics therefore creates new observations even when the snapshot, work item, and model revision are unchanged.
+The active routing contract identifier is `processing-lane+authority-policy/v2`. Shadow observation identity includes this contract identifier so evidence collected under older semantics cannot be silently deduplicated against current observations.
+
+Unknown work kinds do not get guessed into yes/no authority. They become `AUTHORITY_POLICY_UNRESOLVED` until the project profile defines an explicit rule.
