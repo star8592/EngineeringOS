@@ -1,8 +1,11 @@
+import json
 import pathlib
 import sys
+import tempfile
 
 sys.path.insert(0, "src/engineeringos")
 
+import devcontrol_release_evidence as release_module
 from devcontrol_release_evidence import build_release_evidence
 
 
@@ -69,4 +72,24 @@ unqualified = build_release_evidence(
 )
 assert unqualified["qualification_state"] == "UNKNOWN"
 
-print("12 DevControl release-evidence binding invariants passed")
+with tempfile.TemporaryDirectory() as td:
+    root = pathlib.Path(td)
+    release_module.OUT = root / "nested/artifacts/devcontrol-release-evidence.json"
+    release_module.EVIDENCE_DIR = root / "release-evidence"
+    release_module.EVIDENCE_DIR.mkdir()
+    (release_module.EVIDENCE_DIR / "e3b88b47.json").write_text(
+        json.dumps(qualification)
+    )
+    release_module.fetch = lambda _url: ready
+    release_module.git = lambda *args: (
+        "e3b88b47ccce96409eb929fd56ff8ff6e4cc68de"
+        if args == ("rev-list", "--all")
+        else ""
+    )
+    release_module.observe_deployment = lambda **_kwargs: deployment
+    release_module.run()
+    assert release_module.OUT.exists()
+    persisted = json.loads(release_module.OUT.read_text())
+    assert persisted["deployment_identity_state"] == "RESOLVED"
+
+print("14 DevControl release-evidence binding invariants passed")
