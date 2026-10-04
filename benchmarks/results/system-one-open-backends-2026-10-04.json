@@ -4,6 +4,7 @@
   "routing_contract": "processing-lane+authority-policy/v2",
   "corpus": "benchmarks/edb/system_one_routes.jsonl",
   "cases": 12,
+  "measurement_contract": "same EDB runner and Jev-compatible provider normalization; provider-reported engine latency preferred when available",
   "authority_policy": {
     "accuracy": 1,
     "unresolved": 0,
@@ -13,7 +14,9 @@
     {
       "id": "laya-typed-decisions",
       "provider": "laya-local",
-      "engine": "typed-decisions",
+      "models": [
+        "typed-decisions"
+      ],
       "engine_revision": "7b928d828b7b0e022f929d9bd2e44165aa270148",
       "runtime": "native",
       "device": "cuda",
@@ -32,7 +35,9 @@
     {
       "id": "decis-kev-0.8b",
       "provider": "decis",
-      "engine": "kev-0.8b",
+      "models": [
+        "decis/kev-0.8b@vendored-90990a5"
+      ],
       "decis_version": "0.4.0",
       "image": "chaitin/decis:kev-0.8b",
       "image_id": "sha256:7604a60d7f8ce9180ca0b524a49fcff8474086aaef4a0e3ff85daafb570c5bec",
@@ -42,7 +47,7 @@
       "lane_accuracy": 0.9166666666666666,
       "high_risk_lane_miss_rate": 0,
       "lane_expected_calibration_error": 0.36144166666666666,
-      "median_latency_ms": 493.898,
+      "median_latency_ms": 9905.305,
       "disposition": "CANDIDATE_UNQUALIFIED",
       "reasons": [
         "EDB_CASE_COUNT_BELOW_THRESHOLD",
@@ -54,6 +59,6 @@
   "selection": {
     "active_shadow_backend": "laya-typed-decisions",
     "promotion": "NONE",
-    "rationale": "kev shows materially better seed accuracy and zero high-risk misses, but neither backend satisfies the admission contract; retain Laya as fast shadow evidence while expanding EDB and evaluating calibrated/fine-tuned open backends."
+    "rationale": "kev has materially better seed accuracy and zero high-risk misses, but neither backend satisfies the admission contract. Keep Laya as low-latency shadow evidence while expanding EDB; evaluate kev on GPU and/or domain calibration before any promotion."
   }
 }
