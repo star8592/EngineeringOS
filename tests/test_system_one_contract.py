@@ -3,7 +3,6 @@ import sys
 sys.path.insert(0, "src/engineeringos")
 
 from system_one_contract import (
-    AUTHORITY_CHOICES,
     PROCESSING_LANES,
     ROUTES,
     AdvisoryDecision,
@@ -14,26 +13,24 @@ from system_one_contract import (
     build_jev_request,
 )
 
-lane_q = TypedQuestion(
+q = TypedQuestion(
     question_id="engineering_lane",
     kind="choice",
     instructions="Which processing lane is appropriate?",
     options=tuple(sorted(PROCESSING_LANES)),
-)
-authority_q = TypedQuestion(
-    question_id="human_authority",
-    kind="choice",
-    instructions="Is final human authority required?",
-    options=tuple(sorted(AUTHORITY_CHOICES)),
+    criteria=(
+        ("DETERMINISTIC_CANDIDATE", "mechanically checkable"),
+        ("REASONING_REVIEW", "ambiguous engineering judgment"),
+        ("FORMAL_OR_HIGH_ASSURANCE", "safety-critical invariants"),
+    ),
 )
 payload = build_jev_request(
     state={"kind": "example"},
     model="local-open-system-one",
-    questions=(lane_q, authority_q),
+    questions=(q,),
 )
 assert payload["questions"]["engineering_lane"]["type"] == "choice"
-assert len(payload["questions"]["engineering_lane"]["options"]) == 3
-assert len(payload["questions"]["human_authority"]["options"]) == 2
+assert set(payload["questions"]["engineering_lane"]["criteria"]) == PROCESSING_LANES
 assert "HUMAN_REVIEW" not in PROCESSING_LANES
 assert "HUMAN_REVIEW" in ROUTES
 
@@ -57,20 +54,25 @@ low_conf = AdvisoryDecision(
     raw_answer="DETERMINISTIC_CANDIDATE",
 )
 assert advisory_route(low_conf)["recommended_route"] == "REASONING_REVIEW"
-assert (
-    advisory_route(high_conf, high_risk=True)["recommended_route"]
-    == "FORMAL_OR_HIGH_ASSURANCE"
+assert advisory_route(high_conf, high_risk=True)["recommended_route"] == "FORMAL_OR_HIGH_ASSURANCE"
+
+bad = TypedQuestion(
+    question_id="bad",
+    kind="choice",
+    instructions="bad criteria",
+    options=("A", "B"),
+    criteria=(("A", "only A"),),
 )
+try:
+    bad.validate()
+    raise AssertionError("mismatched criteria were accepted")
+except SystemOneContractError as exc:
+    assert str(exc) == "CHOICE_CRITERIA_KEYS_MUST_MATCH_OPTIONS"
 
 try:
-    assert_not_authorization(
-        {
-            "authorization": "ALLOW",
-            "advisory_only": False,
-        }
-    )
+    assert_not_authorization({"authorization": "ALLOW", "advisory_only": False})
     raise AssertionError("authorization drift was not rejected")
 except SystemOneContractError as exc:
     assert str(exc) == "SYSTEM_ONE_MUST_NOT_AUTHORIZE"
 
-print("10 System-One two-axis contract invariants passed")
+print("11 System-One processing-lane contract invariants passed")
