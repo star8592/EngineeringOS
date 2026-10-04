@@ -8,6 +8,7 @@ on:
       - "src/engineeringos/authority_policy.py"
       - "src/engineeringos/jev_http_provider.py"
       - "src/engineeringos/laya_provider.py"
+      - "tests/test_system_one_backend_matrix.py"
       - "src/engineeringos/decis_provider.py"
       - "project_profiles/devcontrol/system-one-authority-policy.json"
       - "tests/test_system_one_contract.py"
@@ -60,6 +61,7 @@ jobs:
       - run: python3 tests/test_system_one_contract.py
       - run: python3 tests/test_laya_provider.py
       - run: python3 tests/test_decis_provider.py
+      - run: python3 tests/test_system_one_backend_matrix.py
       - run: python3 tests/test_system_one_shadow.py
       - run: python3 tests/test_authority_policy.py
       - run: python3 tests/test_system_one_admission.py
