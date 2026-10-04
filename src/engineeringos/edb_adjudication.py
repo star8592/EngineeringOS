@@ -117,6 +117,8 @@ def validate_record_shape(record: dict[str, Any]) -> str | None:
         return "REVIEWER_REF_REQUIRED"
     if not str(record.get("rationale") or "").strip():
         return "RATIONALE_REQUIRED"
+    if not str(record.get("reviewed_at") or "").strip():
+        return "REVIEWED_AT_REQUIRED"
     evidence_refs = record.get("evidence_refs")
     if not isinstance(evidence_refs, list) or not evidence_refs:
         return "EVIDENCE_REFS_REQUIRED"
