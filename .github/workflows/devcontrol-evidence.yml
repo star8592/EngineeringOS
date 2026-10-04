@@ -8,6 +8,8 @@ on:
       - "src/engineeringos/devcontrol_release_evidence.py"
       - "src/engineeringos/production_evidence_semantics.py"
       - "src/engineeringos/action_details.py"
+      - "tests/test_queue_evidence_reconciliation.py"
+      - "src/engineeringos/reconcile_queue_outcomes.py"
       - "src/engineeringos/manager.py"
       - "src/engineeringos/shadow_run.py"
       - "tests/test_devcontrol_deployment_observer.py"
@@ -36,6 +38,7 @@ jobs:
       - run: python3 tests/test_devcontrol_deployment_observer.py
       - run: python3 tests/test_devcontrol_release_evidence.py
       - run: python3 tests/test_production_evidence_semantics.py
+      - run: python3 tests/test_queue_evidence_reconciliation.py
       - name: Compile evidence adapters
         run: |
           python3 -m py_compile \
@@ -43,4 +46,5 @@ jobs:
             src/engineeringos/devcontrol_release_evidence.py \
             src/engineeringos/action_details.py \
             src/engineeringos/shadow_run.py \
-            src/engineeringos/manager.py
+            src/engineeringos/manager.py \
+            src/engineeringos/reconcile_queue_outcomes.py
