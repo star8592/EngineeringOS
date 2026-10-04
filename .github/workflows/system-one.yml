@@ -7,6 +7,9 @@ on:
       - "src/engineeringos/system_one_*.py"
       - "src/engineeringos/authority_policy.py"
       - "src/engineeringos/laya_provider.py"
+      - "tests/test_decis_provider.py"
+      - "src/engineeringos/decis_provider.py"
+      - "src/engineeringos/jev_http_provider.py"
       - "project_profiles/devcontrol/system-one-authority-policy.json"
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
@@ -51,6 +54,7 @@ jobs:
       - uses: actions/checkout@v5
       - run: python3 tests/test_system_one_contract.py
       - run: python3 tests/test_laya_provider.py
+      - run: python3 tests/test_decis_provider.py
       - run: python3 tests/test_system_one_shadow.py
       - run: python3 tests/test_authority_policy.py
       - run: python3 tests/test_system_one_admission.py
