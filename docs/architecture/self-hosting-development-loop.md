@@ -101,3 +101,7 @@ The continuous Supervisor consumes durable Autopilot projections. A stable proje
 ## Safe Autopilot execution boundary
 
 ADVANCE is scheduling intent, not execution authority. A separate admission gate checks work state, scheduler disposition, unresolved human authority, an action allowlist, and assurance ceiling before creating a deterministic command. The first enabled lane is non-side-effecting verification. Its receipt binds PASS evidence to the subject source SHA and only then permits capability VERIFIED and work RESOLVED.
+
+## Controlled mutation lane
+
+Autonomous code changes are proposed against an exact source SHA in an isolated detached worktree. A proposal declares its complete allowed mutation surface and verification command. Protected runtime/Git paths and path escape are denied. A verified isolated patch is only `READY_FOR_CONVERGENCE`; it cannot mutate main. Convergence separately requires clean main, unchanged source SHA, exact changed-path equality, and matching diff evidence, then reruns verification after applying the patch. Commit, push, release, and production remain later authority boundaries.

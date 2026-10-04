@@ -69,3 +69,7 @@ Observed outcome:
 - Supervisor time-series retention is bounded and systemd output uses journald rather than an unbounded append log.
 
 This is the first acceptance where the self-hosting loop produced a visible product result and then stopped automatically after evidence-backed completion.
+
+## First controlled self-mutation — 2026-10-05
+
+EngineeringOS performed its first code mutation through the isolated mutation lane. The proposal was bound to an exact source SHA and one declared file (`dashboard/index.html`). The first attempt was correctly denied while the source workspace was dirty. After the mutation-lane baseline was committed, a stale proposal was correctly denied with `SOURCE_SHA_DRIFT`. A fresh proposal created a detached worktree, changed only the declared file, passed verification, produced a diff digest, and left main untouched. The convergence gate then rechecked clean main, exact source SHA, exact mutation surface, and diff evidence before applying the patch to main and rerunning verification. The result stopped at `CONVERGED_UNCOMMITTED`; commit/push authority remains a separate boundary.
