@@ -11,6 +11,8 @@ on:
       - "tests/test_qualification_resolution.py"
       - "tests/test_workflow_evidence.py"
       - "src/engineeringos/work_queue.py"
+      - "tests/test_queue_evidence_reconciliation.py"
+      - "src/engineeringos/reconcile_queue_outcomes.py"
       - "src/engineeringos/evidence_plane.py"
       - "src/engineeringos/qualification_resolution.py"
       - "src/engineeringos/workflow_evidence.py"
@@ -46,6 +48,7 @@ jobs:
       - run: python3 tests/test_workflow_evidence.py
       - run: python3 tests/test_qualification_resolution.py
       - run: python3 tests/test_qualification_action_details.py
+      - run: python3 tests/test_queue_evidence_reconciliation.py
       - name: Compile evidence adapters
         run: |
           python3 -m py_compile \
@@ -54,6 +57,7 @@ jobs:
             src/engineeringos/workflow_evidence.py \
             src/engineeringos/qualification_resolution.py \
             src/engineeringos/evidence_plane.py \
+            src/engineeringos/reconcile_queue_outcomes.py \
             src/engineeringos/action_details.py \
             src/engineeringos/shadow_run.py \
             src/engineeringos/manager.py
