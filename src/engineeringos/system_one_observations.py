@@ -59,6 +59,7 @@ def make_observation(snapshot: dict, action: dict, item: dict, revision: str | N
         "source_head":snapshot.get("source_head"),
         "item_id":item.get("item_id"),
         "kind":item.get("kind"),
+        "reason":action.get("reason"),
         "required_assurance":action.get("required_assurance"),
         "automation":action.get("automation"),
         "scheduler_lane":scheduler,
