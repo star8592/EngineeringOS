@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-04",
+  "routing_contract": "processing-lane+authority-policy/v2",
+  "corpus": "benchmarks/edb/system_one_routes.jsonl",
+  "cases": 12,
+  "authority_policy": {
+    "accuracy": 1,
+    "unresolved": 0,
+    "mismatches": 0
+  },
+  "backends": [
+    {
+      "id": "laya-typed-decisions",
+      "provider": "laya-local",
+      "engine": "typed-decisions",
+      "engine_revision": "7b928d828b7b0e022f929d9bd2e44165aa270148",
+      "runtime": "native",
+      "device": "cuda",
+      "lane_accuracy": 0.6666666666666666,
+      "high_risk_lane_miss_rate": 0.8,
+      "lane_expected_calibration_error": 0.21233333333333332,
+      "median_latency_ms": 9.835,
+      "disposition": "ACTIVE_SHADOW_UNQUALIFIED",
+      "reasons": [
+        "EDB_CASE_COUNT_BELOW_THRESHOLD",
+        "LANE_ACCURACY_BELOW_THRESHOLD",
+        "HIGH_RISK_MISS_ABOVE_THRESHOLD",
+        "CALIBRATION_ABOVE_THRESHOLD"
+      ]
+    },
+    {
+      "id": "decis-kev-0.8b",
+      "provider": "decis",
+      "engine": "kev-0.8b",
+      "decis_version": "0.4.0",
+      "image": "chaitin/decis:kev-0.8b",
+      "image_id": "sha256:7604a60d7f8ce9180ca0b524a49fcff8474086aaef4a0e3ff85daafb570c5bec",
+      "runtime": "docker",
+      "device": "cpu",
+      "dtype": "float32",
+      "lane_accuracy": 0.9166666666666666,
+      "high_risk_lane_miss_rate": 0,
+      "lane_expected_calibration_error": 0.36144166666666666,
+      "median_latency_ms": 493.898,
+      "disposition": "CANDIDATE_UNQUALIFIED",
+      "reasons": [
+        "EDB_CASE_COUNT_BELOW_THRESHOLD",
+        "CALIBRATION_ABOVE_THRESHOLD",
+        "CPU_LATENCY_NOT_SUITABLE_FOR_DEFAULT_SHADOW_LOOP"
+      ]
+    }
+  ],
+  "selection": {
+    "active_shadow_backend": "laya-typed-decisions",
+    "promotion": "NONE",
+    "rationale": "kev shows materially better seed accuracy and zero high-risk misses, but neither backend satisfies the admission contract; retain Laya as fast shadow evidence while expanding EDB and evaluating calibrated/fine-tuned open backends."
+  }
+}
