@@ -21,6 +21,8 @@ on:
       - "src/engineeringos/devcontrol_release_evidence.py"
       - "src/engineeringos/production_evidence_semantics.py"
       - "src/engineeringos/action_details.py"
+      - "src/engineeringos/manager.py"
+      - "src/engineeringos/shadow_run.py"
       - "tests/test_devcontrol_deployment_observer.py"
       - "tests/test_devcontrol_release_evidence.py"
       - "tests/test_production_evidence_semantics.py"
