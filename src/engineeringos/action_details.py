@@ -22,11 +22,13 @@ def build_action_details(brief: dict, debt: dict, release: dict) -> dict:
             evidence=dims.get('divergence',{}).get('evidence',[])
             resolution=['check whether each line is still active','compare unique commits with current main before deciding rebase/supersede']
         elif kind=='CLOSE_ARTIFACT_IDENTITY_GAP':
-            evidence=[{'artifact_identity_state':release.get('artifact_identity_state'),'release_evidence_file':release.get('release_evidence_file'),'production':release.get('production'),'reasoning':release.get('reasoning',{}).get('artifact_identity')}]
-            resolution=['bind immutable server/agent artifact digests to release evidence','verify deployed runtime against the exact artifact identity']
+            dep=release.get('deployment_observation') or {}
+            evidence=[{'artifact_identity_state':release.get('artifact_identity_state'),'release_evidence_file':release.get('release_evidence_file'),'production':release.get('production'),'deployment_binding_sha256':release.get('deployment_binding_sha256'),'server_tree_sha256':(dep.get('server') or {}).get('tree_sha256'),'agent_tree_sha256':(dep.get('agent') or {}).get('tree_sha256'),'reasoning':release.get('reasoning',{}).get('artifact_identity')}]
+            resolution=['persist immutable build/staging artifact manifests in release evidence','bind future build artifact digests to the already observed deployed-tree identities']
         elif kind=='CLOSE_DEPLOYMENT_IDENTITY_GAP':
-            evidence=[{'deployment_identity_state':release.get('deployment_identity_state'),'full_source_sha':release.get('full_source_sha'),'production':release.get('production'),'reasoning':release.get('reasoning',{}).get('deployment_identity')}]
-            resolution=['bind runtime deployment identity to full source SHA and artifact digest','verify the production observation references that exact deployment']
+            dep=release.get('deployment_observation') or {}
+            evidence=[{'deployment_identity_state':release.get('deployment_identity_state'),'full_source_sha':release.get('full_source_sha'),'production':release.get('production'),'deployment_binding_sha256':release.get('deployment_binding_sha256'),'server':dep.get('server'),'agent':dep.get('agent'),'binding_reasons':dep.get('reasons'),'reasoning':release.get('reasoning',{}).get('deployment_identity')}]
+            resolution=['bind runtime release_id to full source SHA and both deployed-tree digests','resolve any server/agent current-release or tree-digest mismatch before closure']
         details.append({
             'item_id':action['item_id'],'kind':kind,'priority':action.get('priority'),
             'evidence_count':len(evidence),'evidence':evidence,'suggested_resolution':resolution,
