@@ -26,13 +26,15 @@ engineering events
 - benchmarked on EngineeringOS/DevControl evidence rather than vendor leaderboards;
 - false-negative cost measured explicitly for safety-critical routing.
 
-## Selected default backend
+## Open backend boundary
 
-EngineeringOS uses **Laya** as the first default open System-One provider. The provider runs on localhost and exposes the Jev-compatible `/v1/systemone` wire protocol. The EngineeringOS adapter remains provider-neutral so another open implementation can replace Laya without changing queue, policy, approval, or execution semantics.
+EngineeringOS consumes open System-One engines through a provider-neutral Jev-compatible HTTP contract. The shared adapter owns `/v1/systemone`; backend adapters only define endpoint, health/readiness, authentication, and default model names. Replacing Laya with Decis/kev or another compatible engine must not change queue, scheduler, policy, human-authority, approval, or execution semantics.
 
-Laya begins in `SHADOW_ADVISORY` mode. Its recommendation is recorded next to the deterministic scheduler lane but cannot mutate scheduler state. Provider unavailability must degrade to deterministic/reasoning behavior; it must never degrade the Supervisor into an execution-authority fallback.
+The currently active shadow backend is **Laya `typed-decisions`**, because it is already running locally on CUDA with low latency. This is an operational default, not an architectural dependency or a quality endorsement. EXP-046 shows that Decis `kev-0.8b` materially outperforms it on the seed EDB but still fails the calibration/sample-size admission gates.
 
-For routing thresholds, EngineeringOS uses `answer_confidence`, not Laya's type-specific entropy-style `confidence`. Thresholds are learned from Engineering Decision Benchmark data and are not copied from hosted Jev.
+All model backends begin in `SHADOW_ADVISORY` mode. Recommendations are recorded beside the deterministic scheduler lane and cannot mutate scheduler state. Backend unavailability must degrade to deterministic/reasoning behavior; it must never create an execution-authority fallback.
+
+Admission uses measured EDB accuracy, safety-critical misses, calibration and sample size. Backend-specific confidence fields are normalized into `answer_confidence`; no vendor threshold is copied into EngineeringOS policy.
 
 ## Two-axis routing contract
 
