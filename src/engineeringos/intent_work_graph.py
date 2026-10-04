@@ -8,12 +8,13 @@ def gap_work_items(reconciliation:dict, project:str)->list[dict]:
   if row["state"]=="NEEDS_INTENT":
    continue
   for req in row.get("requirements",[]):
-   if req["state"]!="UNKNOWN":
+   if req["state"]=="VERIFIED":
     continue
-   seed=f'{project}|{intent["id"]}|{req["requirement"]}'
-   wid="gap-"+hashlib.sha256(seed.encode()).hexdigest()[:12]
+   kind="CAPABILITY_GAP" if req["state"]=="UNKNOWN" else "VERIFICATION_GAP"
+   seed=f'{project}|{intent["id"]}|{kind}|{req["requirement"]}'
+   wid=("gap-" if kind=="CAPABILITY_GAP" else "verify-")+hashlib.sha256(seed.encode()).hexdigest()[:12]
    out.append({
-    "id":wid,"project":project,"kind":"CAPABILITY_GAP",
+    "id":wid,"project":project,"kind":kind,
     "intent_id":intent["id"],"requirement":req["requirement"],
     "expected_outcome":intent["statement"],
     "state":"DISCOVERED","automation":"REVIEW",
@@ -23,7 +24,7 @@ def gap_work_items(reconciliation:dict, project:str)->list[dict]:
       "requirement":req["requirement"],
       "accepted_states":["VERIFIED"]
     },
-    "reason":"Active human intent is clear, but current evidence cannot verify the required capability."
+    "reason":("Active human intent is clear, but the required capability has not been discovered." if kind=="CAPABILITY_GAP" else "The capability is discovered, but current evidence does not verify its behavior." )
    })
  return out
 

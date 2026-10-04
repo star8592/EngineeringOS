@@ -109,3 +109,7 @@ Autonomous code changes are proposed against an exact source SHA in an isolated 
 ## Coding-agent boundary
 
 Coding models do not receive convergence, commit, push, release, or production authority. They receive a Task Envelope and may return only candidate replacement content for explicitly allowed paths. The provider adapter runs with the narrowest available sandbox and structured output. Candidate validation, isolated mutation, verification, diff evidence, convergence, and later release authority remain deterministic system responsibilities. Provider outage/timeout is a machine failure and must not be escalated as an intent question.
+
+## Supervisor convergence unit
+
+A dispatchable work item is not executable merely because an agent can reason about it. Autonomous mutation requires an explicit mutation contract. The Supervisor may converge at most one commit per tick; after a successful commit, the repository HEAD becomes new world state and remaining work must be reconciled again. This prevents stale-source parallel candidates from being blindly applied. Commit evidence is the transition boundary from a verified candidate to durable source truth; agent success alone never closes work.

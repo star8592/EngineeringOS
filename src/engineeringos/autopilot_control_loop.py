@@ -22,5 +22,6 @@ def tick(*,project:str,turns:list[IntentTurn],intent_id:str,required_capabilitie
   plan={"schema_version":1,"project":project,"admitted":True,"errors":[],"work_items":revision["created"],"dispatch":revision["dispatch"],"human_interruptions":[],"summary":{"work_items":len(revision["created"]),"dispatchable":sum(x["schedule_state"]=="DISPATCHABLE" for x in revision["dispatch"]),"human_interruptions":0}}
  else:
   plan=plan_from_reconciliation(rec,project)
- status="NEEDS_INTENT" if plan.get("human_interruptions") else ("WORKING" if plan.get("work_items") else "VERIFIED")
+ intent_state=rec["intents"][0]["state"] if rec.get("intents") else "NEEDS_INTENT"
+ status="NEEDS_INTENT" if plan.get("human_interruptions") else ("VERIFIED" if intent_state=="VERIFIED" else "WORKING")
  return {"schema_version":1,"project":project,"intent_state":state,"reconciliation":rec,"plan":plan,"revision":revision,"status":status}

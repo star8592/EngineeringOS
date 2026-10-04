@@ -77,3 +77,7 @@ EngineeringOS performed its first code mutation through the isolated mutation la
 ## SH-07B Coding Agent candidate lane — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. Coding agents are proposal generators, never execution authorities. A Task Envelope binds goal, exact source SHA, complete allowed path set, verification argv, and context. Provider output is schema-closed to the allowed paths and becomes a Mutation Proposal only after validation. Codex CLI is integrated in read-only/ephemeral structured-output mode; its process lifetime is bounded and timeout kills the isolated process group. Provider failure is machine work (`REOPENED / WAITING_PROVIDER`), never `NEEDS_INTENT`. A provider pool may fall back to another coding backend without changing authority semantics.
+
+## SH-07C Autonomous supervisor execution loop — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. The generic Supervisor consumes scheduler dispatches and executes only work items carrying an explicit mutation contract (`allowed_paths`, `verification_argv`, source SHA). Missing contracts remain `WAITING_CONTRACT`; provider failures become `REOPENED / WAITING_PROVIDER`; neither is an intent interruption. Successful coding candidates pass the isolated mutation lane, deterministic verification, convergence gate, post-convergence verification, and commit receipt. A commit receipt binds source SHA, result SHA, changed paths, and diff SHA256 as capability evidence. One Supervisor tick converges at most one commit so later work must reconcile against the new HEAD before execution.
