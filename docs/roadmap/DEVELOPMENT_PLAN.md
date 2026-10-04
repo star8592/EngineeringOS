@@ -90,10 +90,11 @@ Completed:
 - Event-log-derived Control Room command receipt/outcome-evidence drill-down with retry/probe and SHA-256 evidence verification (EXP-049).
 - Read-only DevControl deployment provenance observer that binds runtime release, full source SHA, server deployed-tree digest and Agent deployed-tree digest without conflating deployed bytes with build artifact identity (EXP-050).
 - Explicit current-head CI qualification evidence states (`NO_RUN/RUNNING/PASS/FAIL`) with GitHub query transport separated from workflow evidence and stable queue semantics (EXP-051).
+- Evidence-backed queue closure for recovered qualification, live-production, and deployment-identity conditions; artifact identity remains independently open (EXP-052).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and EDB review candidates; adjudicate diverse cases only through the versioned adjudication contract until the 100-case qualification floor is reached.
-2. Use its action brief to reconcile the current DevControl queue, especially the remaining build-artifact provenance gap, explicit current-head qualification evidence, dirty/overlap/divergence findings, and duplicate heads.
+2. Use its action brief to reconcile the current DevControl queue, especially the remaining build-artifact provenance gap, dirty/overlap/divergence findings, and duplicate heads; recovered qualification/deployment conditions now close through authoritative evidence.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Continue G3 pilot dogfood with the single deterministic-check allowlist; prove deferral, idempotency, evidence closure, and no target mutation before adding any second action class.
 6. Run the active open System-One backend continuously in shadow advisory mode, expand EDB from real outcomes, and benchmark alternative open backends through the same contract; only allow model recommendations to influence routing after measured admission thresholds pass.
