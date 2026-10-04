@@ -89,6 +89,7 @@ Completed:
 - Versioned EDB adjudication ledger with provenance-bound gold creation and explicit rejection of model-only/Scheduler-only label authority (EXP-048).
 - Event-log-derived Control Room command receipt/outcome-evidence drill-down with retry/probe and SHA-256 evidence verification (EXP-049).
 - Read-only DevControl deployment provenance observer that binds runtime release, full source SHA, server deployed-tree digest and Agent deployed-tree digest without conflating deployed bytes with build artifact identity (EXP-050).
+- Typed evidence-backed queue closure for recovered main qualification, live production qualification and deployment identity; pending disappearance never auto-resolves without matching evidence (EXP-051).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and EDB review candidates; adjudicate diverse cases only through the versioned adjudication contract until the 100-case qualification floor is reached.
