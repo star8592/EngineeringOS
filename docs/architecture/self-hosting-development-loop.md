@@ -113,3 +113,7 @@ Coding models do not receive convergence, commit, push, release, or production a
 ## Supervisor convergence unit
 
 A dispatchable work item is not executable merely because an agent can reason about it. Autonomous mutation requires an explicit mutation contract. The Supervisor may converge at most one commit per tick; after a successful commit, the repository HEAD becomes new world state and remaining work must be reconciled again. This prevents stale-source parallel candidates from being blindly applied. Commit evidence is the transition boundary from a verified candidate to durable source truth; agent success alone never closes work.
+
+## Durable project journal
+
+Autopilot durable truth is an append-only per-project event journal with compare-and-swap sequencing. Intent revisions and Work lifecycle transitions are replayed from that journal; projections may be regenerated and therefore are not authoritative. Restart recovery must require no conversational memory. A local verified commit can close only work whose required assurance is A1/A2 and whose completion predicate explicitly accepts capability evidence. Higher-assurance work requires the corresponding runtime, CI, release, or production evidence before resolution.
