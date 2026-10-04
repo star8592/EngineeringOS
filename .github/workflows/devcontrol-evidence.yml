@@ -7,6 +7,13 @@ on:
       - "src/engineeringos/devcontrol_deployment_observer.py"
       - "src/engineeringos/devcontrol_release_evidence.py"
       - "src/engineeringos/production_evidence_semantics.py"
+      - "tests/test_qualification_action_details.py"
+      - "tests/test_qualification_resolution.py"
+      - "tests/test_workflow_evidence.py"
+      - "src/engineeringos/work_queue.py"
+      - "src/engineeringos/evidence_plane.py"
+      - "src/engineeringos/qualification_resolution.py"
+      - "src/engineeringos/workflow_evidence.py"
       - "src/engineeringos/action_details.py"
       - "src/engineeringos/manager.py"
       - "src/engineeringos/shadow_run.py"
@@ -36,11 +43,17 @@ jobs:
       - run: python3 tests/test_devcontrol_deployment_observer.py
       - run: python3 tests/test_devcontrol_release_evidence.py
       - run: python3 tests/test_production_evidence_semantics.py
+      - run: python3 tests/test_workflow_evidence.py
+      - run: python3 tests/test_qualification_resolution.py
+      - run: python3 tests/test_qualification_action_details.py
       - name: Compile evidence adapters
         run: |
           python3 -m py_compile \
             src/engineeringos/devcontrol_deployment_observer.py \
             src/engineeringos/devcontrol_release_evidence.py \
+            src/engineeringos/workflow_evidence.py \
+            src/engineeringos/qualification_resolution.py \
+            src/engineeringos/evidence_plane.py \
             src/engineeringos/action_details.py \
             src/engineeringos/shadow_run.py \
             src/engineeringos/manager.py
