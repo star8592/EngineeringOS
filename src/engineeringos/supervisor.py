@@ -154,6 +154,14 @@ def run_checked(args: list[str], timeout: int = 240) -> None:
     subprocess.run(args, cwd=ROOT, check=True, timeout=timeout, stdout=subprocess.DEVNULL)
 
 
+def run_optional(args: list[str], timeout: int = 60) -> tuple[bool, str | None]:
+    try:
+        run_checked(args, timeout=timeout)
+        return True, None
+    except Exception as exc:
+        return False, f"{type(exc).__name__}: {exc}"
+
+
 def run_cycle() -> dict:
     started = time.monotonic()
     started_at = utcnow()
@@ -180,6 +188,71 @@ def run_cycle() -> dict:
         system_one_observations = read_json(STATE / 'system-one/observation-summary.json')
         run_checked(['python3', 'src/engineeringos/system_one_admission.py'], timeout=30)
         system_one_admission = read_json(STATE / 'system-one/admission.json')
+
+        candidate_path = STATE / 'system-one/candidates/decis-kev-0.8b.json'
+        candidate_summary_path = STATE / 'system-one/candidates/decis-kev-0.8b-summary.json'
+        provider_matrix_path = STATE / 'system-one/provider-matrix.json'
+
+        candidate_ok, candidate_error = run_optional(
+            ['python3', 'src/engineeringos/system_one_candidate_shadow.py'],
+            timeout=60,
+        )
+        if candidate_ok and candidate_path.exists():
+            system_one_candidate = read_json(candidate_path)
+        else:
+            system_one_candidate = {
+                'schema_version': 1,
+                'generated_at': utcnow(),
+                'candidate_id': 'decis-kev-0.8b',
+                'provider': 'decis-kev-candidate',
+                'role': 'PARALLEL_SHADOW_CANDIDATE',
+                'status': 'ERROR',
+                'advisory_only': True,
+                'authorization': 'UNAVAILABLE',
+                'influence_routing': False,
+                'items': [],
+                'errors': [{'error': candidate_error or 'candidate projection unavailable'}],
+            }
+            atomic_json(candidate_path, system_one_candidate)
+
+        observations_ok, observations_error = run_optional(
+            ['python3', 'src/engineeringos/system_one_candidate_observations.py'],
+            timeout=30,
+        )
+        if observations_ok and candidate_summary_path.exists():
+            system_one_candidate_observations = read_json(candidate_summary_path)
+        else:
+            system_one_candidate_observations = {
+                'schema_version': 1,
+                'generated_at': utcnow(),
+                'candidate_id': 'decis-kev-0.8b',
+                'provider': 'decis-kev-candidate',
+                'candidate_status': system_one_candidate.get('status'),
+                'observations': 0,
+                'fresh': False,
+                'error': observations_error or 'candidate observation summary unavailable',
+            }
+            atomic_json(candidate_summary_path, system_one_candidate_observations)
+
+        matrix_ok, matrix_error = run_optional(
+            ['python3', 'src/engineeringos/system_one_provider_matrix.py'],
+            timeout=30,
+        )
+        if matrix_ok and provider_matrix_path.exists():
+            system_one_matrix = read_json(provider_matrix_path)
+        else:
+            system_one_matrix = {
+                'schema_version': 1,
+                'generated_at': utcnow(),
+                'items_compared': 0,
+                'provider_agreement_rate': None,
+                'candidate_influence_routing': False,
+                'authorization': 'UNAVAILABLE',
+                'fresh': False,
+                'error': matrix_error or 'provider matrix unavailable',
+            }
+            atomic_json(provider_matrix_path, system_one_matrix)
+
         run_checked(['python3', 'src/engineeringos/g3_controller.py'], timeout=300)
 
         completed_at = utcnow()
@@ -203,6 +276,13 @@ def run_cycle() -> dict:
             'system_one_observations': system_one_observations.get('observations', 0),
             'system_one_scheduler_agreement': system_one_observations.get('scheduler_agreement_rate'),
             'system_one_influence_routing': False,
+            'system_one_candidate_status': system_one_candidate.get('status', 'UNKNOWN'),
+            'system_one_candidate_provider': system_one_candidate.get('provider'),
+            'system_one_candidate_items': len(system_one_candidate.get('items', [])),
+            'system_one_candidate_observations': system_one_candidate_observations.get('observations', 0),
+            'system_one_candidate_scheduler_agreement': system_one_candidate_observations.get('scheduler_agreement_rate'),
+            'system_one_provider_agreement': system_one_matrix.get('provider_agreement_rate'),
+            'system_one_candidate_influence_routing': False,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)
