@@ -105,3 +105,7 @@ ADVANCE is scheduling intent, not execution authority. A separate admission gate
 ## Controlled mutation lane
 
 Autonomous code changes are proposed against an exact source SHA in an isolated detached worktree. A proposal declares its complete allowed mutation surface and verification command. Protected runtime/Git paths and path escape are denied. A verified isolated patch is only `READY_FOR_CONVERGENCE`; it cannot mutate main. Convergence separately requires clean main, unchanged source SHA, exact changed-path equality, and matching diff evidence, then reruns verification after applying the patch. Commit, push, release, and production remain later authority boundaries.
+
+## Coding-agent boundary
+
+Coding models do not receive convergence, commit, push, release, or production authority. They receive a Task Envelope and may return only candidate replacement content for explicitly allowed paths. The provider adapter runs with the narrowest available sandbox and structured output. Candidate validation, isolated mutation, verification, diff evidence, convergence, and later release authority remain deterministic system responsibilities. Provider outage/timeout is a machine failure and must not be escalated as an intent question.
