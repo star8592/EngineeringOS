@@ -33,3 +33,16 @@ EngineeringOS uses **Laya** as the first default open System-One provider. The p
 Laya begins in `SHADOW_ADVISORY` mode. Its recommendation is recorded next to the deterministic scheduler lane but cannot mutate scheduler state. Provider unavailability must degrade to deterministic/reasoning behavior; it must never degrade the Supervisor into an execution-authority fallback.
 
 For routing thresholds, EngineeringOS uses `answer_confidence`, not Laya's type-specific entropy-style `confidence`. Thresholds are learned from Engineering Decision Benchmark data and are not copied from hosted Jev.
+
+## Two-axis routing contract
+
+System-One routing is intentionally split into two independent typed decisions:
+
+1. **Processing lane** — `DETERMINISTIC_CANDIDATE`, `REASONING_REVIEW`, or `FORMAL_OR_HIGH_ASSURANCE`.
+2. **Human authority** — `NO_HUMAN_AUTHORITY` or `HUMAN_AUTHORITY_REQUIRED`.
+
+`HUMAN_REVIEW` remains readable as a legacy single-axis route in persisted evidence, but it is not part of the v2 processing-lane domain.
+
+This separation prevents approval semantics from being collapsed into engineering-assurance semantics. A work item may simultaneously require `FORMAL_OR_HIGH_ASSURANCE` processing and `HUMAN_AUTHORITY_REQUIRED`; neither dimension substitutes for the other. System-One still cannot authorize execution.
+
+The routing contract identifier `processing-lane+human-authority/v2` is persisted with shadow projections and observation identities. Changing routing semantics therefore creates new observations even when the snapshot, work item, and model revision are unchanged.
