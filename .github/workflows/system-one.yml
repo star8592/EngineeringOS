@@ -8,6 +8,9 @@ on:
       - "src/engineeringos/authority_policy.py"
       - "tests/test_edb_curation.py"
       - "src/engineeringos/edb_curation.py"
+      - "benchmarks/edb/adjudications.jsonl"
+      - "tests/test_edb_adjudication.py"
+      - "src/engineeringos/edb_adjudication.py"
       - "src/engineeringos/jev_http_provider.py"
       - "src/engineeringos/laya_provider.py"
       - "tests/test_system_one_backend_matrix.py"
@@ -67,6 +70,7 @@ jobs:
       - run: python3 tests/test_system_one_shadow.py
       - run: python3 tests/test_authority_policy.py
       - run: python3 tests/test_edb_curation.py
+      - run: python3 tests/test_edb_adjudication.py
       - run: python3 tests/test_system_one_admission.py
       - run: python3 tests/test_system_one_observations.py
       - run: python3 tests/test_control_room_system_one.py
