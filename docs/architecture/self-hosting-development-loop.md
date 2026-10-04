@@ -127,3 +127,7 @@ Continuous Autopilot runs inside the existing singleton Supervisor rather than a
 Chat, voice, web, and future clients are transports, not intent databases. They submit idempotent Conversation Command Envelopes; EngineeringOS derives generation from the durable project journal. Models may classify or propose, but they do not author durable generation numbers or mutation authority. Process-control utterances such as “continue” must not automatically become new product intent. Product corrections and reversals reconcile existing work: safe stale work is superseded, unsafe in-flight work is protected.
 
 Natural-language clarity is not mutation authority. New desires first create capability-planning work. A read-only planner may propose a mutation contract, but only deterministic contract admission can persist executable paths and verification argv. Coding execution consumes only that admitted durable contract.
+
+## Durable planning boundary
+
+Planning and coding are separate durable phases. A planner never hands an in-memory contract directly to a coder. Deterministic admission binds an accepted contract to a source SHA and writes it to the project journal; only a later replayed state may enter mutation execution. Source drift invalidates the contract and requires replanning. This makes repository evolution between AI planning and AI coding an ordinary machine reconciliation problem rather than a hidden race or a human escalation.

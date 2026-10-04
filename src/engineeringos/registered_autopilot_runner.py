@@ -4,11 +4,14 @@ from durable_supervisor_runtime import recover,resume_once
 from continuous_autopilot import classify,after_execution
 from project_registry import load
 from codex_readonly_provider import CodexReadOnlyProvider
+from codex_planning_provider import CodexPlanningProvider
+from planning_phase import plan_one
 
 def atomic(path,obj):
  p=pathlib.Path(path);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(".tmp");tmp.write_text(json.dumps(obj,sort_keys=True,ensure_ascii=False)+"\n");tmp.replace(p)
-def run_registered_once(registry_path,runtime_root,*,provider_factory=None,now=None):
+def run_registered_once(registry_path,runtime_root,*,provider_factory=None,planner_factory=None,now=None):
  provider_factory=provider_factory or (lambda cfg:[CodexReadOnlyProvider(timeout=int(cfg.get("provider_timeout",60)))])
+ planner_factory=planner_factory or (lambda cfg:[CodexPlanningProvider(timeout=int(cfg.get("planner_timeout",60)))])
  now=time.time() if now is None else now;out=[]
  for cfg in load(registry_path)["projects"]:
   if not cfg.get("autopilot_enabled"):continue
@@ -17,8 +20,14 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,now=N
    out.append({"project":cfg["name"],"action":"BACKOFF_WAIT","delay_seconds":round(prev["next_eligible_at"]-now)});continue
   decision=classify(state,{**prev,"last_result":None} if prev.get("last_result")=="MACHINE_FAILURE" else prev)
   if decision["action"]=="ADVANCE":
-   result=resume_once(cfg["repo"],runtime_root,cfg["name"],provider_factory(cfg),workspace_root=cfg["workspace_root"],verification_timeout=int(cfg.get("verification_timeout",120)))
-   decision=after_execution(decision,result);out.append({"project":cfg["name"],"action":"ADVANCE","result":result["execution"]})
+   planning=plan_one(cfg["repo"],runtime_root,cfg["name"],planner_factory(cfg))
+   if planning["state"]=="CONTRACT_ADMITTED":
+    decision["last_result"]="SUCCESS";out.append({"project":cfg["name"],"action":"PLAN","result":planning})
+   elif planning["state"]=="PLANNER_FAILED":
+    decision["last_result"]="MACHINE_FAILURE";out.append({"project":cfg["name"],"action":"PLAN_FAILED","result":planning})
+   else:
+    result=resume_once(cfg["repo"],runtime_root,cfg["name"],provider_factory(cfg),workspace_root=cfg["workspace_root"],verification_timeout=int(cfg.get("verification_timeout",120)))
+    decision=after_execution(decision,result);out.append({"project":cfg["name"],"action":"ADVANCE","result":result["execution"]})
   else:out.append({"project":cfg["name"],"action":decision["action"],"reason":decision["reason"],"should_notify":decision.get("should_notify",False)})
   delay=decision.get("delay_seconds",0)
   if decision.get("last_result")=="MACHINE_FAILURE":

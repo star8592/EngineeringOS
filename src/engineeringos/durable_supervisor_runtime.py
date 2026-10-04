@@ -16,14 +16,16 @@ def discover_work(runtime_root,project,item):
  p=journal_path(runtime_root,project)
  payload={k:v for k,v in item.items() if k!="id"}
  return append(p,project=project,typ="WORK_DISCOVERED",key=item["id"],generation=item.get("intent_generation",0),payload=payload)
-def admit_work_contract(runtime_root,project,item_id,contract,*,planner_evidence):
+def admit_work_contract(runtime_root,project,item_id,contract,*,planner_evidence,source_sha=None):
  st=recover(runtime_root,project);item=st["work_items"].get(item_id)
  if not item:raise KeyError(item_id)
- return append(journal_path(runtime_root,project),project=project,typ="WORK_CONTRACT_ADMITTED",key=item_id,generation=item.get("intent_generation",0),payload={"allowed_paths":contract["allowed_paths"],"verification_argv":contract["verification_argv"],"contract_admission":contract.get("admission"),"planner_evidence":planner_evidence})
+ return append(journal_path(runtime_root,project),project=project,typ="WORK_CONTRACT_ADMITTED",key=item_id,generation=item.get("intent_generation",0),payload={"allowed_paths":contract["allowed_paths"],"verification_argv":contract["verification_argv"],"contract_admission":contract.get("admission"),"planner_evidence":planner_evidence,**({"source_sha":source_sha} if source_sha else {})})
 
 def _record_result(path,project,item,result):
  state=result["state"]; typ={"REOPENED":"WORK_REOPENED","WAITING_CONTRACT":"WORK_WAITING_CONTRACT","COMMITTED":"WORK_COMMITTED"}.get(state)
  if not typ:return None
+ if state=="REOPENED" and result.get("reason")=="SOURCE_SHA_DRIFT":
+  return append(path,project=project,typ="WORK_CONTRACT_INVALIDATED",key=item["id"],generation=item.get("intent_generation",0),payload={"reason":"SOURCE_SHA_DRIFT","replan_required":True})
  payload={"reason":result.get("reason")} if state!="COMMITTED" else {"commit_receipt":result["commit_receipt"],"capability_evidence":result["capability_evidence"]}
  ev=append(path,project=project,typ=typ,key=item["id"],generation=item.get("intent_generation",0),payload=payload)
  if state=="COMMITTED":
