@@ -33,6 +33,20 @@ LANE_QUESTION = TypedQuestion(
         "otherwise use REASONING_REVIEW. Human decision authority is asked separately."
     ),
     options=tuple(sorted(PROCESSING_LANES)),
+    criteria=(
+        (
+            "DETERMINISTIC_CANDIDATE",
+            "Low-risk, mechanically checkable work where deterministic tests, formatting, read-only inspection, or a fixed procedure can establish the result without ambiguous engineering judgment.",
+        ),
+        (
+            "REASONING_REVIEW",
+            "Engineering work that requires interpretation, architectural judgment, ambiguity resolution, or semantic review, but not formal methods or high-assurance state-machine reasoning.",
+        ),
+        (
+            "FORMAL_OR_HIGH_ASSURANCE",
+            "Safety-critical engineering involving authorization semantics, concurrency, leases, at-most-once execution, release/rollback state machines, security, identity, provenance, or invariants that deserve model checking or formal proof.",
+        ),
+    ),
 )
 
 AUTHORITY_QUESTION = TypedQuestion(
@@ -43,6 +57,16 @@ AUTHORITY_QUESTION = TypedQuestion(
         "permission, or governance decision rather than merely reviewing engineering evidence?"
     ),
     options=tuple(sorted(AUTHORITY_CHOICES)),
+    criteria=(
+        (
+            "NO_HUMAN_AUTHORITY",
+            "Engineering evidence, deterministic policy, tests, formal proof, or documented technical rules can determine the outcome. A human may review evidence, but no final discretionary product, business, permission, governance, legal, or spending decision is required.",
+        ),
+        (
+            "HUMAN_AUTHORITY_REQUIRED",
+            "A human must make or approve the final discretionary decision, such as granting/revoking privileges, changing product scope, accepting legal/governance risk, approving spending, or choosing among legitimate business outcomes that technical evidence alone cannot decide.",
+        ),
+    ),
 )
 
 
