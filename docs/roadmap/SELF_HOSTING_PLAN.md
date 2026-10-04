@@ -89,3 +89,7 @@ State: IMPLEMENTED_BASELINE. Intent and autonomous Work lifecycle now have a CAS
 ## SH-07E Continuous registered Autopilot — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. The existing singleton Supervisor process now owns a separate generic Project Autopilot lane; no second daemon is introduced. Projects must be explicitly registered in runtime policy before autonomous mutation is eligible. The current safe lane requires `autopilot_enabled=true` and `max_assurance` A1/A2. Stable project state sleeps without journal growth, machine/provider failures use persisted exponential backoff (30s doubling to 1800s), restart recovery comes from the project journal, and unchanged `NEEDS_INTENT` is notified once rather than repeatedly. Project Autopilot failures are isolated from the legacy DevControl G2/G3 shadow lane. EngineeringOS is Project Zero; its first live idle run produced OBSERVE followed by SLEEP with zero journal growth and zero repository mutation.
+
+### Runtime activation evidence
+
+The existing `engineeringos-supervisor.service` was already enabled and active. After SH-07E landed it was restarted through the repository service script, remained `active/running` with `NRestarts=0`, and retained the single-process service model. Historical logs showed an older crash/restart burst before the current stable run; failure status now persists a bounded traceback so future daemon failures are diagnosable from runtime state rather than only a systemd exit code.

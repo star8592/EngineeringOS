@@ -10,6 +10,7 @@ import pathlib
 import subprocess
 import tempfile
 import time
+import traceback
 from collections import Counter
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -267,6 +268,7 @@ def run_cycle() -> dict:
             'duration_seconds': round(time.monotonic() - started, 3),
             'error_type': type(exc).__name__,
             'error': str(exc),
+            'traceback': traceback.format_exc()[-12000:],
             'project_autopilot': project_autopilot,
             'target_mutation_authorized': False,
         }
