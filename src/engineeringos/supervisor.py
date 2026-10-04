@@ -164,6 +164,8 @@ def run_cycle() -> dict:
         queue = read_json(STATE / 'work-queue.json')
         dispatch = read_json(ROOT / 'artifacts/dispatch-plan.json')
         loop = read_json(STATE / 'control-loop/projection.json')
+        run_checked(['python3', 'src/engineeringos/control_loop_details.py'], timeout=30)
+        loop_details = read_json(STATE / 'control-loop/details.json')
 
         row = make_timeseries_row(snapshot, queue, dispatch, loop)
         series_path = STATE / 'time-series.jsonl'
@@ -200,6 +202,10 @@ def run_cycle() -> dict:
             'observations': len(series),
             'active_work_items': brief['active_work_items'],
             'top_action_count': len(brief['actions']),
+            'command_receipts': loop_details.get('summary', {}).get('commands', 0),
+            'command_unknown_completion': loop_details.get('summary', {}).get('unknown_completion', 0),
+            'command_probe_required': loop_details.get('summary', {}).get('probe_required', 0),
+            'command_evidence_invalid': loop_details.get('summary', {}).get('evidence_invalid', 0),
             'system_one_status': system_one.get('status', 'UNKNOWN'),
             'system_one_provider': system_one.get('provider'),
             'system_one_advisory_items': len(system_one.get('items', [])),
