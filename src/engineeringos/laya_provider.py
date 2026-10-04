@@ -90,10 +90,14 @@ class LayaLocalProvider:
         return {
             "type": "choice",
             "instructions": question.instructions,
-            "criteria": {
-                option: option.replace("_", " ").lower()
-                for option in question.options
-            },
+            "criteria": (
+                dict(question.criteria)
+                if question.criteria
+                else {
+                    option: option.replace("_", " ").lower()
+                    for option in question.options
+                }
+            ),
         }
 
     def decide_many(
