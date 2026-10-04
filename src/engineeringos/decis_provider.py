@@ -22,7 +22,7 @@ class DecisProvider(JevCompatibleHTTPProvider):
                 or os.environ.get(
                     "ENGINEERINGOS_DECIS_BASE_URL"
                 )
-                or "http://127.0.0.1:8018"
+                or "http://127.0.0.1:8019"
             ),
             model=(
                 model
