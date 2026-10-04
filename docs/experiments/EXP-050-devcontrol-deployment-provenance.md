@@ -33,13 +33,26 @@ Deployment identity is resolved only if both current-release pointers and both d
 
 Build artifact identity remains PARTIAL because deployed-tree identity is not the same claim as the original staged artifact identity.
 
-## Expected effect
+## Live result
 
-For a healthy live release with matching server/Agent current pointers:
+Validated against production DevControl 3.1.21 / release `e3b88b47`:
 
-- `deployment_identity_state` may become `RESOLVED`;
-- `artifact_identity_state` becomes `PARTIAL` when deployed byte digests are known;
-- the manager should retire `CLOSE_DEPLOYMENT_IDENTITY_GAP`;
-- `CLOSE_ARTIFACT_IDENTITY_GAP` remains until the DevControl producer persists an immutable build manifest/tarball digest.
+- full source SHA: `e3b88b47ccce96409eb929fd56ff8ff6e4cc68de`;
+- production server current: `releases/e3b88b47`;
+- local Agent current: `releases/e3b88b47`;
+- server deployed-tree SHA-256: `0f142877483c086108942ad67b377c033913c2540204967de051ae52d1acd665`;
+- Agent deployed-tree SHA-256: `ad3438fd1bb4e865be2f5ee4cbf791fcdf02638a1dbf4a937c67f60b3400fa85`;
+- deployment binding SHA-256: `0234f95ce39d2995500bc6433616af6fd57cdbb775f7f57f93bb12f9f8d9bc09`.
+
+Both deployed trees resolved to the live release id and contained non-empty byte sets.
+
+Result:
+
+- `deployment_identity_state = RESOLVED`;
+- `artifact_identity_state = PARTIAL`;
+- Manager automatically removed `CLOSE_DEPLOYMENT_IDENTITY_GAP`;
+- `CLOSE_ARTIFACT_IDENTITY_GAP` remained.
+
+The experiment also exposed two EngineeringOS runtime defects during clean-worktree validation: artifact output directories were assumed to pre-exist, and the first SSH implementation mishandled multiline `python -c` quoting. Both were fixed with explicit output-directory bootstrap and a quoted/base64 remote observer command.
 
 This narrows provenance debt without weakening proof semantics or modifying DevControl.
