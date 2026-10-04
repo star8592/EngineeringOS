@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import json, pathlib, subprocess
-ROOT=pathlib.Path('artifacts')
+ROOT=pathlib.Path('artifacts'); ROOT.mkdir(parents=True,exist_ok=True)
 def ensure(file,cmd):
  p=ROOT/file
  if not p.exists(): subprocess.check_call(cmd)

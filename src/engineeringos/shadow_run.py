@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json,pathlib,subprocess,datetime,hashlib
 from state_paths import runtime
-A=pathlib.Path('artifacts'); S=runtime('shadow'); S.mkdir(parents=True,exist_ok=True)
+A=pathlib.Path('artifacts'); A.mkdir(parents=True,exist_ok=True); S=runtime('shadow'); S.mkdir(parents=True,exist_ok=True)
 def run(cmd): subprocess.check_call(cmd,stdout=subprocess.DEVNULL)
 for cmd in [
  ['python3','src/engineeringos/devcontrol_inventory.py'],
