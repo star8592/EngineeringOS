@@ -1,0 +1,40 @@
+name: DevControl Evidence
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/engineeringos/devcontrol_deployment_observer.py"
+      - "src/engineeringos/devcontrol_release_evidence.py"
+      - "src/engineeringos/production_evidence_semantics.py"
+      - "src/engineeringos/action_details.py"
+      - "tests/test_devcontrol_deployment_observer.py"
+      - "tests/test_devcontrol_release_evidence.py"
+      - "tests/test_production_evidence_semantics.py"
+      - ".github/workflows/devcontrol-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/engineeringos/devcontrol_deployment_observer.py"
+      - "src/engineeringos/devcontrol_release_evidence.py"
+      - "src/engineeringos/production_evidence_semantics.py"
+      - "src/engineeringos/action_details.py"
+      - "tests/test_devcontrol_deployment_observer.py"
+      - "tests/test_devcontrol_release_evidence.py"
+      - "tests/test_production_evidence_semantics.py"
+      - ".github/workflows/devcontrol-evidence.yml"
+
+jobs:
+  provenance-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 tests/test_devcontrol_deployment_observer.py
+      - run: python3 tests/test_devcontrol_release_evidence.py
+      - run: python3 tests/test_production_evidence_semantics.py
+      - name: Compile evidence adapters
+        run: |
+          python3 -m py_compile \
+            src/engineeringos/devcontrol_deployment_observer.py \
+            src/engineeringos/devcontrol_release_evidence.py \
+            src/engineeringos/action_details.py
