@@ -180,6 +180,8 @@ def run_cycle() -> dict:
         system_one_observations = read_json(STATE / 'system-one/observation-summary.json')
         run_checked(['python3', 'src/engineeringos/edb_curation.py'], timeout=30)
         edb_curation = read_json(STATE / 'system-one/edb-curation-summary.json')
+        run_checked(['python3', 'src/engineeringos/edb_adjudication.py'], timeout=30)
+        edb_adjudication = read_json(STATE / 'system-one/edb-adjudication-summary.json')
         run_checked(['python3', 'src/engineeringos/system_one_admission.py'], timeout=30)
         system_one_admission = read_json(STATE / 'system-one/admission.json')
         run_checked(['python3', 'src/engineeringos/g3_controller.py'], timeout=300)
@@ -205,8 +207,10 @@ def run_cycle() -> dict:
             'system_one_observations': system_one_observations.get('observations', 0),
             'system_one_scheduler_agreement': system_one_observations.get('scheduler_agreement_rate'),
             'system_one_edb_candidates': edb_curation.get('candidate_count', 0),
-            'system_one_edb_pending_adjudication': edb_curation.get('pending_adjudication', 0),
-            'system_one_edb_gold': 0,
+            'system_one_edb_pending_adjudication': edb_adjudication.get('pending_adjudication', 0),
+            'system_one_edb_gold': edb_adjudication.get('gold_count', 0),
+            'system_one_edb_review_records': edb_adjudication.get('adjudication_records', 0),
+            'system_one_edb_invalid_reviews': edb_adjudication.get('invalid_count', 0),
             'system_one_influence_routing': False,
             'target_mutation_authorized': False,
         }
