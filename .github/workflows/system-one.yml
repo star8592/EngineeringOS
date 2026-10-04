@@ -13,6 +13,7 @@ on:
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
       - "tests/test_decis_provider.py"
+      - "tests/test_decis_kev_installer.py"
       - "tests/test_system_one_shadow.py"
       - "tests/test_system_one_admission.py"
       - "tests/test_system_one_observations.py"
@@ -22,6 +23,7 @@ on:
       - "benchmarks/results/system-one-*.json"
       - "scripts/run_system_one_edb.py"
       - "scripts/install_laya_system_one.sh"
+      - "scripts/install_decis_kev_system_one.sh"
       - "src/engineeringos/supervisor.py"
       - "src/engineeringos/dashboard_projector.py"
       - "dashboard/index.html"
@@ -38,6 +40,7 @@ on:
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
       - "tests/test_decis_provider.py"
+      - "tests/test_decis_kev_installer.py"
       - "tests/test_system_one_shadow.py"
       - "tests/test_system_one_admission.py"
       - "tests/test_system_one_observations.py"
@@ -47,6 +50,7 @@ on:
       - "benchmarks/results/system-one-*.json"
       - "scripts/run_system_one_edb.py"
       - "scripts/install_laya_system_one.sh"
+      - "scripts/install_decis_kev_system_one.sh"
       - "src/engineeringos/supervisor.py"
       - "src/engineeringos/dashboard_projector.py"
       - "dashboard/index.html"
@@ -60,12 +64,14 @@ jobs:
       - run: python3 tests/test_system_one_contract.py
       - run: python3 tests/test_laya_provider.py
       - run: python3 tests/test_decis_provider.py
+      - run: python3 tests/test_decis_kev_installer.py
       - run: python3 tests/test_system_one_shadow.py
       - run: python3 tests/test_authority_policy.py
       - run: python3 tests/test_system_one_admission.py
       - run: python3 tests/test_system_one_observations.py
       - run: python3 tests/test_control_room_system_one.py
       - run: bash -n scripts/install_laya_system_one.sh
+      - run: bash -n scripts/install_decis_kev_system_one.sh
       - name: Validate EDB corpus
         run: |
           python3 - <<'PY'
