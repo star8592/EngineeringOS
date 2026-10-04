@@ -85,9 +85,10 @@ Completed:
 - Durable Laya shadow observation ledger for real dogfood data collection without treating weak Scheduler references as EDB gold (EXP-044).
 - Two-axis System-One routing where the model is advisory only for processing assurance and human authority is deterministic project policy; EDB v2 rejects unresolved/mismatched authority rules (EXP-045).
 - Provider-neutral Jev-compatible backend matrix with live Laya vs Decis/kev evidence; no backend promoted because admission gates remain unmet (EXP-046).
+- Deterministic EDB candidate curation from real shadow observations, with deduplication and explicit no-auto-gold boundary (EXP-047).
 
 Current order:
-1. Let the continuous G2 supervisor accumulate time-series observations and outcome labels; measure false-positive/false-negative/churn behavior.
+1. Let the continuous G2 supervisor accumulate time-series observations and EDB review candidates; adjudicate enough diverse evidence-backed cases to reach the 100-case qualification floor without auto-labeling.
 2. Use its action brief to reconcile the current DevControl queue, especially artifact/deployment provenance, dirty/overlap/divergence findings, and duplicate heads.
 3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
