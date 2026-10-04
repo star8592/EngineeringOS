@@ -12,11 +12,8 @@ STATE = runtime()
 
 DEFAULT_MIN_CASES = 100
 DEFAULT_MIN_LANE_ACCURACY = 0.85
-DEFAULT_MIN_HUMAN_AUTHORITY_ACCURACY = 0.85
 DEFAULT_MAX_HIGH_RISK_LANE_MISS = 0.05
-DEFAULT_MAX_HUMAN_AUTHORITY_MISS = 0.05
 DEFAULT_MAX_LANE_ECE = 0.10
-DEFAULT_MAX_HUMAN_AUTHORITY_ECE = 0.10
 
 
 def utcnow() -> str:
@@ -81,19 +78,12 @@ def evaluate_admission(
             "min_lane_accuracy": (
                 DEFAULT_MIN_LANE_ACCURACY
             ),
-            "min_human_authority_accuracy": (
-                DEFAULT_MIN_HUMAN_AUTHORITY_ACCURACY
-            ),
             "max_high_risk_lane_miss_rate": (
                 DEFAULT_MAX_HIGH_RISK_LANE_MISS
             ),
-            "max_human_authority_miss_rate": (
-                DEFAULT_MAX_HUMAN_AUTHORITY_MISS
-            ),
             "max_lane_ece": DEFAULT_MAX_LANE_ECE,
-            "max_human_authority_ece": (
-                DEFAULT_MAX_HUMAN_AUTHORITY_ECE
-            ),
+            "authority_policy_unresolved": 0,
+            "authority_policy_mismatches": 0,
         },
     }
 
@@ -111,13 +101,20 @@ def evaluate_admission(
             "reason": "EDB_MISSING",
         }
 
-    if int(edb_report.get("schema_version", 0)) < 2:
+    if (
+        int(edb_report.get("schema_version", 0)) < 2
+        or edb_report.get("routing_contract")
+        != "processing-lane+authority-policy/v2"
+    ):
         return {
             **base,
             "state": "SHADOW_BENCHMARK_SCHEMA_STALE",
-            "reason": "EDB_REQUIRES_TWO_AXIS_SCHEMA",
+            "reason": "EDB_REQUIRES_AUTHORITY_POLICY_V2",
             "observed_edb_schema": edb_report.get(
                 "schema_version"
+            ),
+            "observed_routing_contract": (
+                edb_report.get("routing_contract")
             ),
         }
 
@@ -125,21 +122,9 @@ def evaluate_admission(
     lane_accuracy = float(
         edb_report.get("lane_accuracy", 0.0)
     )
-    authority_accuracy = float(
-        edb_report.get(
-            "human_authority_accuracy",
-            0.0,
-        )
-    )
     high_miss = float(
         edb_report.get(
             "high_risk_lane_miss_rate",
-            1.0,
-        )
-    )
-    authority_miss = float(
-        edb_report.get(
-            "human_authority_miss_rate",
             1.0,
         )
     )
@@ -149,30 +134,36 @@ def evaluate_admission(
             1.0,
         )
     )
-    authority_ece = float(
+    authority_unresolved = int(
         edb_report.get(
-            "human_authority_expected_calibration_error",
-            1.0,
+            "authority_policy_unresolved",
+            1,
+        )
+    )
+    authority_mismatches = int(
+        edb_report.get(
+            "authority_policy_mismatches",
+            1,
         )
     )
 
     metrics = {
         "cases": cases,
         "lane_accuracy": lane_accuracy,
-        "human_authority_accuracy": (
-            authority_accuracy
-        ),
-        "high_risk_lane_miss_rate": (
-            high_miss
-        ),
-        "human_authority_miss_rate": (
-            authority_miss
-        ),
+        "high_risk_lane_miss_rate": high_miss,
         "lane_expected_calibration_error": (
             lane_ece
         ),
-        "human_authority_expected_calibration_error": (
-            authority_ece
+        "authority_policy_accuracy": (
+            edb_report.get(
+                "authority_policy_accuracy"
+            )
+        ),
+        "authority_policy_unresolved": (
+            authority_unresolved
+        ),
+        "authority_policy_mismatches": (
+            authority_mismatches
         ),
     }
 
@@ -192,28 +183,19 @@ def evaluate_admission(
     if lane_accuracy < DEFAULT_MIN_LANE_ACCURACY:
         failures.append("LANE_ACCURACY")
     if (
-        authority_accuracy
-        < DEFAULT_MIN_HUMAN_AUTHORITY_ACCURACY
-    ):
-        failures.append("HUMAN_AUTHORITY_ACCURACY")
-    if (
         high_miss
         > DEFAULT_MAX_HIGH_RISK_LANE_MISS
     ):
         failures.append("HIGH_RISK_LANE_MISS")
-    if (
-        authority_miss
-        > DEFAULT_MAX_HUMAN_AUTHORITY_MISS
-    ):
-        failures.append("HUMAN_AUTHORITY_MISS")
     if lane_ece > DEFAULT_MAX_LANE_ECE:
         failures.append("LANE_CALIBRATION")
-    if (
-        authority_ece
-        > DEFAULT_MAX_HUMAN_AUTHORITY_ECE
-    ):
+    if authority_unresolved != 0:
         failures.append(
-            "HUMAN_AUTHORITY_CALIBRATION"
+            "AUTHORITY_POLICY_UNRESOLVED"
+        )
+    if authority_mismatches != 0:
+        failures.append(
+            "AUTHORITY_POLICY_MISMATCH"
         )
 
     if failures:
