@@ -32,11 +32,11 @@ class Handler(BaseHTTPRequestHandler):
         for qid, question in request["questions"].items():
             assert question["type"] == "choice"
             assert "criteria" in question
-            if qid == "human_authority":
-                choice = "HUMAN_AUTHORITY_REQUIRED"
+            if qid == "secondary_route":
+                choice = "STATIC_ANALYSIS"
                 probs = {
-                    "HUMAN_AUTHORITY_REQUIRED": 0.88,
-                    "NO_HUMAN_AUTHORITY": 0.12,
+                    "STATIC_ANALYSIS": 0.88,
+                    "TEST_EXECUTION": 0.12,
                 }
             else:
                 choice = "REASONING_REVIEW"
@@ -86,12 +86,12 @@ try:
         ),
     )
     authority = TypedQuestion(
-        question_id="human_authority",
+        question_id="secondary_route",
         kind="choice",
-        instructions="Human authority?",
+        instructions="Which secondary engineering route?",
         options=(
-            "HUMAN_AUTHORITY_REQUIRED",
-            "NO_HUMAN_AUTHORITY",
+            "STATIC_ANALYSIS",
+            "TEST_EXECUTION",
         ),
     )
     batch = provider.decide_many(
@@ -100,15 +100,15 @@ try:
     )
     assert set(batch.answers) == {
         "engineering_lane",
-        "human_authority",
+        "secondary_route",
     }
     assert (
         batch.answers["engineering_lane"].choice
         == "REASONING_REVIEW"
     )
     assert (
-        batch.answers["human_authority"].choice
-        == "HUMAN_AUTHORITY_REQUIRED"
+        batch.answers["secondary_route"].choice
+        == "STATIC_ANALYSIS"
     )
     assert (
         batch.answers["engineering_lane"].answer_confidence
