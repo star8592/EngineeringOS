@@ -9,6 +9,9 @@ for p in plan['work_queue']:
     wid=hashlib.sha256(f"{plan['project']}|{p['kind']}".encode()).hexdigest()[:16]; seen.add(wid)
     if wid in by:
         x=by[wid]; x.update({'priority':p['priority'],'reason':p['reason'],'required_assurance':p['required_assurance'],'automation':p['automation'],'last_seen_at':now})
+        for key in ('evidence_state','reason_code'):
+            if key in p: x[key]=p[key]
+            else: x.pop(key,None)
         if x['state']=='RESOLVED': x['state']='REOPENED'; x['reopened_at']=now
     else:
         by[wid]={'id':wid,'project':plan['project'],**p,'state':'DISCOVERED','first_seen_at':now,'last_seen_at':now,'evidence_refs':[]}
