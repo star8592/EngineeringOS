@@ -16,7 +16,7 @@ from system_one_contract import (
     advisory_route,
     assert_not_authorization,
 )
-from system_one_provider import SystemOneProviderError
+from system_one_provider import SystemOneProvider, SystemOneProviderError
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -89,7 +89,7 @@ def load_authority_policy(path: pathlib.Path = AUTHORITY_POLICY_PATH) -> dict:
 
 
 def classify_action(
-    provider: LayaLocalProvider,
+    provider: SystemOneProvider,
     action: dict,
     *,
     authority_policy: dict | None = None,

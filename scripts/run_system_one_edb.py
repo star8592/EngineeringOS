@@ -11,7 +11,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src/engineeringos"))
 
 from authority_policy import decide_authority, validate_policy
+from decis_provider import DecisProvider
 from laya_provider import LayaLocalProvider
+from system_one_provider import SystemOneProvider
 from system_one_contract import advisory_route
 from system_one_shadow import LANE_QUESTION
 
@@ -68,7 +70,7 @@ def calibration_error(
 
 def evaluate(
     cases: list[dict],
-    provider: LayaLocalProvider,
+    provider: SystemOneProvider,
     authority_policy: dict,
 ) -> dict:
     rows = []
@@ -96,6 +98,7 @@ def evaluate(
 
         rows.append({
             "id": case["id"],
+            "model": result.model,
             "expected_lane": expected_lane,
             "raw_lane": raw_lane,
             "safe_lane": safe_lane,
@@ -166,6 +169,7 @@ def evaluate(
             "processing-lane+authority-policy/v2"
         ),
         "provider": provider.name,
+        "models": sorted({row["model"] for row in rows}),
         "cases": len(rows),
         "lane_accuracy": lane_accuracy,
         "high_risk_lane_miss_rate": (
@@ -204,6 +208,15 @@ def main() -> int:
         default="benchmarks/edb/system_one_routes.jsonl",
     )
     parser.add_argument(
+        "--backend",
+        choices=("laya", "decis"),
+        default="laya",
+    )
+    parser.add_argument("--base-url")
+    parser.add_argument("--model")
+    parser.add_argument("--api-key")
+    parser.add_argument("--timeout-seconds", type=float, default=30.0)
+    parser.add_argument(
         "--authority-policy",
         default=str(
             DEFAULT_AUTHORITY_POLICY.relative_to(ROOT)
@@ -241,9 +254,20 @@ def main() -> int:
     if not policy_path.is_absolute():
         policy_path = ROOT / policy_path
 
-    provider = LayaLocalProvider(
-        timeout_seconds=30
-    )
+    if args.backend == "decis":
+        provider = DecisProvider(
+            base_url=args.base_url,
+            model=args.model,
+            api_key=args.api_key,
+            timeout_seconds=args.timeout_seconds,
+        )
+    else:
+        provider = LayaLocalProvider(
+            base_url=args.base_url,
+            model=args.model,
+            api_key=args.api_key,
+            timeout_seconds=args.timeout_seconds,
+        )
     report = evaluate(
         read_cases(ROOT / args.cases),
         provider,

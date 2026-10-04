@@ -6,7 +6,7 @@ proj = (root / "src/engineeringos/dashboard_projector.py").read_text()
 sup = (root / "src/engineeringos/supervisor.py").read_text()
 shadow = (root / "src/engineeringos/system_one_shadow.py").read_text()
 
-assert "System-One · Laya shadow routing" in dash
+assert "System-One · open shadow routing" in dash
 assert "./runtime/system-one.json" in dash
 assert "human_authority_decision" in dash
 assert "human_authority_source" in dash
