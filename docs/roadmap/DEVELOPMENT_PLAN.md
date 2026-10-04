@@ -1,7 +1,7 @@
 # EngineeringOS Development Plan
 
 Status: Active
-Updated: 2026-10-03
+Updated: 2026-10-04
 
 ## Non-negotiable development invariants
 
@@ -87,11 +87,11 @@ Completed:
 - Provider-neutral Jev-compatible backend matrix with live Laya vs Decis/kev evidence; no backend promoted because admission gates remain unmet (EXP-046).
 - Deterministic EDB candidate curation from real shadow observations, with deduplication and explicit no-auto-gold boundary (EXP-047).
 - Versioned EDB adjudication ledger with provenance-bound gold creation and explicit rejection of model-only/Scheduler-only label authority (EXP-048).
+- Event-log-derived Control Room command receipt/outcome-evidence drill-down with retry/probe and SHA-256 evidence verification (EXP-049).
 
 Current order:
 1. Let the continuous G2 supervisor accumulate time-series observations and EDB review candidates; adjudicate diverse cases only through the versioned adjudication contract until the 100-case qualification floor is reached.
 2. Use its action brief to reconcile the current DevControl queue, especially artifact/deployment provenance, dirty/overlap/divergence findings, and duplicate heads.
-3. Extend the Control Room drill-down from action evidence to command events/receipts/outcome evidence while preserving projection-only semantics.
 4. Expand generic CI/release/runtime adapters beyond DevControl-specific profiles.
 5. Continue G3 pilot dogfood with the single deterministic-check allowlist; prove deferral, idempotency, evidence closure, and no target mutation before adding any second action class.
 6. Run the active open System-One backend continuously in shadow advisory mode, expand EDB from real outcomes, and benchmark alternative open backends through the same contract; only allow model recommendations to influence routing after measured admission thresholds pass.
