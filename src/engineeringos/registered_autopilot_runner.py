@@ -4,13 +4,14 @@ from durable_supervisor_runtime import recover,resume_once
 from continuous_autopilot import classify,after_execution
 from project_registry import load
 from codex_readonly_provider import CodexReadOnlyProvider
+from claude_readonly_provider import ClaudeReadonlyProvider
 from codex_planning_provider import CodexPlanningProvider
 from planning_phase import plan_one
 
 def atomic(path,obj):
  p=pathlib.Path(path);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(".tmp");tmp.write_text(json.dumps(obj,sort_keys=True,ensure_ascii=False)+"\n");tmp.replace(p)
 def run_registered_once(registry_path,runtime_root,*,provider_factory=None,planner_factory=None,now=None):
- provider_factory=provider_factory or (lambda cfg:[CodexReadOnlyProvider(timeout=int(cfg.get("provider_timeout",60)))])
+ provider_factory=provider_factory or (lambda cfg:[CodexReadOnlyProvider(timeout=int(cfg.get("provider_timeout",60))),ClaudeReadonlyProvider(timeout=int(cfg.get("provider_timeout",60)))])
  planner_factory=planner_factory or (lambda cfg:[CodexPlanningProvider(timeout=int(cfg.get("planner_timeout",60)))])
  now=time.time() if now is None else now;out=[]
  for cfg in load(registry_path)["projects"]:
