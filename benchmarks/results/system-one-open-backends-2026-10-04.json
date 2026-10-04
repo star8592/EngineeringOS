@@ -54,11 +54,36 @@
         "CALIBRATION_ABOVE_THRESHOLD",
         "CPU_LATENCY_NOT_SUITABLE_FOR_DEFAULT_SHADOW_LOOP"
       ]
+    },
+    {
+      "id": "decis-kev-0.8b-cuda",
+      "provider": "decis",
+      "models": [
+        "decis/kev-0.8b@vendored-90990a5"
+      ],
+      "decis_version": "0.4.0",
+      "decis_revision": "ae7c27be7774efc75411b97037a9d2f9ff98abc3",
+      "adapter_revision": "54f4f8777356cd5bbbb6c6919c657f26e6f2f6d8",
+      "base_revision": "dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68",
+      "runtime": "native",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "lane_accuracy": 0.9166666666666666,
+      "high_risk_lane_miss_rate": 0,
+      "lane_expected_calibration_error": 0.3617833333333333,
+      "median_latency_ms": 22.33,
+      "gpu_memory_mib": 3882,
+      "disposition": "PARALLEL_SHADOW_CANDIDATE_UNQUALIFIED",
+      "reasons": [
+        "EDB_CASE_COUNT_BELOW_THRESHOLD",
+        "CALIBRATION_ABOVE_THRESHOLD"
+      ]
     }
   ],
   "selection": {
     "active_shadow_backend": "laya-typed-decisions",
+    "parallel_shadow_candidate": "decis-kev-0.8b-cuda",
     "promotion": "NONE",
-    "rationale": "kev has materially better seed accuracy and zero high-risk misses, but neither backend satisfies the admission contract. Keep Laya as low-latency shadow evidence while expanding EDB; evaluate kev on GPU and/or domain calibration before any promotion."
+    "rationale": "GPU kev preserves its materially better seed accuracy and zero high-risk misses at ~22 ms median, making it suitable for parallel shadow collection. It remains unqualified because the EDB has only 12 gold cases and ECE remains above the 0.10 gate."
   }
 }
