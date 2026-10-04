@@ -28,9 +28,10 @@ fi
 cd "$src"
 git fetch origin "$revision"
 git checkout --detach "$revision"
+git reset --hard "$revision"
 
 export UV_LINK_MODE=copy
-uv sync --python "$python_bin" --extra dev --extra kev
+uv sync --frozen --python "$python_bin" --extra dev --extra kev
 uv run decis download --engine kev-0.8b --dest "$models"
 
 adapter="$models/kev-0.8b"
@@ -44,22 +45,32 @@ done
 HF_HOME="$hf_home" "$src/.venv/bin/python" - <<'PY'
 import json
 from pathlib import Path
-from huggingface_hub import snapshot_download
+from huggingface_hub.constants import HF_HUB_CACHE
 
-repo_id = "Qwen/Qwen3.5-0.8B-Base"
 revision = "dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68"
-root = Path(snapshot_download(repo_id=repo_id, revision=revision, local_files_only=True))
-marker = root / "config.json"
+root = (
+    Path(HF_HUB_CACHE)
+    / "models--Qwen--Qwen3.5-0.8B-Base"
+    / "snapshots"
+    / revision
+)
+required = [
+    root / "config.json",
+    root / "tokenizer.json",
+    root / "tokenizer_config.json",
+    root / "model.safetensors.index.json",
+]
+missing_required = [str(path.name) for path in required if not path.is_file()]
+if missing_required:
+    raise SystemExit(f"incomplete Qwen base cache at {root}: {missing_required}")
 index = root / "model.safetensors.index.json"
-if not marker.is_file() or not index.is_file():
-    raise SystemExit(f"incomplete Qwen base cache at {root}")
 manifest = json.loads(index.read_text())
-missing = sorted({
+missing_shards = sorted({
     name for name in manifest.get("weight_map", {}).values()
     if isinstance(name, str) and not (root / name).is_file()
 })
-if missing:
-    raise SystemExit(f"incomplete Qwen base cache, missing: {missing[:3]}")
+if missing_shards:
+    raise SystemExit(f"incomplete Qwen base cache, missing shards: {missing_shards[:3]}")
 print("DECIS_KEV_BASE=", root)
 PY
 
