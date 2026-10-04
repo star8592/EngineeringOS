@@ -32,10 +32,24 @@ def append_once(path: pathlib.Path,row: dict) -> bool:
     with open(path,"a+",encoding="utf-8") as h:
         fcntl.flock(h.fileno(),fcntl.LOCK_EX)
         h.seek(0)
-        for line in h:
-            if line.strip() and json.loads(line).get("observation_id")==row["observation_id"]:
-                fcntl.flock(h.fileno(),fcntl.LOCK_UN)
-                return False
+        rows=[json.loads(line) for line in h if line.strip()]
+        for index,old in enumerate(rows):
+            if old.get("observation_id")!=row["observation_id"]:
+                continue
+            enriched=False
+            for key,value in row.items():
+                if old.get(key) in (None,"") and value not in (None,""):
+                    old[key]=value
+                    enriched=True
+            if enriched:
+                rows[index]=old
+                h.seek(0)
+                h.truncate()
+                for saved in rows:
+                    h.write(json.dumps(saved,sort_keys=True,ensure_ascii=False)+"\n")
+                h.flush(); os.fsync(h.fileno())
+            fcntl.flock(h.fileno(),fcntl.LOCK_UN)
+            return False
         h.seek(0,os.SEEK_END)
         h.write(json.dumps(row,sort_keys=True,ensure_ascii=False)+"\n")
         h.flush(); os.fsync(h.fileno())
@@ -59,6 +73,7 @@ def make_observation(snapshot: dict, action: dict, item: dict, revision: str | N
         "source_head":snapshot.get("source_head"),
         "item_id":item.get("item_id"),
         "kind":item.get("kind"),
+        "reason":action.get("reason"),
         "required_assurance":action.get("required_assurance"),
         "automation":action.get("automation"),
         "scheduler_lane":scheduler,

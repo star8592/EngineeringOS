@@ -64,14 +64,28 @@ assert row["routing_contract"] == "processing-lane+authority-policy/v2"
 
 with tempfile.TemporaryDirectory() as td:
     p = pathlib.Path(td) / "obs.jsonl"
-    assert append_once(p, row) is True
-    assert append_once(p, row2) is False
+    legacy_row = dict(row)
+    legacy_row["reason"] = None
+    assert append_once(p, legacy_row) is True
+    enriched = dict(row2)
+    enriched["reason"] = "review overlap semantics"
+    assert append_once(p, enriched) is False
     saved = [
         json.loads(x)
         for x in p.read_text().splitlines()
         if x.strip()
     ]
     assert len(saved) == 1
+    assert saved[0]["reason"] == "review overlap semantics"
+    conflicting = dict(enriched)
+    conflicting["reason"] = "must not overwrite"
+    assert append_once(p, conflicting) is False
+    saved = [
+        json.loads(x)
+        for x in p.read_text().splitlines()
+        if x.strip()
+    ]
+    assert saved[0]["reason"] == "review overlap semantics"
 
 bad = dict(row)
 bad["observation_id"] = "other"
@@ -95,4 +109,4 @@ assert s["human_authority_required_decisions"] == 1
 assert s["human_authority_unresolved"] == 1
 assert s["edb_gold_observations"] == 0
 
-print("14 System-One authority-policy observation invariants passed")
+print("17 System-One authority-policy observation invariants passed")

@@ -50,3 +50,12 @@ This separation prevents approval semantics from being collapsed into engineerin
 The active routing contract identifier is `processing-lane+authority-policy/v2`. Shadow observation identity includes this contract identifier so evidence collected under older semantics cannot be silently deduplicated against current observations.
 
 Unknown work kinds do not get guessed into yes/no authority. They become `AUTHORITY_POLICY_UNRESOLVED` until the project profile defines an explicit rule.
+
+
+## EDB curation boundary
+
+Continuous shadow observations are not benchmark truth. EngineeringOS deterministically groups repeated observations by engineering semantics into an EDB candidate pool, but every generated candidate remains `edb_gold=false`, with `expected_lane=null` and `label_source=null`.
+
+The curation layer may prioritize disagreement, high-assurance, low-confidence, and unresolved-policy examples for review, but it cannot adjudicate them. Missing semantic context yields `BLOCKED_INCOMPLETE_CONTEXT`; unresolved human-authority policy yields `BLOCKED_AUTHORITY_POLICY_UNRESOLVED`.
+
+Only a later explicit adjudication step may create gold labels. Control Room is projection-only and exposes candidate counts/status; it does not provide a parallel approval or implicit labeling path.
