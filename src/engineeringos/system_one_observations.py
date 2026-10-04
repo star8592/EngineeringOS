@@ -46,8 +46,8 @@ def read_jsonl(path: pathlib.Path) -> list[dict]:
     if not path.exists(): return []
     return [json.loads(x) for x in path.read_text().splitlines() if x.strip()]
 
-def make_observation(snapshot: dict, action: dict, item: dict, revision: str | None) -> dict:
-    key="|".join([str(snapshot.get("content_sha256","")),str(item.get("item_id","")),str(revision or "unknown")])
+def make_observation(snapshot: dict, action: dict, item: dict, revision: str | None, routing_contract: str = "legacy-single-axis/v1") -> dict:
+    key="|".join([str(snapshot.get("content_sha256","")),str(item.get("item_id","")),str(revision or "unknown"),str(routing_contract)])
     obs_id=hashlib.sha256(key.encode()).hexdigest()[:24]
     scheduler=item.get("scheduler_lane")
     model=item.get("model_recommendation")
@@ -66,9 +66,15 @@ def make_observation(snapshot: dict, action: dict, item: dict, revision: str | N
         "advisory_route":item.get("advisory_route"),
         "answer_confidence":item.get("answer_confidence"),
         "probabilities":item.get("probabilities"),
+        "human_authority_decision":item.get("human_authority_decision"),
+        "human_authority_required":item.get("human_authority_required"),
+        "human_authority_unresolved":item.get("human_authority_unresolved"),
+        "human_authority_source":item.get("human_authority_source"),
+        "human_authority_rule":item.get("human_authority_rule"),
         "latency_ms":item.get("latency_ms"),
         "model":item.get("model"),
         "model_revision":revision,
+        "routing_contract":routing_contract,
         "comparable":scheduler is not None,
         "agrees_with_scheduler": scheduler == model if scheduler is not None else None,
         "label_strength":"WEAK_SCHEDULER_REFERENCE",
@@ -83,6 +89,8 @@ def summarize(rows: list[dict]) -> dict:
     high_disagree=[r for r in high if r.get("agrees_with_scheduler") is False]
     conf=[float(r["answer_confidence"]) for r in rows if r.get("answer_confidence") is not None]
     lat=[float(r["latency_ms"]) for r in rows if r.get("latency_ms") is not None]
+    authority_required=[r for r in rows if r.get("human_authority_required") is True]
+    authority_unresolved=[r for r in rows if r.get("human_authority_unresolved") is True]
     return {
         "schema_version":1,
         "generated_at":utcnow(),
@@ -93,6 +101,8 @@ def summarize(rows: list[dict]) -> dict:
         "high_assurance_disagreements":len(high_disagree),
         "median_answer_confidence":statistics.median(conf) if conf else None,
         "median_latency_ms":statistics.median(lat) if lat else None,
+        "human_authority_required_decisions":len(authority_required),
+        "human_authority_unresolved":len(authority_unresolved),
         "label_strength":"WEAK_SCHEDULER_REFERENCE",
         "edb_gold_observations":0,
     }
@@ -111,15 +121,17 @@ def run() -> dict:
     by_action={x.get("item_id"):x for x in brief.get("actions",[])}
     revisions=((projection.get("provider_health") or {}).get("body") or {}).get("revisions") or {}
     revision=revisions.get("typed-decisions")
+    routing_contract=projection.get("routing_contract","legacy-single-axis/v1")
     path=STATE/"system-one/observations.jsonl"
     appended=0
     for item in projection.get("items",[]):
         action=by_action.get(item.get("item_id"),{})
-        if append_once(path,make_observation(snapshot,action,item,revision)): appended+=1
+        if append_once(path,make_observation(snapshot,action,item,revision,routing_contract)): appended+=1
     rows=read_jsonl(path)
     summary=summarize(rows)
     summary["appended_this_cycle"]=appended
     summary["model_revision"]=revision
+    summary["routing_contract"]=routing_contract
     atomic_json(STATE/"system-one/observation-summary.json",summary)
     return summary
 

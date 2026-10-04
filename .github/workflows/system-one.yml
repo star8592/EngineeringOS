@@ -5,37 +5,43 @@ on:
     branches: [main]
     paths:
       - "src/engineeringos/system_one_*.py"
-      - "src/engineeringos/system_one_admission.py"
+      - "src/engineeringos/authority_policy.py"
       - "src/engineeringos/laya_provider.py"
+      - "project_profiles/devcontrol/system-one-authority-policy.json"
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
+      - "tests/test_system_one_shadow.py"
+      - "tests/test_system_one_admission.py"
+      - "tests/test_system_one_observations.py"
+      - "tests/test_authority_policy.py"
+      - "tests/test_control_room_system_one.py"
       - "benchmarks/edb/**"
       - "scripts/run_system_one_edb.py"
       - "scripts/install_laya_system_one.sh"
       - "src/engineeringos/supervisor.py"
       - "src/engineeringos/dashboard_projector.py"
       - "dashboard/index.html"
-      - "tests/test_system_one_shadow.py"
-      - "tests/test_control_room_system_one.py"
       - ".github/workflows/system-one.yml"
   push:
     branches: [main]
     paths:
       - "src/engineeringos/system_one_*.py"
-      - "src/engineeringos/system_one_admission.py"
+      - "src/engineeringos/authority_policy.py"
       - "src/engineeringos/laya_provider.py"
+      - "project_profiles/devcontrol/system-one-authority-policy.json"
       - "tests/test_system_one_contract.py"
       - "tests/test_laya_provider.py"
+      - "tests/test_system_one_shadow.py"
+      - "tests/test_system_one_admission.py"
+      - "tests/test_system_one_observations.py"
+      - "tests/test_authority_policy.py"
+      - "tests/test_control_room_system_one.py"
       - "benchmarks/edb/**"
       - "scripts/run_system_one_edb.py"
       - "scripts/install_laya_system_one.sh"
       - "src/engineeringos/supervisor.py"
       - "src/engineeringos/dashboard_projector.py"
       - "dashboard/index.html"
-      - "tests/test_system_one_shadow.py"
-      - "tests/test_system_one_admission.py"
-      - "tests/test_system_one_observations.py"
-      - "tests/test_control_room_system_one.py"
       - ".github/workflows/system-one.yml"
 
 jobs:
@@ -46,6 +52,7 @@ jobs:
       - run: python3 tests/test_system_one_contract.py
       - run: python3 tests/test_laya_provider.py
       - run: python3 tests/test_system_one_shadow.py
+      - run: python3 tests/test_authority_policy.py
       - run: python3 tests/test_system_one_admission.py
       - run: python3 tests/test_system_one_observations.py
       - run: python3 tests/test_control_room_system_one.py
@@ -57,12 +64,16 @@ jobs:
           p=pathlib.Path("benchmarks/edb/system_one_routes.jsonl")
           rows=[json.loads(x) for x in p.read_text().splitlines() if x.strip()]
           assert len(rows) >= 10
-          assert {x["expected_route"] for x in rows} == {
+          assert {x["expected_lane"] for x in rows} == {
               "DETERMINISTIC_CANDIDATE",
               "REASONING_REVIEW",
               "FORMAL_OR_HIGH_ASSURANCE",
-              "HUMAN_REVIEW",
+          }
+          assert {x["expected_human_authority"] for x in rows} == {
+              "NO_HUMAN_AUTHORITY",
+              "HUMAN_AUTHORITY_REQUIRED",
           }
           assert any(x["high_risk"] for x in rows)
+          assert any(x["expected_human_authority"] == "HUMAN_AUTHORITY_REQUIRED" for x in rows)
           print(f"EDB_CORPUS_OK cases={len(rows)}")
           PY
