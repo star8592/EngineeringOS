@@ -3,13 +3,36 @@ import json,pathlib
 from state_paths import runtime
 
 
-def build_action_details(brief: dict, debt: dict, release: dict) -> dict:
+def build_action_details(brief: dict, debt: dict, release: dict, evidence_plane: dict | None = None) -> dict:
     dims=debt.get('dimensions',{})
     details=[]
     for action in brief.get('actions',[]):
         kind=action.get('kind')
         evidence=[]; resolution=[]
-        if kind=='TRIAGE_DIRTY_WORKSPACES':
+        if kind in ('RESOLVE_MAIN_QUALIFICATION','RESTORE_MAIN_QUALIFICATION'):
+            plane=evidence_plane or {}
+            head=plane.get('current_head_evidence') or {}
+            ci=head.get('ci_evidence') or {}
+            evidence=[{
+                'origin_main':plane.get('origin_main'),
+                'qualification':(plane.get('interpretation') or {}).get('qualification'),
+                'qualification_evidence_state':(plane.get('interpretation') or {}).get('qualification_evidence_state'),
+                'qualification_reason':(plane.get('interpretation') or {}).get('qualification_reason'),
+                'workflow_query':plane.get('workflow_query'),
+                'ci_evidence':ci,
+            }]
+            state=(plane.get('interpretation') or {}).get('qualification_evidence_state')
+            if state=='NO_RUN':
+                resolution=['run the canonical DevControl 3 CI for the current origin/main head','do not substitute CI evidence from an ancestor commit']
+            elif state=='RUNNING':
+                resolution=['await the existing current-head CI run','do not start a duplicate qualification run']
+            elif state=='QUERY_ERROR':
+                resolution=['restore authoritative GitHub workflow evidence retrieval','do not infer CI absence from a failed query']
+            elif state=='FAIL':
+                resolution=['inspect the exact current-head CI run conclusion and evidence','restore current-head qualification before release/convergence actions']
+            else:
+                resolution=['reconcile current-head CI evidence through the canonical workflow source']
+        elif kind=='TRIAGE_DIRTY_WORKSPACES':
             evidence=dims.get('dirty_workspace',{}).get('evidence',[])
             resolution=['identify the active owner/agent for each dirty workspace','preserve uncommitted work before any convergence decision','classify each workspace as active, stale, or ready for review']
         elif kind=='REVIEW_OVERLAPPING_LINES':
@@ -41,7 +64,8 @@ def main():
     brief=json.load(open(runtime('action-brief.json')))
     debt=json.load(open('artifacts/convergence-debt.json'))
     release=json.load(open('artifacts/devcontrol-release-evidence.json'))
-    out=build_action_details(brief,debt,release)
+    evidence_plane=json.load(open('artifacts/evidence-plane.json')) if pathlib.Path('artifacts/evidence-plane.json').exists() else {}
+    out=build_action_details(brief,debt,release,evidence_plane)
     p=runtime('action-details.json');p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(out,indent=2,ensure_ascii=False)+'\n')
     print(json.dumps({'items':len(out['items']),'evidence':sum(x['evidence_count'] for x in out['items'])},indent=2))
 if __name__=='__main__':main()
