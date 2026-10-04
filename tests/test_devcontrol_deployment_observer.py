@@ -8,6 +8,7 @@ from devcontrol_deployment_observer import (
     DeploymentObservationError,
     canonical_tree_digest,
     evaluate_deployment_binding,
+    remote_tree_command,
 )
 
 
@@ -31,6 +32,11 @@ with tempfile.TemporaryDirectory() as td:
     with_link = canonical_tree_digest(root)
     assert with_link["symlink_count"] == 1
     assert with_link["tree_sha256"] != changed["tree_sha256"]
+
+cmd = remote_tree_command("/opt/devcontrol3/releases/e3b88b47")
+assert cmd.startswith("python3 -c ")
+assert "/opt/devcontrol3/releases/e3b88b47" in cmd
+assert "\n" not in cmd
 
 try:
     canonical_tree_digest(pathlib.Path("/definitely/missing"))
@@ -77,4 +83,4 @@ assert missing_agent["state"] == "PARTIAL"
 assert "AGENT_DEPLOYMENT_UNRESOLVED" in missing_agent["reasons"]
 assert "AGENT_TREE_DIGEST_MISSING" in missing_agent["reasons"]
 
-print("13 DevControl deployment-provenance invariants passed")
+print("16 DevControl deployment-provenance invariants passed")
