@@ -1,0 +1,47 @@
+name: Control Room Receipts
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/engineeringos/control_loop_details.py"
+      - "src/engineeringos/command_processor.py"
+      - "src/engineeringos/execution_receipt.py"
+      - "src/engineeringos/supervisor.py"
+      - "src/engineeringos/dashboard_projector.py"
+      - "dashboard/index.html"
+      - "tests/test_control_loop_details.py"
+      - "tests/test_control_room_command_receipts.py"
+      - "tests/test_command_processor.py"
+      - "tests/test_execution_receipt.py"
+      - ".github/workflows/control-room-receipts.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/engineeringos/control_loop_details.py"
+      - "src/engineeringos/command_processor.py"
+      - "src/engineeringos/execution_receipt.py"
+      - "src/engineeringos/supervisor.py"
+      - "src/engineeringos/dashboard_projector.py"
+      - "dashboard/index.html"
+      - "tests/test_control_loop_details.py"
+      - "tests/test_control_room_command_receipts.py"
+      - "tests/test_command_processor.py"
+      - "tests/test_execution_receipt.py"
+      - ".github/workflows/control-room-receipts.yml"
+
+jobs:
+  receipt-projection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 tests/test_command_processor.py
+      - run: python3 tests/test_execution_receipt.py
+      - run: python3 tests/test_control_loop_details.py
+      - run: python3 tests/test_control_room_command_receipts.py
+      - name: Compile receipt projection
+        run: |
+          python3 -m py_compile \
+            src/engineeringos/control_loop_details.py \
+            src/engineeringos/supervisor.py \
+            src/engineeringos/dashboard_projector.py
