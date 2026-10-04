@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "experiment": "EXP-046",
+  "backend": "decis",
+  "provider": "decis",
+  "engine": "kev-0.8b",
+  "service_version": "0.4.0",
+  "image": "chaitin/decis:kev-0.8b",
+  "image_id": "sha256:7604a60d7f8ce9180ca0b524a49fcff8474086aaef4a0e3ff85daafb570c5bec",
+  "base_model": "Qwen/Qwen3.5-0.8B-Base@dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68",
+  "transport": "jev-compatible-http",
+  "device": "cpu",
+  "dtype": "float32",
+  "cases": 12,
+  "lane_accuracy": 0.9166666666666666,
+  "high_risk_lane_miss_rate": 0,
+  "lane_expected_calibration_error": 0.36144166666666666,
+  "authority_policy_accuracy": 1,
+  "authority_policy_unresolved": 0,
+  "authority_policy_mismatches": 0,
+  "median_latency_ms": 493.898,
+  "admission": {
+    "min_cases": 100,
+    "min_lane_accuracy": 0.85,
+    "max_high_risk_lane_miss_rate": 0.05,
+    "max_lane_ece": 0.1,
+    "qualified": false,
+    "reasons": [
+      "INSUFFICIENT_EVIDENCE",
+      "LANE_CALIBRATION"
+    ]
+  },
+  "routing_contract": "processing-lane+authority-policy/v2",
+  "authorization": "UNAVAILABLE",
+  "influence_routing": false
+}

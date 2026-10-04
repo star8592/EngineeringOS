@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "experiment": "EXP-046",
+  "backend": "laya",
+  "provider": "laya-local",
+  "engine": "typed-decisions",
+  "checkpoint_revision": "7b928d828b7b0e022f929d9bd2e44165aa270148",
+  "transport": "jev-compatible-http",
+  "device": "cuda",
+  "cases": 12,
+  "lane_accuracy": 0.6666666666666666,
+  "high_risk_lane_miss_rate": 0.8,
+  "lane_expected_calibration_error": 0.21233333333333332,
+  "authority_policy_accuracy": 1,
+  "authority_policy_unresolved": 0,
+  "authority_policy_mismatches": 0,
+  "median_latency_ms": 9.635,
+  "admission": {
+    "min_cases": 100,
+    "min_lane_accuracy": 0.85,
+    "max_high_risk_lane_miss_rate": 0.05,
+    "max_lane_ece": 0.1,
+    "qualified": false,
+    "reasons": [
+      "INSUFFICIENT_EVIDENCE",
+      "LANE_ACCURACY",
+      "HIGH_RISK_LANE_MISS",
+      "LANE_CALIBRATION"
+    ]
+  },
+  "routing_contract": "processing-lane+authority-policy/v2",
+  "authorization": "UNAVAILABLE",
+  "influence_routing": false
+}
