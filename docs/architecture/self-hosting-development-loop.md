@@ -121,3 +121,9 @@ Autopilot durable truth is an append-only per-project event journal with compare
 ## Continuous runtime and explicit project authority
 
 Continuous Autopilot runs inside the existing singleton Supervisor rather than a competing daemon. Project discovery never grants mutation authority: autonomous execution requires an explicit runtime registry entry and a bounded assurance ceiling. Machine failures are retried with persisted bounded exponential backoff; stable state sleeps; unchanged human-intent waits are deduplicated. A project lane failure must not widen permissions or disable unrelated supervision lanes.
+
+## Conversation command boundary
+
+Chat, voice, web, and future clients are transports, not intent databases. They submit idempotent Conversation Command Envelopes; EngineeringOS derives generation from the durable project journal. Models may classify or propose, but they do not author durable generation numbers or mutation authority. Process-control utterances such as “continue” must not automatically become new product intent. Product corrections and reversals reconcile existing work: safe stale work is superseded, unsafe in-flight work is protected.
+
+Natural-language clarity is not mutation authority. New desires first create capability-planning work. A read-only planner may propose a mutation contract, but only deterministic contract admission can persist executable paths and verification argv. Coding execution consumes only that admitted durable contract.

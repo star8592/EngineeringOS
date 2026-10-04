@@ -93,3 +93,9 @@ State: IMPLEMENTED_BASELINE. The existing singleton Supervisor process now owns 
 ### Runtime activation evidence
 
 The existing `engineeringos-supervisor.service` was already enabled and active. After SH-07E landed it was restarted through the repository service script, remained `active/running` with `NRestarts=0`, and retained the single-process service model. Historical logs showed an older crash/restart burst before the current stable run; failure status now persists a bounded traceback so future daemon failures are diagnosable from runtime state rather than only a systemd exit code.
+
+## SH-08A Conversation command ingress — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. A frontend-neutral Conversation Command Envelope now persists user turns into the authoritative project journal. `command_id` is the retry/idempotency boundary; intent generation is calculated from durable state rather than supplied by a UI or model. DESIRE/CORRECTION create or revise durable intent and capability-planning work; REVERSAL deactivates the intent; FEEDBACK/APPROVAL/ARTIFACT/INTERRUPTION remain durable turns without falsely advancing product generation. Correction/reversal automatically supersede older safe work and PROTECT unsafe in-flight work. Clear Desire can start engineering automatically, but does not receive a mutation contract from natural language alone.
+
+A read-only Planning Provider may propose `allowed_paths` and `verification_argv`. Deterministic contract admission rejects path escape, arbitrary shell wrappers, and assurance above the A1/A2 safe lane. An admitted contract is persisted as `WORK_CONTRACT_ADMITTED` before any coding provider may execute it. Fixture end-to-end acceptance proves: conversation Desire -> durable intent -> planning work -> admitted contract -> coding candidate -> isolated verification -> commit receipt -> RESOLVED; a subsequent correction advances the same intent to generation 2.
