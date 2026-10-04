@@ -42,6 +42,7 @@ row = make_observation(
     action,
     item,
     "rev1",
+    "processing-lane+human-authority/v2",
 )
 assert row["agrees_with_scheduler"] is True
 assert row["edb_gold"] is False
@@ -55,11 +56,21 @@ row2 = make_observation(
     action,
     item,
     "rev1",
+    "processing-lane+human-authority/v2",
 )
 assert (
     row2["observation_id"]
     == row["observation_id"]
 )
+legacy = make_observation(
+    snapshot,
+    action,
+    item,
+    "rev1",
+    "legacy-single-axis/v1",
+)
+assert legacy["observation_id"] != row["observation_id"]
+assert row["routing_contract"] == "processing-lane+human-authority/v2"
 
 with tempfile.TemporaryDirectory() as td:
     p = pathlib.Path(td) / "obs.jsonl"
