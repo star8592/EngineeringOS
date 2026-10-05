@@ -4,7 +4,7 @@ from coding_agent_provider import TaskEnvelope,CodingAgentError,to_mutation_prop
 from coding_agent_router import ProviderPool,classify_provider_failure
 from mutation_proposal import execute_proposal
 from convergence_gate import converge
-from commit_receipt import commit_converged,CommitReceiptError
+from commit_receipt import commit_converged,commit_recovery_token,CommitReceiptError
 
 def _head(repo): return subprocess.check_output(["git","-C",repo,"rev-parse","HEAD"],text=True).strip()
 def _invalid_verification_harness(result:dict)->bool:
@@ -41,7 +41,8 @@ def execute_work_item(repo:str,item:dict,providers,*,workspace_root:str,verifica
  if not conv.get("applied"):
   return {"item_id":item["id"],"state":"REOPENED","reason":conv.get("reason") or conv.get("gate",{}).get("reason","CONVERGENCE_DENIED"),"needs_intent":False,"user_interruption":False,"routing":routing,"proposal":proposal,"verification_result":verified,"convergence":conv}
  try:
-  receipt=commit_converged(repo,item_id=item["id"],source_sha=source_sha,changed_paths=verified["changed_paths"],message=item.get("commit_message") or ("autopilot: "+item["id"]))
+  token=commit_recovery_token(project=item["project"],item_id=item["id"],generation=int(item.get("intent_generation",0)),source_sha=source_sha,allowed_paths=contract["allowed_paths"],verification_argv=contract["verification_argv"])
+  receipt=commit_converged(repo,item_id=item["id"],source_sha=source_sha,changed_paths=verified["changed_paths"],message=item.get("commit_message") or ("autopilot: "+item["id"]),recovery_token=token)
  except CommitReceiptError as exc:
   return {"item_id":item["id"],"state":"REOPENED","reason":str(exc),"needs_intent":False,"user_interruption":False,"routing":routing,"proposal":proposal,"verification_result":verified,"convergence":conv}
  return {"item_id":item["id"],"state":"COMMITTED","needs_intent":False,"user_interruption":False,"routing":routing,"proposal":proposal,"verification_result":verified,"convergence":conv,"commit_receipt":receipt,"capability_evidence":receipt["evidence_refs"]}

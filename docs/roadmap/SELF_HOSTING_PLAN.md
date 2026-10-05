@@ -142,3 +142,7 @@ Backend Host observations are no longer timeless. Supervisor refreshes canonical
 ## ADR-030 management authority convergence — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. External project management no longer requires two independent approval switches. management_target is the durable human/policy authority goal; promotion evidence is the runtime eligibility gate; effective Autopilot is derived. The legacy autopilot_enabled boolean remains compatibility only for projects not yet migrated to a management target. This prevents both false disablement after an already-approved management decision and accidental privilege widening by flipping a boolean.
+
+## SH-08C Git/journal crash-window reconciliation — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. Autonomous commits now carry deterministic recovery trailers bound to project, item, intent generation, source SHA, allowed paths, verification argv and the exact binary diff hash. On restart, the durable supervisor reconciles Git before provider dispatch. A valid unjournaled commit is reconstructed into a commit receipt and the missing WORK_COMMITTED/RESOLVED events are appended without re-running the coding provider. HEAD movement without full recovery evidence still fails closed. See ADR-031.

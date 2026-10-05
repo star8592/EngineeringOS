@@ -4,6 +4,7 @@ from project_journal import append,events
 from project_replay import replay_project
 from scheduler import schedule
 from autopilot_supervisor import supervisor_tick
+from commit_receipt import recover_commit_receipt
 
 def journal_path(runtime_root,project):
  return pathlib.Path(runtime_root)/"projects"/project/"journal.jsonl"
@@ -36,10 +37,25 @@ def _record_result(path,project,item,result):
    if refs:
     append(path,project=project,typ="WORK_RESOLVED",key=item["id"],generation=item.get("intent_generation",0),payload={"verifier":"durable-supervisor","resolution_evidence_refs":refs,"requirement":pred.get("requirement")})
  return ev
+def _reconcile_committed_work(repo,path,project,items):
+ recovered=[]
+ for item in items:
+  if item.get("state") in {"COMMITTED","RESOLVED","SUPERSEDED","PROTECT"}:continue
+  source_sha=item.get("source_sha");paths=item.get("allowed_paths");argv=item.get("verification_argv")
+  if not source_sha or not isinstance(paths,list) or not paths or not isinstance(argv,list) or not argv:continue
+  receipt=recover_commit_receipt(repo,project=project,item_id=item["id"],generation=int(item.get("intent_generation",0)),source_sha=source_sha,allowed_paths=paths,verification_argv=argv)
+  if not receipt:continue
+  result={"item_id":item["id"],"state":"COMMITTED","commit_receipt":receipt,"capability_evidence":receipt["evidence_refs"]}
+  _record_result(path,project,item,result);recovered.append({"item_id":item["id"],"result_sha":receipt["result_sha"],"recovered":True})
+ return recovered
+
 def resume_once(repo,runtime_root,project,providers,*,workspace_root,verification_timeout=120):
- before=recover(runtime_root,project);items=list(before["work_items"].values());dispatch=schedule(items)
+ before=recover(runtime_root,project);p=journal_path(runtime_root,project);items=list(before["work_items"].values())
+ recovered_commits=_reconcile_committed_work(repo,p,project,items)
+ if recovered_commits:before=recover(runtime_root,project);items=list(before["work_items"].values())
+ dispatch=schedule(items)
  result=supervisor_tick(repo,items,dispatch,providers,workspace_root=workspace_root,verification_timeout=verification_timeout)
- p=journal_path(runtime_root,project);by={x["id"]:x for x in items}
+ by={x["id"]:x for x in items}
  for row in result["results"]:
   if row["item_id"] in by:_record_result(p,project,by[row["item_id"]],row)
- return {"before":before,"dispatch":dispatch,"execution":result,"after":recover(runtime_root,project)}
+ return {"before":before,"recovered_commits":recovered_commits,"dispatch":dispatch,"execution":result,"after":recover(runtime_root,project)}

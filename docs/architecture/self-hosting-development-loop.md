@@ -135,3 +135,7 @@ Planning and coding are separate durable phases. A planner never hands an in-mem
 ## Provider runtime is evidence, not intent
 
 Provider latency, authentication, timeout, and availability are machine facts. Each provider owns a conservative native runtime budget; project policy may explicitly override it, but orchestration must not silently replace it with a shorter generic timeout. Provider attempts record latency and deterministic failure classification. Machine failures enter bounded backoff. Repository source drift is reconciliation, not provider failure, and must invalidate the old contract before replanning. Neither condition escalates to the human as a product-intent question.
+
+## Git/journal commit boundary
+
+Git commit and durable journal append are separate persistence boundaries. EngineeringOS therefore treats the interval between them as an explicit crash window. Autonomous commits include deterministic recovery metadata. Restart recovery verifies source ancestry, first-descendant identity, work/contract token, changed-path containment and exact diff hash before reconstructing missing durable completion. Repository movement by itself is never interpreted as completion.
