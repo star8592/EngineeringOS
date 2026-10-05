@@ -131,3 +131,17 @@ If no, determine whether the control represents a genuine human decision or leak
 ## Default status surface
 
 The primary status surface answers only three ordinary-user questions: **现在怎么样？正在做什么？需要我决定什么？** Engineering evidence, queues, receipts, assurance levels, and control-plane internals remain available as optional Engineering Details and are not required to use the product.
+
+## Automatic project routing
+
+Project selection is backstage behavior. The human should normally name the product naturally (for example, “袋鼠数学，计算训练入口还是不明显”) or simply continue talking while a product is already selected/bound.
+
+Deterministic routing precedence is: explicit project mention -> explicit current-product context -> durable conversation binding -> single registered project -> one concise project-selection question. Models do not get authority to guess across conflicting projects. Registered aliases are unique across projects.
+
+A transport/model may classify a turn as DESIRE / FEEDBACK / CORRECTION / REVERSAL / QUESTION / APPROVAL / ARTIFACT / INTERRUPTION, but durable project routing, idempotency and authority semantics are enforced by EngineeringOS.
+
+Process-control utterances such as “继续” do not create a new product intent. They preserve the existing project/task context and ask the system to continue machine work.
+
+Conversational APPROVAL is product feedback only. It is durably scoped as PRODUCT_FEEDBACK_ONLY and can never satisfy host-tool approval, execution admission, authentication/authorization, release, deployment, destructive-action, or production approval.
+
+`command_id` is the retry boundary: identical retries are idempotent and do not grow the journal; reuse with a different command envelope is rejected as IDEMPOTENCY_CONFLICT.

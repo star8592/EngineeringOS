@@ -38,15 +38,16 @@ def build(registry_path,runtime_root)->dict:
    decisions.append({"question":x.get("question") or x.get("intent_question") or "有一个产品方向需要你确认。"})
   baseline_state=baseline.get("state") if baseline else None
   if needs: status="NEEDS_INTENT"
-  elif active: status="WORKING"
   elif baseline_state=="PROTECTED_EXISTING_WORK": status="PROTECTED"
+  elif active and cfg.get("autopilot_enabled"): status="WORKING"
+  elif active: status="QUEUED"
   elif baseline_state=="CLEAN_CONNECTED" and not cfg.get("autopilot_enabled"): status="BASELINED"
   elif cfg.get("autopilot_enabled"): status="HEALTHY"
   else: status="CONNECTED"
   products.append({
    "id":name,"name":display_name,"connected":True,"autopilot_enabled":bool(cfg.get("autopilot_enabled")),
    "status":status,
-   "management_note":("检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。" if status=="PROTECTED" else ("安全基线已建立，可以在明确授权后开启自动管理。" if status=="BASELINED" else None)),
+   "management_note":("检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。" if status=="PROTECTED" else ("已有需求进入队列，但自动管理尚未开启。" if status=="QUEUED" else ("安全基线已建立，可以在明确授权后开启自动管理。" if status=="BASELINED" else None))),
    "active_work":[{"text":_text(x)} for x in active[:5]],
    "recent_completed":recent,
    "decisions":decisions

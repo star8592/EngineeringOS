@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+import json
 from project_journal import append,events
 from project_replay import replay_project
 from durable_supervisor_runtime import journal_path
@@ -27,11 +28,20 @@ def ingest(root,*,project,command_id,conversation_id,kind,text,intent_id=None,ar
  if kind not in KINDS:raise ConversationCommandError("UNKNOWN_KIND")
  if not command_id or not conversation_id or not text.strip():raise ConversationCommandError("COMMAND_ID_CONVERSATION_TEXT_REQUIRED")
  if kind in {"DESIRE","CORRECTION","REVERSAL","FEEDBACK","APPROVAL"} and not intent_id:raise ConversationCommandError("INTENT_ID_REQUIRED")
- st=_state(root,project);cur=st["intents"].get(intent_id,{}) if intent_id else {};gen=int(cur.get("generation",0))
+ caps_for_fingerprint=None if required_capabilities is None else list(required_capabilities)
+ fingerprint_payload={"project":project,"conversation_id":conversation_id,"kind":kind,"text":text,"intent_id":intent_id,"artifact_ref":artifact_ref,"affects_task":bool(affects_task),"required_capabilities":caps_for_fingerprint}
+ fingerprint=hashlib.sha256(json.dumps(fingerprint_payload,sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()).hexdigest()
+ st=_state(root,project)
+ existing=next((x for x in st.get("conversation_turns",[]) if x.get("command_id")==command_id),None)
+ if existing:
+  if existing.get("command_fingerprint")==fingerprint:return st
+  raise ConversationCommandError("IDEMPOTENCY_CONFLICT")
+ cur=st["intents"].get(intent_id,{}) if intent_id else {};gen=int(cur.get("generation",0))
  if kind in {"DESIRE","CORRECTION","REVERSAL"}:gen+=1
  p=journal_path(root,project)
  if kind in {"CORRECTION","REVERSAL"}:_reconcile_old_work(p,project,st,intent_id,gen,command_id)
- turn={"command_id":command_id,"conversation_id":conversation_id,"kind":kind,"text":text,"intent_id":intent_id,"artifact_ref":artifact_ref,"affects_task":bool(affects_task)}
+ turn={"command_id":command_id,"conversation_id":conversation_id,"kind":kind,"text":text,"intent_id":intent_id,"artifact_ref":artifact_ref,"affects_task":bool(affects_task),"command_fingerprint":fingerprint}
+ if kind=="APPROVAL":turn["approval_scope"]="PRODUCT_FEEDBACK_ONLY"
  append(p,project=project,typ="CONVERSATION_TURN",key=command_id,generation=gen,payload=turn,idempotency_key="conversation:"+command_id)
  if kind in {"DESIRE","CORRECTION"}:
   caps=list(required_capabilities if required_capabilities is not None else cur.get("required_capabilities",[]))

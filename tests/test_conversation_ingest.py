@@ -1,7 +1,6 @@
 import sys,tempfile,pathlib
 sys.path.insert(0,'src/engineeringos')
 from conversation_ingest import *
-from event_store import EventStoreError
 from durable_supervisor_runtime import discover_work
 with tempfile.TemporaryDirectory() as td:
  s=ingest(td,project="P",command_id="m1",conversation_id="c",kind="DESIRE",text="给家长加微信登录",intent_id="wechat",required_capabilities=["parent wechat login"])
@@ -19,8 +18,14 @@ with tempfile.TemporaryDirectory() as td:
  assert s["work_items"]["busy"]["state"]=="PROTECT"
  s=ingest(td,project="P",command_id="m3",conversation_id="c",kind="FEEDBACK",text="这里太挤了",intent_id="wechat",artifact_ref="preview:17")
  assert s["intents"]["wechat"]["generation"]==2 and s["conversation_turns"][-1]["artifact_ref"]=="preview:17"
- try:ingest(td,project="P",command_id="m3",conversation_id="c",kind="FEEDBACK",text="这里太挤了",intent_id="wechat");raise AssertionError()
- except EventStoreError as e:assert str(e)=="DUPLICATE_EVENT_ID"
+ before=len(s["conversation_turns"])
+ retry=ingest(td,project="P",command_id="m3",conversation_id="c",kind="FEEDBACK",text="这里太挤了",intent_id="wechat",artifact_ref="preview:17")
+ assert len(retry["conversation_turns"])==before
+ try:ingest(td,project="P",command_id="m3",conversation_id="c",kind="FEEDBACK",text="不同内容",intent_id="wechat",artifact_ref="preview:17");raise AssertionError()
+ except ConversationCommandError as e:assert str(e)=="IDEMPOTENCY_CONFLICT"
  s=ingest(td,project="P",command_id="m4",conversation_id="c",kind="REVERSAL",text="这个功能不要了",intent_id="wechat")
  assert s["intents"]["wechat"]["generation"]==3 and not s["intents"]["wechat"]["active"]
- print("14 conversation-ingest invariants passed")
+ s=ingest(td,project="P",command_id="m5",conversation_id="c",kind="APPROVAL",text="这个效果可以",intent_id="wechat")
+ assert s["conversation_turns"][-1]["approval_scope"]=="PRODUCT_FEEDBACK_ONLY"
+ assert "execution_approval" not in s["conversation_turns"][-1]
+ print("18 conversation-ingest invariants passed")

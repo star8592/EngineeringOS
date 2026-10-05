@@ -22,7 +22,13 @@ with tempfile.TemporaryDirectory() as td:
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"require_clean_baseline":"yes"}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="INVALID_BASELINE_POLICY"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","display_name":"产品","aliases":["别名"],"repo":"/r","autopilot_enabled":False},{"name":"Q","display_name":"另一个","aliases":["别名"],"repo":"/q","autopilot_enabled":False}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="PROJECT_ALIAS_COLLISION"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","display_name":"产品","aliases":"bad","repo":"/r","autopilot_enabled":False}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="INVALID_PROJECT_ALIASES"
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeouts":{"unknown":1}}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="UNKNOWN_PROVIDER_TIMEOUT"
-print("13 project-registry invariants passed")
+print("17 project-registry invariants passed")

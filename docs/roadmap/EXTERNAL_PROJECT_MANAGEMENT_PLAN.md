@@ -130,8 +130,20 @@ Acceptance to reach A2_MANAGED later:
 
 EP-01 DONE: commercial multi-project shell and CONNECTED external project visibility.
 EP-02 NOW: durable read-only external-project baseline and dirty-work protection.
-EP-03: conversation -> automatic project routing -> durable command ingress.
+EP-03 DONE: conversation -> automatic project routing -> durable command ingress.
 EP-04: A2 promotion gate and first KangarooMath autonomous change.
 EP-05: preview/browser acceptance bound to artifact feedback.
 EP-06: release authority lane and production evidence.
 EP-07: backend capability catalog lock and automatic TOOL_SURFACE_DRIFT reconciliation.
+
+## EP-03 Conversation routing baseline — 2026-10-05
+
+State: IMPLEMENTED_BASELINE.
+
+The conversation gateway now routes natural language to a registered project using deterministic evidence rather than repository names supplied by the human. Stable technical identity, display name, and aliases are distinct registry concepts. Cross-project alias collisions are rejected.
+
+Routing order is explicit project mention, explicit selected/current project, durable conversation binding, then the only registered project. Multi-project ambiguity returns NEEDS_PROJECT_SELECTION rather than guessing.
+
+A new DESIRE receives a system-derived intent id and, when the transport supplies no semantic capability list, a conservative capability-planning requirement derived from the user's statement. Follow-up CORRECTION/REVERSAL/FEEDBACK/APPROVAL may bind to the recent intent in the same durable conversation when unambiguous. The coding/planning authority boundary is unchanged.
+
+The frontend-neutral CLI `scripts/engineeringos_conversation.py` exercises the same gateway used by future chat/voice/web transports. It is an internal ingress surface, not a public unauthenticated write API. The commercial web shell remains read-only until authenticated write ingress is added.

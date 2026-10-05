@@ -6,11 +6,19 @@ def load(path):
  if not p.exists():return {"schema_version":1,"projects":[]}
  body=json.loads(p.read_text())
  if body.get("schema_version")!=1:raise RegistryError("UNSUPPORTED_REGISTRY_SCHEMA")
- seen=set()
+ seen=set();routing_terms={}
  for x in body.get("projects",[]):
   if not x.get("name") or not x.get("repo"):raise RegistryError("PROJECT_IDENTITY_REQUIRED")
   if "display_name" in x and (not isinstance(x["display_name"],str) or not x["display_name"].strip()):raise RegistryError("INVALID_DISPLAY_NAME")
   if "require_clean_baseline" in x and not isinstance(x["require_clean_baseline"],bool):raise RegistryError("INVALID_BASELINE_POLICY")
+  aliases=x.get("aliases",[])
+  if not isinstance(aliases,list) or any(not isinstance(a,str) or not a.strip() for a in aliases):raise RegistryError("INVALID_PROJECT_ALIASES")
+  for term in [x["name"],x.get("display_name"),*aliases]:
+   if not isinstance(term,str) or not term.strip():continue
+   norm="".join(term.split()).casefold()
+   owner=routing_terms.get(norm)
+   if owner and owner!=x["name"]:raise RegistryError("PROJECT_ALIAS_COLLISION")
+   routing_terms[norm]=x["name"]
   if x["name"] in seen:raise RegistryError("DUPLICATE_PROJECT")
   seen.add(x["name"])
   if x.get("autopilot_enabled") and not x.get("workspace_root"):raise RegistryError("WORKSPACE_ROOT_REQUIRED")

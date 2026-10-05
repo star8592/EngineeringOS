@@ -21,4 +21,11 @@ with tempfile.TemporaryDirectory() as td:
  c2=build(reg,runtime)['products'][1];assert c2['status']=='PROTECTED' and '不会覆盖' in c2['management_note']
  op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'CLEAN_CONNECTED'}))
  c3=build(reg,runtime)['products'][1];assert c3['status']=='BASELINED' and '安全基线' in c3['management_note']
- print('15 commercial-projection invariants passed')
+ # Active work on a disabled clean project is queued, not falsely shown as being developed.
+ j2=runtime/'projects'/'Other'/'journal.jsonl'
+ append(j2,project='Other',typ='INTENT_RECORDED',key='i2',generation=1,payload={'statement':'queued','required_capabilities':['q']})
+ append(j2,project='Other',typ='WORK_DISCOVERED',key='w2',generation=1,payload={'project':'Other','kind':'CAPABILITY_PLANNING','intent_id':'i2','expected_outcome':'待处理需求','requirement':'q'})
+ c4=build(reg,runtime)['products'][1];assert c4['status']=='QUEUED' and '尚未开启' in c4['management_note']
+ op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'PROTECTED_EXISTING_WORK'}))
+ c5=build(reg,runtime)['products'][1];assert c5['status']=='PROTECTED' and '不会覆盖' in c5['management_note']
+ print('19 commercial-projection invariants passed')
