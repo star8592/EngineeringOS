@@ -7,4 +7,13 @@ with tempfile.TemporaryDirectory() as d:
  assert not list(b.parent.glob('*.tmp'))
  assert optional_copy_json(d/'missing.json',d/'missing-out.json') is None
  assert not (d/'missing-out.json').exists()
-print('4 dashboard-projector invariants passed')
+html=pathlib.Path('dashboard/index.html').read_text()
+assert '<strong>最近完成</strong>' in html
+assert 'id="recentCompletionText"' in html
+assert 'completed_work_items' in html and 'recently_completed' in html
+assert "verifiedStates.has" in html
+assert '还没有已验证完成的工作，完成后会显示在这里。' in html
+user_home=html[html.index('<section class="user-home">'):html.index('</section>')]
+for engineering_term in ('Git','commit','SHA','source_head','source_sha'):
+ assert engineering_term not in user_home
+print('10 dashboard-projector invariants passed')
