@@ -11,7 +11,10 @@ from planning_phase import plan_one
 def atomic(path,obj):
  p=pathlib.Path(path);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(".tmp");tmp.write_text(json.dumps(obj,sort_keys=True,ensure_ascii=False)+"\n");tmp.replace(p)
 def run_registered_once(registry_path,runtime_root,*,provider_factory=None,planner_factory=None,now=None):
- provider_factory=provider_factory or (lambda cfg:[CodexReadOnlyProvider(**({"timeout":int(cfg["provider_timeout"])} if "provider_timeout" in cfg else {})),ClaudeReadonlyProvider(**({"timeout":int(cfg["provider_timeout"])} if "provider_timeout" in cfg else {}))])
+ def default_provider_factory(cfg):
+  budgets=cfg.get("provider_timeouts",{})
+  return [CodexReadOnlyProvider(**({"timeout":int(budgets["codex-cli-readonly"])} if "codex-cli-readonly" in budgets else {})),ClaudeReadonlyProvider(**({"timeout":int(budgets["claude-cli-readonly"])} if "claude-cli-readonly" in budgets else {}))]
+ provider_factory=provider_factory or default_provider_factory
  planner_factory=planner_factory or (lambda cfg:[CodexPlanningProvider(timeout=int(cfg.get("planner_timeout",60)))])
  now=time.time() if now is None else now;out=[]
  for cfg in load(registry_path)["projects"]:

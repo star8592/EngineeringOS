@@ -13,4 +13,10 @@ def load(path):
   seen.add(x["name"])
   if x.get("autopilot_enabled") and not x.get("workspace_root"):raise RegistryError("WORKSPACE_ROOT_REQUIRED")
   if x.get("autopilot_enabled") and x.get("max_assurance") not in ("A1","A2"):raise RegistryError("SAFE_AUTOPILOT_ASSURANCE_REQUIRED")
+  if "provider_timeout" in x:raise RegistryError("LEGACY_SHARED_PROVIDER_TIMEOUT_FORBIDDEN")
+  pts=x.get("provider_timeouts",{})
+  if not isinstance(pts,dict):raise RegistryError("PROVIDER_TIMEOUTS_MUST_BE_OBJECT")
+  allowed={"codex-cli-readonly","claude-cli-readonly"}
+  if set(pts)-allowed:raise RegistryError("UNKNOWN_PROVIDER_TIMEOUT")
+  if any(not isinstance(v,int) or isinstance(v,bool) or v<1 for v in pts.values()):raise RegistryError("INVALID_PROVIDER_TIMEOUT")
  return body

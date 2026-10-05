@@ -10,4 +10,12 @@ with tempfile.TemporaryDirectory() as td:
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A3"}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="SAFE_AUTOPILOT_ASSURANCE_REQUIRED"
-print("6 project-registry invariants passed")
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeout":30}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="LEGACY_SHARED_PROVIDER_TIMEOUT_FORBIDDEN"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeouts":{"codex-cli-readonly":240}}]}))
+ assert load(p)["projects"][0]["provider_timeouts"]["codex-cli-readonly"]==240
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeouts":{"unknown":1}}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="UNKNOWN_PROVIDER_TIMEOUT"
+print("9 project-registry invariants passed")
