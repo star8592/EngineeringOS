@@ -31,6 +31,7 @@ index 3367afd..3e75765 100644
  after=run('git','status','--porcelain=v1','--branch',cwd=repo)
  assert out['state']=='VERIFIED_PROTECTED_REPAIR_CANDIDATE' and out['convergence_authorized'] is False and before==after
  assert out['changes']['protected.txt']=='good\n' and out['composed_verification']['state']=='PASS'
+ assert out['prior_repair_paths']==[] and out['combined_repair_paths']==['protected.txt']
  badtask=TaskEnvelope(project='P',item_id='repair-2',source_sha=sha,goal='bad surface',allowed_paths=('outside.txt',),verification_argv=(sys.executable,'-c','print(1)'),context={})
  try:prepare(repo,inv,deferred,badtask,Good(),verification_timeout=20);raise AssertionError()
  except ProtectedRepairError as e:assert str(e)=='ALLOWED_PATH_OUTSIDE_PROTECTED_WORK'

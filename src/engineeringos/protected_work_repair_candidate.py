@@ -20,7 +20,7 @@ def _current_files(repo:pathlib.Path,inventory:dict,allowed_paths:tuple[str,...]
   files[rel]=p.read_text()
  return files
 
-def prepare(repo_path:str|pathlib.Path,inventory:dict,deferred_candidate:dict,task:TaskEnvelope,provider:CodingAgentProvider,*,verification_timeout:int=900)->dict:
+def prepare(repo_path:str|pathlib.Path,inventory:dict,deferred_candidate:dict,task:TaskEnvelope,provider:CodingAgentProvider,*,prior_repairs:dict[str,str]|None=None,verification_timeout:int=900)->dict:
  repo=pathlib.Path(repo_path).resolve()
  head=inventory.get("head")
  if not head or task.source_sha!=head or deferred_candidate.get("source_sha")!=head:
@@ -28,15 +28,23 @@ def prepare(repo_path:str|pathlib.Path,inventory:dict,deferred_candidate:dict,ta
  if deferred_candidate.get("state")!="VERIFIED_DEFERRED_CANDIDATE":
   raise ProtectedRepairError("VERIFIED_DEFERRED_CANDIDATE_REQUIRED")
  files=_current_files(repo,inventory,task.allowed_paths)
+ prior=dict(prior_repairs or {})
+ if set(prior) & set(task.allowed_paths):
+  raise ProtectedRepairError("PRIOR_REPAIR_OVERLAP")
+ protected={x.get("path") for x in inventory.get("paths",[]) if x.get("path")}
+ if not set(prior).issubset(protected):
+  raise ProtectedRepairError("PRIOR_REPAIR_OUTSIDE_PROTECTED_WORK")
  started=time.monotonic()
  candidate=provider.propose(task=task,files=files);validate_candidate(task,candidate)
- composed=verify_composed(repo,inventory,deferred_candidate,list(task.verification_argv),replacements=candidate.changes,timeout_seconds=verification_timeout)
+ combined={**prior,**candidate.changes}
+ composed=verify_composed(repo,inventory,deferred_candidate,list(task.verification_argv),replacements=combined,timeout_seconds=verification_timeout)
  state="VERIFIED_PROTECTED_REPAIR_CANDIDATE" if composed.get("state")=="PASS" else ("SOURCE_CHANGED_DURING_PREPARATION" if composed.get("state")=="SOURCE_CHANGED_DURING_VERIFY" else "VERIFICATION_FAILED")
  return {
   "schema_version":1,"state":state,"project":task.project,"item_id":task.item_id,"source_sha":task.source_sha,
   "goal":task.goal,"allowed_paths":list(task.allowed_paths),"verification_argv":list(task.verification_argv),
   "provider":candidate.provider,"model":candidate.model,"confidence":candidate.confidence,"rationale":candidate.rationale,
   "changes":candidate.changes,"changes_sha256":_fingerprint_changes(candidate.changes),
+  "prior_repair_paths":sorted(prior),"combined_repair_paths":sorted(combined),"combined_changes_sha256":_fingerprint_changes(combined),
   "composed_verification":composed,"elapsed_ms":round((time.monotonic()-started)*1000),
   "authority":"CANDIDATE_ONLY_NO_CONVERGENCE_AUTHORITY","convergence_authorized":False,
  }
