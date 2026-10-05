@@ -51,3 +51,7 @@ The ordinary-user product surface is refreshed independently from long engineeri
 ## Management state semantics
 
 The commercial UI shows effective management state, not raw configuration flags. A project with target A2_MANAGED but failing promotion evidence is shown as protected or safety-blocked. When promotion evidence becomes eligible, the existing management authorization becomes effective automatically; the user is not asked to approve the same A2 management decision again.
+
+## Protected existing work
+
+The commercial surface may show only bounded management facts about pre-existing dirty work: count of protected paths, count of non-authoritative candidate groups, and high-level verification state. It must not expose repository paths, file names, content fingerprints or source code. “Protected” means EngineeringOS is managing the risk, not that the existing work has been accepted or verified.

@@ -146,3 +146,7 @@ State: IMPLEMENTED_BASELINE. External project management no longer requires two 
 ## SH-08C Git/journal crash-window reconciliation — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. Autonomous commits now carry deterministic recovery trailers bound to project, item, intent generation, source SHA, allowed paths, verification argv and the exact binary diff hash. On restart, the durable supervisor reconciles Git before provider dispatch. A valid unjournaled commit is reconstructed into a commit receipt and the missing WORK_COMMITTED/RESOLVED events are appended without re-running the coding provider. HEAD movement without full recovery evidence still fails closed. See ADR-031.
+
+## EP-02B Protected external work reconciliation — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. External dirty work is now fingerprinted, structurally grouped, quiet-window tracked and isolated-verifiable without source mutation. Candidate groups are explicitly non-authoritative. Differential verification separates pre-existing baseline debt from regressions introduced by the protected snapshot. The first KangarooMath run produced four candidate groups across 11 paths and BASELINE_RED_SAME_FAILURE against the project-owned public quality gate.

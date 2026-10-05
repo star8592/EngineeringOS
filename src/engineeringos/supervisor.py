@@ -21,6 +21,8 @@ from external_project_baseline import refresh_registered_projects
 from project_promotion import assess_registered
 from backend_surface_monitor import reconcile as reconcile_backend_surface
 from dashboard_projector import project_fast as project_fast_dashboard
+from protected_work_inventory import inspect as inspect_protected_work
+from project_registry import load as load_project_registry
 STATE = runtime()
 
 
@@ -172,13 +174,27 @@ def run_project_baseline_lane() -> dict:
     registry = STATE / 'projects/registry.json'
     try:
         result = refresh_registered_projects(registry, STATE)
+        registry_body = load_project_registry(registry)
+        by_name = {x['name']:x for x in registry_body.get('projects',[])}
+        protected_counts = {}
+        for row in result.get('projects',[]):
+            name=row.get('project'); cfg=by_name.get(name)
+            if not name or not cfg: continue
+            out_path=STATE/'projects'/name/'protected-work.json'
+            previous=read_json(out_path) if out_path.exists() else None
+            if row.get('state')=='PROTECTED_EXISTING_WORK':
+                inv=inspect_protected_work(cfg['repo'],previous)
+            else:
+                inv={'schema_version':1,'observed_at':utcnow(),'repo':str(pathlib.Path(cfg['repo']).resolve()),'head':row.get('head'),'branch':row.get('branch'),'state':'CLEAN','dirty_path_count':0,'paths':[],'disappeared_paths':[],'structural_edges':[],'candidate_packages':[],'safety':{'mutation_authorized':False,'auto_commit':False,'auto_delete':False,'candidate_groups_authoritative':False}}
+            atomic_json(out_path,inv)
+            protected_counts[name]={'dirty_path_count':inv.get('dirty_path_count',0),'candidate_packages':len(inv.get('candidate_packages',[]))}
         promotion = assess_registered(registry, STATE)
         atomic_json(STATE / 'projects/promotion-summary.json', promotion)
         for row in promotion.get('projects', []):
             atomic_json(STATE / 'projects' / row['project'] / 'promotion.json', row)
         counts = Counter(x.get('state','UNKNOWN') for x in result.get('projects',[]))
         promotion_counts = Counter(x.get('state','UNKNOWN') for x in promotion.get('projects',[]))
-        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts),'promotion_states':dict(promotion_counts)}
+        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts),'promotion_states':dict(promotion_counts),'protected_work':protected_counts}
     except Exception as exc:
         return {'health':'DEGRADED','error_type':type(exc).__name__,'error':str(exc)}
 

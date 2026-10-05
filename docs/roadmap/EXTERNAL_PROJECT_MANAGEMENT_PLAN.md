@@ -185,3 +185,17 @@ A live acceptance immediately exercised this path: DevControl still exposed 26 t
 User-facing project state is refreshed before the long G2/G3/System-One diagnostic cycle. The fast projection contains only the product catalog, commercial project projection and backend surface/freshness status. Long engineering diagnostics may remain on the previous completed cycle until they finish, but ordinary product status must not wait on them.
 
 This prevents a clean/protected project transition or tool-surface drift from being hidden behind a long control-plane cycle. The fast projection is read-only and remains a projection of the same durable/runtime sources, not a second authority.
+
+## EP-02B Protected existing work inventory and differential verification — 2026-10-05
+
+State: IMPLEMENTED_BASELINE.
+
+A dirty external repository is no longer represented only as a Boolean block. EngineeringOS records a protected-work inventory bound to the observed HEAD. Each dirty path carries status, bounded metadata, a non-secret content fingerprint where safe, first/last observation state and explicit PROTECTED_EXISTING_WORK authority. Secret/private-looking paths are metadata-only and never content-hashed by this lane.
+
+Structural references between dirty paths (local imports, application routes, exact path references, and unique basename references) form NON_AUTHORITATIVE_CANDIDATE_GROUP packages. These groups help the manager reason about related work but never grant commit, deletion, adoption or cleanup authority. A package must remain unchanged for a quiet window before it can be called QUIET; two fast polls produce only STABLE_RECENT.
+
+Protected work can be verified without mutating the source checkout. EngineeringOS exports the source HEAD into a temporary isolated snapshot, overlays the observed dirty paths, reuses dependencies read-only where available, executes the project-owned verification command, and invalidates evidence if source HEAD/status changes during verification. Sensitive dirty paths block this lane rather than being copied.
+
+Verification is differential when the canonical HEAD is already red. The same project-owned gate is run against a clean HEAD snapshot and the dirty snapshot. Results are classified as DIRTY_VERIFIED, DIRTY_REGRESSION, DIRTY_IMPROVES_BASELINE, BASELINE_RED_SAME_FAILURE, or INCONCLUSIVE_DIFFERENT_FAILURE. A baseline-red same-failure result explicitly does not mean the dirty work passed; it only proves the observed failure was not newly introduced by that dirty snapshot.
+
+Live KangarooMath acceptance observed 11 dirty paths grouped into four candidate work packages: governance (5 paths), solution materialization (1), G1-2 solution-v2 migration (1), and student card-book UI (4). The project-owned verify:public gate fails on both clean d586d84 and the dirty snapshot at the same committed MathCardReveal.tsx eslint set-state-in-effect diagnostic. The differential state is BASELINE_RED_SAME_FAILURE; source HEAD/status remained unchanged throughout both isolated runs.

@@ -27,7 +27,12 @@ with tempfile.TemporaryDirectory() as td:
  append(j2,project='Other',typ='WORK_DISCOVERED',key='w2',generation=1,payload={'project':'Other','kind':'CAPABILITY_PLANNING','intent_id':'i2','expected_outcome':'待处理需求','requirement':'q'})
  c4=build(reg,runtime)['products'][1];assert c4['status']=='QUEUED' and '尚未生效' in c4['management_note']
  op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'PROTECTED_EXISTING_WORK'}))
- c5=build(reg,runtime)['products'][1];assert c5['status']=='PROTECTED' and '不会覆盖' in c5['management_note']
+ wp=runtime/'projects'/'Other'/'protected-work.json';wp.write_text(json.dumps({'schema_version':1,'state':'PROTECTED_EXISTING_WORK','dirty_path_count':3,'paths':[{'path':'secret-do-not-expose','observation':'STABLE'}],'candidate_packages':[{'id':'p1'}]}))
+ cp=runtime/'projects'/'Other'/'protected-comparison.json';cp.write_text(json.dumps({'schema_version':1,'state':'BASELINE_RED_SAME_FAILURE','baseline_failure_stage':'eslint','dirty_verified':False,'dirty_regression_proven':False}))
+ c5=build(reg,runtime)['products'][1];assert c5['status']=='PROTECTED' and '3 项' in c5['management_note'] and '1 个候选关联组' in c5['management_note']
+ assert c5['protected_work']['dirty_path_count']==3 and c5['protected_work']['candidate_package_count']==1
+ assert c5['protected_verification']['state']=='BASELINE_RED_SAME_FAILURE' and c5['protected_verification']['baseline_failure_stage']=='eslint'
+ assert 'secret-do-not-expose' not in json.dumps(c5,ensure_ascii=False)
  # A2 target is the durable authorization goal: promotion evidence makes management effective without a second switch.
  reg.write_text(json.dumps({'schema_version':1,'projects':[{'name':'Kangaroo','display_name':'袋鼠数学','repo':'/secret/repo','workspace_root':'/secret/ws','autopilot_enabled':True,'max_assurance':'A2'},{'name':'Other','display_name':'另一个产品','repo':'/secret/other','autopilot_enabled':False,'management_target':'A2_MANAGED','workspace_root':'/tmp/ws','max_assurance':'A2'}]}))
  op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'CLEAN_CONNECTED'}))
@@ -38,4 +43,4 @@ with tempfile.TemporaryDirectory() as td:
  c6=build(reg,runtime)['products'][1];assert c6['status']=='HEALTHY' and c6['autopilot_enabled'] is True
  pp.write_text(json.dumps({'schema_version':1,'project':'Other','state':'BLOCKED','eligible':False,'reason':'ORIGIN_DRIFT'}))
  c7=build(reg,runtime)['products'][1];assert c7['status']=='MANAGEMENT_BLOCKED' and c7['autopilot_enabled'] is False and '安全门' in c7['management_note']
- print('27 commercial-projection invariants passed')
+ print('33 commercial-projection invariants passed')
