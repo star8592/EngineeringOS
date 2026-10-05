@@ -18,9 +18,16 @@ class ClaudeReadonlyProvider:
    try:proc.wait(timeout=5)
    except subprocess.TimeoutExpired:proc.kill()
    raise CodingAgentError("CLAUDE_TIMEOUT") from exc
+  try: outer=json.loads(stdout)
+  except Exception: outer=None
+  if isinstance(outer,dict) and outer.get("is_error"):
+   msg=str(outer.get("result",""))
+   if "Not logged in" in msg: raise CodingAgentError("CLAUDE_NOT_AUTHENTICATED")
+   raise CodingAgentError("CLAUDE_REMOTE_ERROR:"+msg[:500])
   if proc.returncode:raise CodingAgentError("CLAUDE_FAILED:"+stderr[-1000:])
   try:
-   outer=json.loads(stdout);body=outer.get("structured_output")
+   if outer is None: outer=json.loads(stdout)
+   body=outer.get("structured_output")
    if body is None:
     raw=outer.get("result",stdout);body=json.loads(raw) if isinstance(raw,str) else raw
    return AgentCandidate(self.name,self.model or "configured-default",body["changes"],body["rationale"],float(body["confidence"]))
