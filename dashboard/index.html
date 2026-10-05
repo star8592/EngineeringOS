@@ -97,7 +97,7 @@ addProduct.addEventListener('click',()=>{document.querySelector('[data-view="set
 function renderProduct(p){
  projectName.textContent=p.name||'当前产品';
  const status=p.status||'HEALTHY';
- const labels={HEALTHY:'状态良好',CONNECTED:'已接入',BASELINED:'安全基线已建立',READY_FOR_A2:'可以开启自动管理',PROTECTED:'保护现有工作',QUEUED:'需求已排队',WORKING:'正在开发',NEEDS_INTENT:'需要你的决定'};
+ const labels={HEALTHY:'状态良好',CONNECTED:'已接入',BASELINED:'安全基线已建立',MANAGEMENT_BLOCKED:'自动管理已阻断',PROTECTED:'保护现有工作',QUEUED:'需求已排队',WORKING:'正在开发',NEEDS_INTENT:'需要你的决定'};
  projectBadge.textContent=p.autopilot_enabled?'自动管理中':'已接入';
  humanStatus.textContent=labels[status]||status;
  humanSummary.textContent=p.management_note||(status==='NEEDS_INTENT'?'有一个产品方向需要你决定，系统不会替你猜。':status==='WORKING'?'系统正在自己推进明确的开发工作。':status==='CONNECTED'?'项目已经接入，正在建立安全基线。':'当前没有需要你处理的工程问题。');
@@ -120,7 +120,7 @@ function renderProducts(catalog,fallbackAp,fallbackSup,fallbackBrief){
  for(const p of products){
   const card=document.createElement('article');card.className='product-card';
   const badge=document.createElement('span');badge.className='badge';
-  badge.textContent=p.status==='NEEDS_INTENT'?'需要决定':p.status==='WORKING'?'正在开发':p.status==='QUEUED'?'需求已排队':p.status==='PROTECTED'?'保护现有工作':p.status==='READY_FOR_A2'?'可开启自动管理':p.status==='BASELINED'?'基线已建立':(p.autopilot_enabled?'自动管理中':'已接入');
+  badge.textContent=p.status==='NEEDS_INTENT'?'需要决定':p.status==='WORKING'?'正在开发':p.status==='QUEUED'?'需求已排队':p.status==='PROTECTED'?'保护现有工作':p.status==='MANAGEMENT_BLOCKED'?'安全门阻断':p.status==='BASELINED'?'基线已建立':(p.autopilot_enabled?'自动管理中':'已接入');
   const h=document.createElement('h3');h.textContent=p.name;
   const note=document.createElement('div');note.className='muted';
   note.textContent=p.management_note||(p.status==='NEEDS_INTENT'?'有一个产品方向需要你确认。':p.status==='WORKING'?'系统正在持续推进明确的产品工作。':p.autopilot_enabled?'当前状态良好，系统会在有工作时自动推进。':'项目已连接，自动管理未开启。');

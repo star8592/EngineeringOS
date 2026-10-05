@@ -46,3 +46,8 @@ A real project may be visible as CONNECTED before mutation Autopilot is enabled.
 ## Fast status projection
 
 The ordinary-user product surface is refreshed independently from long engineering diagnostics. Product connection/protection/work status and backend surface warnings can update as soon as their authoritative read models are available. Engineering Details may still show the last completed long-cycle diagnostics until that cycle finishes. This is intentional: UI freshness must not require weakening verification or turning diagnostic projections into authority.
+
+
+## Management state semantics
+
+The commercial UI shows effective management state, not raw configuration flags. A project with target A2_MANAGED but failing promotion evidence is shown as protected or safety-blocked. When promotion evidence becomes eligible, the existing management authorization becomes effective automatically; the user is not asked to approve the same A2 management decision again.

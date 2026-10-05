@@ -34,7 +34,16 @@ with tempfile.TemporaryDirectory() as td:
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"expected_origin":""}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="INVALID_MANAGEMENT_POLICY"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"management_target":"A2_MANAGED","max_assurance":"A2"}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="WORKSPACE_ROOT_REQUIRED"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"management_target":"A2_MANAGED","workspace_root":"/w"}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="SAFE_AUTOPILOT_ASSURANCE_REQUIRED"
+ cfg={"name":"P","autopilot_enabled":False,"management_target":"A2_MANAGED"}
+ assert management_requested(cfg) is True
+ assert effective_autopilot(cfg,{"eligible":False}) is False and effective_autopilot(cfg,{"eligible":True}) is True
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeouts":{"unknown":1}}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="UNKNOWN_PROVIDER_TIMEOUT"
-print("21 project-registry invariants passed")
+print("27 project-registry invariants passed")

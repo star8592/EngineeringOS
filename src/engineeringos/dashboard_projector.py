@@ -3,6 +3,7 @@ from __future__ import annotations
 import json,pathlib,tempfile,os
 from state_paths import runtime, RUNTIME_ROOT
 from commercial_projection import build as build_commercial_projection
+from project_registry import effective_autopilot
 
 def atomic_copy_json(src,dst):
     obj=json.load(open(src));p=pathlib.Path(dst);p.parent.mkdir(parents=True,exist_ok=True)
@@ -41,7 +42,9 @@ def safe_product_catalog():
         for item in body.get('projects',[]):
             name=item.get('name')
             if not name: continue
-            products.append({'id':name,'name':item.get('display_name') or name,'connected':True,'autopilot_enabled':bool(item.get('autopilot_enabled'))})
+            pp=runtime('projects',name,'promotion.json')
+            promotion=json.load(open(pp)) if pathlib.Path(pp).exists() else None
+            products.append({'id':name,'name':item.get('display_name') or name,'connected':True,'autopilot_enabled':effective_autopilot(item,promotion)})
     out={'schema_version':1,'products':products}
     dst=pathlib.Path('dashboard/runtime/products.json');dst.parent.mkdir(parents=True,exist_ok=True)
     raw=(json.dumps(out,sort_keys=True,indent=2,ensure_ascii=False)+'\n').encode()

@@ -2,7 +2,7 @@ from __future__ import annotations
 import json,pathlib,time
 from durable_supervisor_runtime import recover,resume_once
 from continuous_autopilot import classify,after_execution
-from project_registry import load
+from project_registry import load,management_requested
 from project_promotion import assess as assess_promotion
 from codex_readonly_provider import CodexReadOnlyProvider
 from claude_readonly_provider import ClaudeReadonlyProvider
@@ -19,7 +19,7 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
  planner_factory=planner_factory or (lambda cfg:[CodexPlanningProvider(timeout=int(cfg.get("planner_timeout",60)))])
  now=time.time() if now is None else now;out=[]
  for cfg in load(registry_path)["projects"]:
-  if not cfg.get("autopilot_enabled"):continue
+  if not management_requested(cfg):continue
   project_root=pathlib.Path(runtime_root)/"projects"/cfg["name"]
   if cfg.get("require_clean_baseline") or cfg.get("management_target")=="A2_MANAGED":
    bp=project_root/"baseline.json"

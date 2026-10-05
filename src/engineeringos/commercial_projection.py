@@ -2,6 +2,7 @@ from __future__ import annotations
 import json,pathlib
 from project_journal import events
 from project_replay import replay_project
+from project_registry import effective_autopilot
 
 FINAL_STATES={"RESOLVED","SUPERSEDED"}
 def _text(item:dict)->str:
@@ -39,18 +40,20 @@ def build(registry_path,runtime_root)->dict:
   for x in needs[:3]:
    decisions.append({"question":x.get("question") or x.get("intent_question") or "有一个产品方向需要你确认。"})
   baseline_state=baseline.get("state") if baseline else None
+  effective=effective_autopilot(cfg,promotion)
+  promotion_blocked=cfg.get("management_target")=="A2_MANAGED" and promotion and promotion.get("state")=="BLOCKED"
   if needs: status="NEEDS_INTENT"
   elif baseline_state=="PROTECTED_EXISTING_WORK": status="PROTECTED"
-  elif active and cfg.get("autopilot_enabled"): status="WORKING"
+  elif promotion_blocked: status="MANAGEMENT_BLOCKED"
+  elif active and effective: status="WORKING"
   elif active: status="QUEUED"
-  elif promotion and promotion.get("state")=="ELIGIBLE_FOR_A2" and not cfg.get("autopilot_enabled"): status="READY_FOR_A2"
-  elif baseline_state=="CLEAN_CONNECTED" and not cfg.get("autopilot_enabled"): status="BASELINED"
-  elif cfg.get("autopilot_enabled"): status="HEALTHY"
+  elif effective: status="HEALTHY"
+  elif baseline_state=="CLEAN_CONNECTED": status="BASELINED"
   else: status="CONNECTED"
   products.append({
-   "id":name,"name":display_name,"connected":True,"autopilot_enabled":bool(cfg.get("autopilot_enabled")),
+   "id":name,"name":display_name,"connected":True,"autopilot_enabled":effective,
    "status":status,
-   "management_note":("检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。" if status=="PROTECTED" else ("已有需求进入队列，但自动管理尚未开启。" if status=="QUEUED" else ("已满足 A2 自动管理的工程条件，等待权限状态晋升。" if status=="READY_FOR_A2" else ("安全基线已建立，可以在明确授权后开启自动管理。" if status=="BASELINED" else None)))),
+   "management_note":("检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。" if status=="PROTECTED" else ("自动管理条件尚未满足，系统不会越过安全门。" if status=="MANAGEMENT_BLOCKED" else ("已有需求进入队列，但自动管理尚未生效。" if status=="QUEUED" else ("安全基线已建立，当前没有自动管理授权。" if status=="BASELINED" else None)))),
    "active_work":[{"text":_text(x)} for x in active[:5]],
    "recent_completed":recent,
    "decisions":decisions

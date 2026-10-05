@@ -1,6 +1,14 @@
 from __future__ import annotations
 import json,pathlib
 class RegistryError(ValueError):pass
+
+def management_requested(cfg):
+ return bool(cfg.get("autopilot_enabled")) or cfg.get("management_target")=="A2_MANAGED"
+
+def effective_autopilot(cfg,promotion=None):
+ if cfg.get("management_target")=="A2_MANAGED":
+  return bool(promotion and promotion.get("eligible"))
+ return bool(cfg.get("autopilot_enabled"))
 def load(path):
  p=pathlib.Path(path)
  if not p.exists():return {"schema_version":1,"projects":[]}
@@ -24,8 +32,8 @@ def load(path):
    routing_terms[norm]=x["name"]
   if x["name"] in seen:raise RegistryError("DUPLICATE_PROJECT")
   seen.add(x["name"])
-  if x.get("autopilot_enabled") and not x.get("workspace_root"):raise RegistryError("WORKSPACE_ROOT_REQUIRED")
-  if x.get("autopilot_enabled") and x.get("max_assurance") not in ("A1","A2"):raise RegistryError("SAFE_AUTOPILOT_ASSURANCE_REQUIRED")
+  if management_requested(x) and not x.get("workspace_root"):raise RegistryError("WORKSPACE_ROOT_REQUIRED")
+  if management_requested(x) and x.get("max_assurance") not in ("A1","A2"):raise RegistryError("SAFE_AUTOPILOT_ASSURANCE_REQUIRED")
   if "provider_timeout" in x:raise RegistryError("LEGACY_SHARED_PROVIDER_TIMEOUT_FORBIDDEN")
   pts=x.get("provider_timeouts",{})
   if not isinstance(pts,dict):raise RegistryError("PROVIDER_TIMEOUTS_MUST_BE_OBJECT")

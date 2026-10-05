@@ -88,7 +88,7 @@ State: IMPLEMENTED_BASELINE. Intent and autonomous Work lifecycle now have a CAS
 
 ## SH-07E Continuous registered Autopilot — 2026-10-05
 
-State: IMPLEMENTED_BASELINE. The existing singleton Supervisor process now owns a separate generic Project Autopilot lane; no second daemon is introduced. Projects must be explicitly registered in runtime policy before autonomous mutation is eligible. The current safe lane requires `autopilot_enabled=true` and `max_assurance` A1/A2. Stable project state sleeps without journal growth, machine/provider failures use persisted exponential backoff (30s doubling to 1800s), restart recovery comes from the project journal, and unchanged `NEEDS_INTENT` is notified once rather than repeatedly. Project Autopilot failures are isolated from the legacy DevControl G2/G3 shadow lane. EngineeringOS is Project Zero; its first live idle run produced OBSERVE followed by SLEEP with zero journal growth and zero repository mutation.
+State: IMPLEMENTED_BASELINE. The existing singleton Supervisor process now owns a separate generic Project Autopilot lane; no second daemon is introduced. Projects must be explicitly registered in runtime policy before autonomous mutation is eligible. Legacy projects may still use autopilot_enabled=true; target-managed projects use management_target plus promotion evidence. In both cases the current safe lane requires max_assurance A1/A2. Stable project state sleeps without journal growth, machine/provider failures use persisted exponential backoff (30s doubling to 1800s), restart recovery comes from the project journal, and unchanged `NEEDS_INTENT` is notified once rather than repeatedly. Project Autopilot failures are isolated from the legacy DevControl G2/G3 shadow lane. EngineeringOS is Project Zero; its first live idle run produced OBSERVE followed by SLEEP with zero journal growth and zero repository mutation.
 
 ### Runtime activation evidence
 
@@ -137,3 +137,8 @@ State: IMPLEMENTED_BASELINE. Tool-surface drift is now represented as evidence a
 ### EP-07 freshness hardening — 2026-10-05
 
 Backend Host observations are no longer timeless. Supervisor refreshes canonical/live surface evidence on a bounded cadence and compares semantic catalog identity with the last Host observation. Admission requires current freshness convergence. A live 26-vs-26 DevControl case with descriptor drift was detected and denied, proving that tool count is not used as a parity proxy.
+
+
+## ADR-030 management authority convergence — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. External project management no longer requires two independent approval switches. management_target is the durable human/policy authority goal; promotion evidence is the runtime eligibility gate; effective Autopilot is derived. The legacy autopilot_enabled boolean remains compatibility only for projects not yet migrated to a management target. This prevents both false disablement after an already-approved management decision and accidental privilege widening by flipping a boolean.
