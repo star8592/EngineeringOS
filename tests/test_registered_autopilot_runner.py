@@ -3,6 +3,7 @@ sys.path.insert(0,'src/engineeringos')
 from registered_autopilot_runner import *
 from durable_supervisor_runtime import record_intent,discover_work
 from coding_agent_provider import CodingAgentError
+from durable_run import arm_run,read_run
 class Bad:
  name="bad"
  def propose(self,**k):raise CodingAgentError("offline")
@@ -12,8 +13,9 @@ with tempfile.TemporaryDirectory() as td:
  run("git","init","-q",cwd=repo);run("git","config","user.email","t@example.com",cwd=repo);run("git","config","user.name","T",cwd=repo);(repo/"x").write_text("a");run("git","add","x",cwd=repo);run("git","commit","-qm","b",cwd=repo);sha=run("git","rev-parse","HEAD",cwd=repo)
  rr=root/"runtime";record_intent(rr,"P",intent_id="i",generation=1,statement="x",required_capabilities=["x"]);discover_work(rr,"P",{"id":"w","project":"P","state":"DISCOVERED","kind":"CAPABILITY_GAP","automation":"REVIEW","required_assurance":"A2","source_sha":sha,"allowed_paths":["x"],"verification_argv":[sys.executable,"-c","assert True"]})
  reg.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":str(repo),"autopilot_enabled":True,"workspace_root":str(root/"ws"),"max_assurance":"A2"}]}))
- a=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=100);assert a[0]["action"]=="ADVANCE"
- b=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=101);assert b[0]["action"]=="BACKOFF_WAIT"
+ arm_run(rr,"P",intent_id="i",conversation_id="chat",command_id="m1")
+ a=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=100);assert a[0]["action"]=="ADVANCE" and read_run(rr,"P")["state"]=="RUNNING"
+ b=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=101);assert b[0]["action"]=="BACKOFF_WAIT" and read_run(rr,"P")["state"]=="BACKOFF"
  c=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=131);assert c[0]["action"]=="ADVANCE"
  # A protected external baseline blocks planning/coding even if config is accidentally enabled.
  bp=rr/"projects"/"P"/"baseline.json";bp.write_text(json.dumps({"schema_version":1,"project":"P","state":"PROTECTED_EXISTING_WORK"}))

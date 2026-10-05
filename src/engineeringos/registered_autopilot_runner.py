@@ -8,6 +8,7 @@ from codex_readonly_provider import CodexReadOnlyProvider
 from claude_readonly_provider import ClaudeReadonlyProvider
 from codex_planning_provider import CodexPlanningProvider
 from planning_phase import plan_one
+from durable_run import read_run,reconcile_run,transition
 
 def atomic(path,obj):
  p=pathlib.Path(path);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(".tmp");tmp.write_text(json.dumps(obj,sort_keys=True,ensure_ascii=False)+"\n");tmp.replace(p)
@@ -34,7 +35,9 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
     continue
   state=recover(runtime_root,cfg["name"]);dp=project_root/"continuous.json";prev=json.loads(dp.read_text()) if dp.exists() else {}
   if prev.get("next_eligible_at",0)>now:
-   out.append({"project":cfg["name"],"action":"BACKOFF_WAIT","delay_seconds":round(prev["next_eligible_at"]-now)});continue
+   row={"project":cfg["name"],"action":"BACKOFF_WAIT","delay_seconds":round(prev["next_eligible_at"]-now)}
+   if read_run(runtime_root,cfg["name"]): row["run"]=transition(runtime_root,cfg["name"],"BACKOFF",action="BACKOFF_WAIT",reason="NEXT_ELIGIBLE_AT")
+   out.append(row);continue
   retry_due=prev.get("last_result")=="MACHINE_FAILURE" and prev.get("next_eligible_at",0)<=now
   decision=classify(state,{**prev,"last_result":None} if retry_due else prev)
   if decision["action"]=="ADVANCE":
@@ -47,6 +50,8 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
     result=resume_once(cfg["repo"],runtime_root,cfg["name"],provider_factory(cfg),workspace_root=cfg["workspace_root"],verification_timeout=int(cfg.get("verification_timeout",120)))
     decision=after_execution(decision,result);out.append({"project":cfg["name"],"action":"ADVANCE","result":result["execution"]})
   else:out.append({"project":cfg["name"],"action":decision["action"],"reason":decision["reason"],"should_notify":decision.get("should_notify",False)})
+  run_state=reconcile_run(runtime_root,cfg["name"],recover(runtime_root,cfg["name"]),decision)
+  if run_state: out[-1]["run"]=run_state
   delay=decision.get("delay_seconds",0)
   if decision.get("last_result")=="MACHINE_FAILURE":
    failures=int(prev.get("failures",0))+1;decision["failures"]=failures
