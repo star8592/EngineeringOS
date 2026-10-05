@@ -133,3 +133,7 @@ State: IMPLEMENTED_GATE. External A2 management requires promotion evidence in a
 ## EP-07 Backend-owned tool-surface evidence — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. Tool-surface drift is now represented as evidence and admission, not prose. EngineeringOS does not copy DevControl's canonical 26-tool registry. It invokes DevControl's own canonical source/live checker, adapts the current ChatGPT Host-observable surface into DevControl's evidence schema, and invokes DevControl's own Host verifier. Surface match and immutable Host acceptance are distinct states. Host-dependent workflows can deny execution on TOOL_SURFACE_DRIFT without coupling local EngineeringOS Autopilot to unrelated ChatGPT metadata.
+
+### EP-07 freshness hardening — 2026-10-05
+
+Backend Host observations are no longer timeless. Supervisor refreshes canonical/live surface evidence on a bounded cadence and compares semantic catalog identity with the last Host observation. Admission requires current freshness convergence. A live 26-vs-26 DevControl case with descriptor drift was detected and denied, proving that tool count is not used as a parity proxy.

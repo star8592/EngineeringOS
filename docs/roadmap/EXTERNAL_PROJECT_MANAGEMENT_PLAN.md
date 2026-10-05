@@ -173,3 +173,9 @@ A deterministic backend-surface admission contract separates ordinary Host-depen
 The current live observation reports DevControl 3.1.28, 26 Host-visible tools, source/live PASS, Host observable PASS, zero stale DevControl 2 markers, and host_acceptance=NOT_PROVEN_BY_SURFACE_OBSERVATION. This is deliberately not called full Host acceptance.
 
 EngineeringOS local self-hosting Autopilot is not coupled to this Host evidence because it does not execute through the ChatGPT DevControl tool surface. The gate applies only to workflows that actually depend on that backend surface.
+
+### EP-07 automatic freshness
+
+The singleton Supervisor now refreshes the backend canonical/live surface at a bounded interval and compares its semantic catalog hash with the last real ChatGPT Host observation. Repository/source changes that leave the tool contract unchanged do not invalidate Host evidence. A canonical tool-contract change produces HOST_OBSERVATION_STALE; source/live disagreement produces TOOL_SURFACE_DRIFT. Backend-surface admission requires freshness=CONVERGED in addition to a matching Host observation.
+
+A live acceptance immediately exercised this path: DevControl still exposed 26 tools and source/live remained PASS, while 10 Host-observable descriptors/contracts had changed. EngineeringOS correctly denied Host-dependent admission instead of accepting the matching count.

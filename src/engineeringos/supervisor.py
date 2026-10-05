@@ -19,6 +19,7 @@ from autopilot_supervision import supervisor_decision, bounded_history
 from registered_autopilot_runner import run_registered_once
 from external_project_baseline import refresh_registered_projects
 from project_promotion import assess_registered
+from backend_surface_monitor import reconcile as reconcile_backend_surface
 STATE = runtime()
 
 
@@ -189,12 +190,34 @@ def run_project_autopilot_lane() -> dict:
         return {'health': 'DEGRADED', 'error_type': type(exc).__name__, 'error': str(exc), 'projects': []}
 
 
+def run_backend_surface_lane(*, profile_path=None, state_root=None, now=None, refresh_seconds=900, reconcile_fn=reconcile_backend_surface) -> dict:
+    root = pathlib.Path(state_root or STATE)
+    profile_path = pathlib.Path(profile_path or (ROOT / 'project_profiles/devcontrol/backend-surface.json'))
+    evidence_path = root / 'backends/DevControl/surface-evidence.json'
+    freshness_path = root / 'backends/DevControl/freshness.json'
+    if not profile_path.exists():
+        return {'health':'HEALTHY','state':'NOT_CONFIGURED','cached':False}
+    now = time.time() if now is None else float(now)
+    if freshness_path.exists() and now - freshness_path.stat().st_mtime < refresh_seconds:
+        cached = read_json(freshness_path)
+        return {'health':'HEALTHY','state':cached.get('state','UNKNOWN'),'reason':cached.get('reason'),'cached':True}
+    try:
+        profile = read_json(profile_path)
+        evidence = read_json(evidence_path) if evidence_path.exists() else None
+        result = reconcile_fn(profile, evidence)
+        atomic_json(freshness_path, result)
+        return {'health':'HEALTHY','state':result.get('state','UNKNOWN'),'reason':result.get('reason'),'cached':False}
+    except Exception as exc:
+        return {'health':'DEGRADED','state':'MONITOR_FAILED','error_type':type(exc).__name__,'error':str(exc),'cached':False}
+
+
 def run_cycle() -> dict:
     started = time.monotonic()
     started_at = utcnow()
     status_path = STATE / 'supervisor/status.json'
     project_baseline = run_project_baseline_lane()
     project_autopilot = run_project_autopilot_lane()
+    backend_surface = run_backend_surface_lane()
     try:
         run_checked(['python3', 'src/engineeringos/shadow_run.py'])
         snapshot = read_json(STATE / 'shadow/latest.json')
@@ -271,6 +294,7 @@ def run_cycle() -> dict:
             'autopilot_should_notify': autopilot_decision.get('should_notify', False),
             'project_baseline': project_baseline,
             'project_autopilot': project_autopilot,
+            'backend_surface': backend_surface,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)
@@ -289,6 +313,7 @@ def run_cycle() -> dict:
             'traceback': traceback.format_exc()[-12000:],
             'project_baseline': project_baseline,
             'project_autopilot': project_autopilot,
+            'backend_surface': backend_surface,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)

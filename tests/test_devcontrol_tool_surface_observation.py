@@ -16,7 +16,10 @@ with tempfile.TemporaryDirectory() as td:
  host=root/'host.json';host.write_text(json.dumps({'tools':[{'name':'x','description':'Do x\n\n```ts\ntool(args: { a: string }): Promise<{ result: any }>;\n```'}]}))
  out=root/'out.json';a=run(profile,host,out)
  assert a['state']=='OBSERVED_MATCH' and a['source_live_check']=='PASS' and a['host_observable_contract_check']=='PASS'
+ verifier.write_text('import sys;print("HOST_BAD");sys.exit(1)\n')
+ hv=run(profile,host,out)
+ assert hv['state']=='TOOL_SURFACE_DRIFT' and hv['source_live_check']=='PASS' and hv['host_observable_contract_check']=='FAIL'
  checker.write_text('import sys;print("SOURCE_BAD");sys.exit(1)\n')
  b=run(profile,host,out)
  assert b['state']=='TOOL_SURFACE_DRIFT' and b['source_live_check']=='FAIL'
- print('8 devcontrol-surface-observation invariants passed')
+ print('11 devcontrol-surface-observation invariants passed')

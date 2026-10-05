@@ -5,6 +5,7 @@ import argparse,datetime as dt,hashlib,importlib.util,json,os,pathlib,subprocess
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"src"/"engineeringos"))
 from chatgpt_tool_surface_adapter import adapt
+from backend_surface_monitor import semantic_sha256
 
 def sha256(path:pathlib.Path)->str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -64,7 +65,9 @@ def run(profile_path:pathlib.Path,host_raw:pathlib.Path,output:pathlib.Path)->di
             "source_live_output":checker.stdout.strip()[-4000:],
             "host_verifier_output":(verifier.stdout.strip()[-4000:] if verifier is not None else canonical_error),
             "host_surface_sha256":sha256(host_path),
+            "host_surface_semantic_sha256":semantic_sha256(host),
             "canonical_catalog_sha256":(sha256(canonical_path) if canonical_path.exists() else None),
+            "canonical_catalog_semantic_sha256":(semantic_sha256(canonical) if canonical_path.exists() else None),
         }
     atomic_json(output,payload)
     return payload
