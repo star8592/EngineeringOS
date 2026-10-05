@@ -129,3 +129,7 @@ State: IMPLEMENTED_BASELINE. Multi-project natural-language routing is determini
 ## EP-04 External A2 promotion gate — 2026-10-05
 
 State: IMPLEMENTED_GATE. External A2 management requires promotion evidence in addition to registry enablement. Canonical origin, branch/upstream identity, clean baseline, zero source divergence, declared project verification entrypoint, A1/A2 ceiling and isolated workspace are checked before planning/coding. Promotion evidence is projected by the singleton Supervisor. This prevents a config typo or stale registry flag from widening mutation authority. KangarooMath is intentionally blocked by protected pre-existing work.
+
+## EP-07 Backend-owned tool-surface evidence — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. Tool-surface drift is now represented as evidence and admission, not prose. EngineeringOS does not copy DevControl's canonical 26-tool registry. It invokes DevControl's own canonical source/live checker, adapts the current ChatGPT Host-observable surface into DevControl's evidence schema, and invokes DevControl's own Host verifier. Surface match and immutable Host acceptance are distinct states. Host-dependent workflows can deny execution on TOOL_SURFACE_DRIFT without coupling local EngineeringOS Autopilot to unrelated ChatGPT metadata.

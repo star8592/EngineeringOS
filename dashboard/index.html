@@ -77,6 +77,7 @@ button,input,textarea{font:inherit}.app{min-height:100vh;display:grid;grid-templ
         <p class="muted">human_authority_decision · human_authority_source</p>
         <h2>EDB curation</h2><div class="grid" id="edbcuration"></div><div id="edbcandidates"></div>
         <p class="muted">Gold labels · Auto adjudication</p>
+        <h2>Backend tool surface</h2><div class="grid" id="backendSurface"></div><p class="muted">Host observable match is not the same as immutable Host acceptance.</p>
         <h2>G3 bounded diagnostics</h2><div class="grid" id="g3"></div><p class="muted">target mutation OFF</p>
         <h2>Work queue</h2><table><thead><tr><th>P</th><th>State</th><th>Work</th><th>Assurance</th></tr></thead><tbody id="queue"></tbody></table>
       </div></details>
@@ -151,7 +152,7 @@ function renderHuman(ap,sup,brief){
  if(!rows.length){const e=document.createElement('div');e.className='empty';e.textContent='目前没有新的开发进展。';progressList.append(e)}
  for(const row of rows){const el=document.createElement('div');el.className='item';const icon=document.createElement('div');icon.className='check';icon.textContent=row.done?'✓':'•';const body=document.createElement('div');const strong=document.createElement('strong');strong.textContent=row.done?'已完成':'正在做';const txt=document.createElement('div');txt.className='muted';txt.textContent=row.text;body.append(strong,txt);el.append(icon,body);progressList.append(el)}
 }
-function renderEngineering(d,c,q,cd,s,b,ad,so,soa,soo,edb,edba,g3c,g3e){
+function renderEngineering(d,c,q,cd,s,b,ad,so,soa,soo,edb,edba,g3c,g3e,backend){
  supervisor.innerHTML=[['Supervisor',s?.health||'STARTING'],['Last cycle',s?.completed_at||s?.failed_at||'—'],['Active work',b?.active_work_items??'—']].map(x=>'<div class="card"><small>'+x[0]+'</small><h2>'+fmt(x[1])+'</h2></div>').join('');
  brief.innerHTML=(b?.actions||[]).map(x=>'<tr><td>P'+x.priority+'</td><td><strong>'+fmt(x.kind)+'</strong><br><small>'+fmt(x.reason)+'</small></td><td><span class="pill">'+fmt(x.state)+'</span></td><td>'+fmt(x.lane)+'</td></tr>').join('')||'<tr><td colspan="4">No active advisory items.</td></tr>';
  details.innerHTML=(ad?.items||[]).map(x=>'<details><summary>P'+x.priority+' '+fmt(x.kind)+' · '+fmt(x.evidence_count)+' evidence item(s)</summary><p><small>Suggested resolution: '+(x.suggested_resolution||[]).join(' → ')+'</small></p><pre>'+JSON.stringify(x.evidence,null,2)+'</pre></details>').join('')||'<span class="muted">No evidence detail projection yet.</span>';
@@ -161,12 +162,13 @@ function renderEngineering(d,c,q,cd,s,b,ad,so,soa,soo,edb,edba,g3c,g3e){
  systemone.innerHTML=so?[['Provider',so.provider],['Status',so.status],['Admission',soa?.state||'UNKNOWN'],['Human authority',(so.items||[]).some(x=>x.human_authority_decision)?'REFERENCED':'NONE']].map(x=>'<div class="card"><small>'+x[0]+'</small><h2>'+fmt(x[1])+'</h2></div>').join(''):'';
  edbcuration.innerHTML=edb?[['Candidates',edb.candidate_count||0],['Gold labels',edba?.gold_count??0],['Auto adjudication',edba?.auto_adjudication?'ON':'OFF']].map(x=>'<div class="card"><small>'+x[0]+'</small><h2>'+fmt(x[1])+'</h2></div>').join(''):'';
  edbcandidates.textContent=(edb?.top_candidates||[]).length?JSON.stringify(edb.top_candidates):'No EDB candidates yet.';
+ backendSurface.innerHTML=backend?[['DevControl surface',backend.state],['Source ↔ live',backend.source_live_check],['Host observable',backend.host_observable_contract_check],['Host acceptance',backend.host_acceptance],['Host tools',backend.host_tool_count]].map(x=>'<div class="card"><small>'+x[0]+'</small><h2>'+fmt(x[1])+'</h2></div>').join(''):'<span class="muted">No Host surface observation recorded.</span>';
  g3.innerHTML=(g3c?.decisions||[]).map(x=>'<div class="card"><small>'+fmt(x.kind)+'</small><h2>'+fmt(x.decision)+'</h2></div>').join('')+(g3e?'<div class="card"><small>Latest bounded execution</small><h2>'+fmt(g3e.check_result)+'</h2></div>':'');
  queue.innerHTML=(q?.items||[]).map(x=>'<tr><td>P'+x.priority+'</td><td>'+fmt(x.state)+'</td><td>'+fmt(x.kind)+'<br><small>'+fmt(x.reason)+'</small></td><td>'+fmt(x.required_assurance)+'</td></tr>').join('');
 }
 Promise.all([
  opt('./runtime/commercial.json'),opt('./runtime/products.json'),opt('./runtime/autopilot-self-hosting.json'),opt('./runtime/supervisor.json'),opt('./runtime/action-brief.json'),
  opt('./runtime/snapshot.json'),opt('./runtime/control-loop.json'),opt('./runtime/queue.json'),opt('./runtime/control-loop-details.json'),opt('./runtime/action-details.json'),
- opt('./runtime/system-one.json'),opt('./runtime/system-one-admission.json'),opt('./runtime/system-one-observations.json'),opt('./runtime/system-one-edb-curation.json'),opt('./runtime/system-one-edb-adjudication.json'),opt('./runtime/g3-controller.json'),opt('./runtime/g3-execution.json')
-]).then(([commercial,catalog,ap,sup,brief,d,c,q,cd,ad,so,soa,soo,edb,edba,g3c,g3e])=>{renderProducts(commercial?.products?.length?commercial:catalog,ap,sup,brief);renderEngineering(d,c,q,cd,sup,brief,ad,so,soa,soo,edb,edba,g3c,g3e)});
+ opt('./runtime/system-one.json'),opt('./runtime/system-one-admission.json'),opt('./runtime/system-one-observations.json'),opt('./runtime/system-one-edb-curation.json'),opt('./runtime/system-one-edb-adjudication.json'),opt('./runtime/g3-controller.json'),opt('./runtime/g3-execution.json'),opt('./runtime/devcontrol-surface.json')
+]).then(([commercial,catalog,ap,sup,brief,d,c,q,cd,ad,so,soa,soo,edb,edba,g3c,g3e,backend])=>{renderProducts(commercial?.products?.length?commercial:catalog,ap,sup,brief);renderEngineering(d,c,q,cd,sup,brief,ad,so,soa,soo,edb,edba,g3c,g3e,backend)});
 </script>

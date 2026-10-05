@@ -48,3 +48,23 @@ EngineeringOS separates four concepts that must never be conflated:
 4. **Execution evidence** — whether the side effect actually occurred and what outcome was verified.
 
 Tool annotations help classify a proposed action. They cannot grant permission, bypass project policy, manufacture host approval, or prove execution success.
+
+## Backend-owned tool-surface authority — 2026-10-05
+
+EngineeringOS MUST NOT maintain a second hand-written copy of an execution backend's public tool ABI when that backend already has a canonical source and verifier.
+
+For DevControl:
+- the Gateway-owned MCP registry is canonical;
+- DevControl's own source/live checker proves Gateway descriptors/bindings/annotations against public MCP;
+- ChatGPT Host observation is converted only into DevControl's declared host-surface evidence schema;
+- DevControl's own host verifier compares name, description and observable input contract;
+- EngineeringOS stores the resulting evidence and applies policy admission to it.
+
+Evidence states are intentionally separate:
+1. source ↔ live public MCP;
+2. live public MCP ↔ Host observable contract;
+3. immutable Host acceptance / same-task continuation acceptance.
+
+An observable surface match MUST NOT be promoted to Host acceptance. Tool count alone is never parity evidence.
+
+OpenAI's current plugin guidance is the external normative baseline: descriptions must distinguish similar tools and state limits/prerequisites; annotations must reflect real behavior; server-side authorization, validation and consequential-action confirmation remain mandatory even when annotations are correct.

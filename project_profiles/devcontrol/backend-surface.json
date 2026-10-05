@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "backend": "DevControl",
+  "repo": "/mnt/disk1/Code/DevControl2",
+  "live_base": "https://mcp.devcontrol.dev",
+  "canonical_checker": "scripts/check_mcp_tool_surface.py",
+  "host_verifier": "scripts/verify_chatgpt_host_surface.py",
+  "canonical_catalog_provider": "scripts/chatgpt_product_readiness.py",
+  "authority": "BACKEND_OWNED_CANONICAL_CONTRACT"
+}

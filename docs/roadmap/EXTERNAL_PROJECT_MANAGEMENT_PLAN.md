@@ -134,7 +134,7 @@ EP-03 DONE: conversation -> automatic project routing -> durable command ingress
 EP-04 ACTIVE: A2 promotion gate implemented; first KangarooMath autonomous change waits for protected existing work to converge.
 EP-05: preview/browser acceptance bound to artifact feedback.
 EP-06: release authority lane and production evidence.
-EP-07: backend capability catalog lock and automatic TOOL_SURFACE_DRIFT reconciliation.
+EP-07 BASELINE DONE: backend-owned capability evidence, TOOL_SURFACE_DRIFT admission and Host-observation separation; automatic refresh/reconciliation remains ongoing.
 
 ## EP-03 Conversation routing baseline — 2026-10-05
 
@@ -156,3 +156,20 @@ State: GATE_IMPLEMENTED / LIVE_PROJECT_BLOCKED_BY_EXISTING_WORK.
 Promotion to A2 is evidence-driven and separate from the boolean Autopilot switch. The gate checks a clean baseline, canonical origin, managed branch/upstream, zero upstream divergence, project-owned verification entrypoint, safe A1/A2 assurance ceiling and dedicated workspace root. The registered runner re-evaluates this evidence before Planner/Coder execution; `autopilot_enabled=true` alone is insufficient.
 
 KangarooMath declares target `A2_MANAGED`, canonical origin `star8592/Kangaroo-Practice-Simulator`, managed branch `main`, project-owned quality gate `verify:public`, A2 ceiling and a dedicated isolated workspace root. Its current promotion result is `BLOCKED / PROTECTED_EXISTING_WORK`, so Autopilot remains disabled. A live accidental-enable acceptance proved that even a temporary config with `autopilot_enabled=true` returns `PROMOTION_BLOCKED` before any provider factory is invoked.
+
+## EP-07 Backend tool-surface drift baseline — 2026-10-05
+
+State: IMPLEMENTED_BASELINE.
+
+EngineeringOS now has a backend-owned surface observation path for DevControl rather than a duplicated tool registry. The adapter converts only the Host-observable fields exposed by ChatGPT into DevControl's own devcontrol.chatgpt-host-surface.v2 evidence schema. DevControl's own source/live checker and Host verifier remain the authority.
+
+A deterministic backend-surface admission contract separates ordinary Host-dependent execution from release acceptance:
+- missing evidence => DENY;
+- source/live mismatch => DENY;
+- Host observable mismatch => DENY;
+- observable contract match => execution may proceed where Host acceptance is not required;
+- release/final acceptance lanes may additionally require immutable host_acceptance=ACCEPTED.
+
+The current live observation reports DevControl 3.1.28, 26 Host-visible tools, source/live PASS, Host observable PASS, zero stale DevControl 2 markers, and host_acceptance=NOT_PROVEN_BY_SURFACE_OBSERVATION. This is deliberately not called full Host acceptance.
+
+EngineeringOS local self-hosting Autopilot is not coupled to this Host evidence because it does not execute through the ChatGPT DevControl tool surface. The gate applies only to workflows that actually depend on that backend surface.
