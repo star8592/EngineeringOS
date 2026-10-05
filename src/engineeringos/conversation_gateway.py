@@ -2,6 +2,7 @@ from __future__ import annotations
 import hashlib,json
 from conversation_ingest import ingest,_state,ConversationCommandError
 from project_router import route
+from durable_run import arm_run,read_run
 
 PROCESS_CONTROL={"继续","继续推进","接着做","接着","往下做","继续往前推进","继续开发"}
 
@@ -20,7 +21,7 @@ def submit(registry_path,runtime_root,*,command_id:str,conversation_id:str,text:
         return {"state":routed.get("state"),"routing":routed,"durable_write":False}
     project=routed["project"]
     if _normalized(text) in {_normalized(x) for x in PROCESS_CONTROL}:
-        return {"state":"CONTINUE_EXISTING_WORK","project":project,"routing":routed,"durable_write":False,"intent_changed":False}
+        return {"state":"CONTINUE_EXISTING_WORK","project":project,"routing":routed,"durable_write":False,"intent_changed":False,"run":read_run(runtime_root,project)}
     if not kind:
         raise ConversationCommandError("TURN_KIND_REQUIRED")
     state=_state(runtime_root,project)
@@ -35,4 +36,5 @@ def submit(registry_path,runtime_root,*,command_id:str,conversation_id:str,text:
     if kind=="DESIRE" and caps is None:
         caps=[text.strip()]
     new_state=ingest(runtime_root,project=project,command_id=command_id,conversation_id=conversation_id,kind=kind,text=text,intent_id=intent_id,artifact_ref=artifact_ref,affects_task=affects_task,required_capabilities=caps)
-    return {"state":"ACCEPTED","project":project,"display_name":routed.get("display_name"),"routing":routed,"intent_id":intent_id,"durable_write":True,"project_state":new_state}
+    run=arm_run(runtime_root,project,intent_id=intent_id,conversation_id=conversation_id,command_id=command_id) if kind in {"DESIRE","CORRECTION","REVERSAL"} else read_run(runtime_root,project)
+    return {"state":"ACCEPTED","project":project,"display_name":routed.get("display_name"),"routing":routed,"intent_id":intent_id,"durable_write":True,"project_state":new_state,"run":run}
