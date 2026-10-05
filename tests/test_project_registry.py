@@ -28,7 +28,13 @@ with tempfile.TemporaryDirectory() as td:
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","display_name":"产品","aliases":"bad","repo":"/r","autopilot_enabled":False}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="INVALID_PROJECT_ALIASES"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"management_target":"A9"}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="INVALID_MANAGEMENT_TARGET"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"expected_origin":""}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="INVALID_MANAGEMENT_POLICY"
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeouts":{"unknown":1}}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="UNKNOWN_PROVIDER_TIMEOUT"
-print("17 project-registry invariants passed")
+print("21 project-registry invariants passed")

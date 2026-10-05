@@ -17,6 +17,6 @@ with tempfile.TemporaryDirectory() as td:
  c=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=131);assert c[0]["action"]=="ADVANCE"
  # A protected external baseline blocks planning/coding even if config is accidentally enabled.
  bp=rr/"projects"/"P"/"baseline.json";bp.write_text(json.dumps({"schema_version":1,"project":"P","state":"PROTECTED_EXISTING_WORK"}))
- reg.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":str(repo),"autopilot_enabled":True,"require_clean_baseline":True,"workspace_root":str(root/"ws"),"max_assurance":"A2"}]}))
- d=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=1000);assert d[0]["action"]=="BASELINE_BLOCKED" and d[0]["reason"]=="PROTECTED_EXISTING_WORK" and d[0]["should_notify"] is False
+ reg.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":str(repo),"autopilot_enabled":True,"require_clean_baseline":True,"management_target":"A2_MANAGED","expected_origin":"https://example/P.git","managed_branch":"main","a2_verification_entrypoint":"verify:public","workspace_root":str(root/"ws"),"max_assurance":"A2"}]}))
+ d=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=1000);assert d[0]["action"]=="PROMOTION_BLOCKED" and d[0]["reason"]=="PROTECTED_EXISTING_WORK" and d[0]["should_notify"] is False
 print("8 registered-autopilot-runner invariants passed")

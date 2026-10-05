@@ -124,3 +124,8 @@ The first external project is `KangarooMath` / 袋鼠数学. Its canonical repos
 ## EP-03 Conversation -> project -> durable intent — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. Multi-project natural-language routing is deterministic and replayable. Explicit product mentions and registered aliases route directly; selected UI context and durable conversation history provide follow-up context; ambiguity never silently chooses a repository. Process-control turns such as “继续” do not create product-intent generations. Command retries are idempotent by command-envelope fingerprint. Conversational APPROVAL is explicitly PRODUCT_FEEDBACK_ONLY and does not satisfy engineering/host/release authority. A frontend-neutral CLI acceptance proved natural-language project routing -> durable intent/work and a following “继续” -> zero journal growth.
+
+
+## EP-04 External A2 promotion gate — 2026-10-05
+
+State: IMPLEMENTED_GATE. External A2 management requires promotion evidence in addition to registry enablement. Canonical origin, branch/upstream identity, clean baseline, zero source divergence, declared project verification entrypoint, A1/A2 ceiling and isolated workspace are checked before planning/coding. Promotion evidence is projected by the singleton Supervisor. This prevents a config typo or stale registry flag from widening mutation authority. KangarooMath is intentionally blocked by protected pre-existing work.

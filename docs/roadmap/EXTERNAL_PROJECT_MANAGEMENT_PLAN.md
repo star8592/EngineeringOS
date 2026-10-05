@@ -131,7 +131,7 @@ Acceptance to reach A2_MANAGED later:
 EP-01 DONE: commercial multi-project shell and CONNECTED external project visibility.
 EP-02 NOW: durable read-only external-project baseline and dirty-work protection.
 EP-03 DONE: conversation -> automatic project routing -> durable command ingress.
-EP-04: A2 promotion gate and first KangarooMath autonomous change.
+EP-04 ACTIVE: A2 promotion gate implemented; first KangarooMath autonomous change waits for protected existing work to converge.
 EP-05: preview/browser acceptance bound to artifact feedback.
 EP-06: release authority lane and production evidence.
 EP-07: backend capability catalog lock and automatic TOOL_SURFACE_DRIFT reconciliation.
@@ -147,3 +147,12 @@ Routing order is explicit project mention, explicit selected/current project, du
 A new DESIRE receives a system-derived intent id and, when the transport supplies no semantic capability list, a conservative capability-planning requirement derived from the user's statement. Follow-up CORRECTION/REVERSAL/FEEDBACK/APPROVAL may bind to the recent intent in the same durable conversation when unambiguous. The coding/planning authority boundary is unchanged.
 
 The frontend-neutral CLI `scripts/engineeringos_conversation.py` exercises the same gateway used by future chat/voice/web transports. It is an internal ingress surface, not a public unauthenticated write API. The commercial web shell remains read-only until authenticated write ingress is added.
+
+
+## EP-04 A2 promotion gate — 2026-10-05
+
+State: GATE_IMPLEMENTED / LIVE_PROJECT_BLOCKED_BY_EXISTING_WORK.
+
+Promotion to A2 is evidence-driven and separate from the boolean Autopilot switch. The gate checks a clean baseline, canonical origin, managed branch/upstream, zero upstream divergence, project-owned verification entrypoint, safe A1/A2 assurance ceiling and dedicated workspace root. The registered runner re-evaluates this evidence before Planner/Coder execution; `autopilot_enabled=true` alone is insufficient.
+
+KangarooMath declares target `A2_MANAGED`, canonical origin `star8592/Kangaroo-Practice-Simulator`, managed branch `main`, project-owned quality gate `verify:public`, A2 ceiling and a dedicated isolated workspace root. Its current promotion result is `BLOCKED / PROTECTED_EXISTING_WORK`, so Autopilot remains disabled. A live accidental-enable acceptance proved that even a temporary config with `autopilot_enabled=true` returns `PROMOTION_BLOCKED` before any provider factory is invoked.

@@ -18,6 +18,7 @@ from state_paths import runtime
 from autopilot_supervision import supervisor_decision, bounded_history
 from registered_autopilot_runner import run_registered_once
 from external_project_baseline import refresh_registered_projects
+from project_promotion import assess_registered
 STATE = runtime()
 
 
@@ -169,8 +170,13 @@ def run_project_baseline_lane() -> dict:
     registry = STATE / 'projects/registry.json'
     try:
         result = refresh_registered_projects(registry, STATE)
+        promotion = assess_registered(registry, STATE)
+        atomic_json(STATE / 'projects/promotion-summary.json', promotion)
+        for row in promotion.get('projects', []):
+            atomic_json(STATE / 'projects' / row['project'] / 'promotion.json', row)
         counts = Counter(x.get('state','UNKNOWN') for x in result.get('projects',[]))
-        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts)}
+        promotion_counts = Counter(x.get('state','UNKNOWN') for x in promotion.get('projects',[]))
+        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts),'promotion_states':dict(promotion_counts)}
     except Exception as exc:
         return {'health':'DEGRADED','error_type':type(exc).__name__,'error':str(exc)}
 

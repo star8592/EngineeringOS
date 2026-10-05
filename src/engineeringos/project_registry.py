@@ -11,6 +11,9 @@ def load(path):
   if not x.get("name") or not x.get("repo"):raise RegistryError("PROJECT_IDENTITY_REQUIRED")
   if "display_name" in x and (not isinstance(x["display_name"],str) or not x["display_name"].strip()):raise RegistryError("INVALID_DISPLAY_NAME")
   if "require_clean_baseline" in x and not isinstance(x["require_clean_baseline"],bool):raise RegistryError("INVALID_BASELINE_POLICY")
+  if "management_target" in x and x["management_target"] not in ("CONNECTED_READ_ONLY","A2_MANAGED"):raise RegistryError("INVALID_MANAGEMENT_TARGET")
+  for field in ("expected_origin","managed_branch","a2_verification_entrypoint"):
+   if field in x and (not isinstance(x[field],str) or not x[field].strip()):raise RegistryError("INVALID_MANAGEMENT_POLICY")
   aliases=x.get("aliases",[])
   if not isinstance(aliases,list) or any(not isinstance(a,str) or not a.strip() for a in aliases):raise RegistryError("INVALID_PROJECT_ALIASES")
   for term in [x["name"],x.get("display_name"),*aliases]:

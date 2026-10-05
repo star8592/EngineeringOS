@@ -28,4 +28,11 @@ with tempfile.TemporaryDirectory() as td:
  c4=build(reg,runtime)['products'][1];assert c4['status']=='QUEUED' and '尚未开启' in c4['management_note']
  op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'PROTECTED_EXISTING_WORK'}))
  c5=build(reg,runtime)['products'][1];assert c5['status']=='PROTECTED' and '不会覆盖' in c5['management_note']
- print('19 commercial-projection invariants passed')
+ # A clean disabled project with passing promotion evidence is visible as ready, not active.
+ op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'CLEAN_CONNECTED'}))
+ pp=runtime/'projects'/'Other'/'promotion.json';pp.write_text(json.dumps({'schema_version':1,'project':'Other','state':'ELIGIBLE_FOR_A2','eligible':True}))
+ # remove active work by resolving it so promotion status becomes user-facing
+ append(j2,project='Other',typ='WORK_COMMITTED',key='w2',generation=1,payload={'commit_receipt':{},'capability_evidence':['e2']})
+ append(j2,project='Other',typ='WORK_RESOLVED',key='w2',generation=1,payload={'verifier':'v','resolution_evidence_refs':['e2'],'requirement':'q'})
+ c6=build(reg,runtime)['products'][1];assert c6['status']=='READY_FOR_A2' and '等待权限状态晋升' in c6['management_note']
+ print('23 commercial-projection invariants passed')
