@@ -42,3 +42,7 @@ EngineeringOS Control Room remains available under Settings -> Engineering Detai
 ## External project onboarding
 
 A real project may be visible as CONNECTED before mutation Autopilot is enabled. This is intentional. If the target repository already contains unrelated or uncommitted work, EngineeringOS must preserve it and establish a safe baseline before enabling autonomous A1/A2 mutation. A registry project may therefore have a stable technical `name` and a user-facing `display_name`; the commercial surface uses the display name while durable project identity remains stable.
+
+## Fast status projection
+
+The ordinary-user product surface is refreshed independently from long engineering diagnostics. Product connection/protection/work status and backend surface warnings can update as soon as their authoritative read models are available. Engineering Details may still show the last completed long-cycle diagnostics until that cycle finishes. This is intentional: UI freshness must not require weakening verification or turning diagnostic projections into authority.

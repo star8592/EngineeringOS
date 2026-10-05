@@ -179,3 +179,9 @@ EngineeringOS local self-hosting Autopilot is not coupled to this Host evidence 
 The singleton Supervisor now refreshes the backend canonical/live surface at a bounded interval and compares its semantic catalog hash with the last real ChatGPT Host observation. Repository/source changes that leave the tool contract unchanged do not invalidate Host evidence. A canonical tool-contract change produces HOST_OBSERVATION_STALE; source/live disagreement produces TOOL_SURFACE_DRIFT. Backend-surface admission requires freshness=CONVERGED in addition to a matching Host observation.
 
 A live acceptance immediately exercised this path: DevControl still exposed 26 tools and source/live remained PASS, while 10 Host-observable descriptors/contracts had changed. EngineeringOS correctly denied Host-dependent admission instead of accepting the matching count.
+
+### Fast product projection
+
+User-facing project state is refreshed before the long G2/G3/System-One diagnostic cycle. The fast projection contains only the product catalog, commercial project projection and backend surface/freshness status. Long engineering diagnostics may remain on the previous completed cycle until they finish, but ordinary product status must not wait on them.
+
+This prevents a clean/protected project transition or tool-surface drift from being hidden behind a long control-plane cycle. The fast projection is read-only and remains a projection of the same durable/runtime sources, not a second authority.

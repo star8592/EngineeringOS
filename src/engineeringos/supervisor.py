@@ -20,6 +20,7 @@ from registered_autopilot_runner import run_registered_once
 from external_project_baseline import refresh_registered_projects
 from project_promotion import assess_registered
 from backend_surface_monitor import reconcile as reconcile_backend_surface
+from dashboard_projector import project_fast as project_fast_dashboard
 STATE = runtime()
 
 
@@ -219,6 +220,10 @@ def run_cycle() -> dict:
     project_autopilot = run_project_autopilot_lane()
     backend_surface = run_backend_surface_lane()
     try:
+        fast_dashboard = project_fast_dashboard()
+    except Exception as exc:
+        fast_dashboard = {'state':'DEGRADED','error_type':type(exc).__name__,'error':str(exc)}
+    try:
         run_checked(['python3', 'src/engineeringos/shadow_run.py'])
         snapshot = read_json(STATE / 'shadow/latest.json')
         queue = read_json(STATE / 'work-queue.json')
@@ -295,6 +300,7 @@ def run_cycle() -> dict:
             'project_baseline': project_baseline,
             'project_autopilot': project_autopilot,
             'backend_surface': backend_surface,
+            'fast_dashboard': fast_dashboard,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)
@@ -314,6 +320,7 @@ def run_cycle() -> dict:
             'project_baseline': project_baseline,
             'project_autopilot': project_autopilot,
             'backend_surface': backend_surface,
+            'fast_dashboard': fast_dashboard,
             'target_mutation_authorized': False,
         }
         atomic_json(status_path, status)
