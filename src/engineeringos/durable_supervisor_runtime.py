@@ -24,8 +24,9 @@ def admit_work_contract(runtime_root,project,item_id,contract,*,planner_evidence
 def _record_result(path,project,item,result):
  state=result["state"]; typ={"REOPENED":"WORK_REOPENED","WAITING_CONTRACT":"WORK_WAITING_CONTRACT","COMMITTED":"WORK_COMMITTED"}.get(state)
  if not typ:return None
- if state=="REOPENED" and result.get("reason")=="SOURCE_SHA_DRIFT":
-  return append(path,project=project,typ="WORK_CONTRACT_INVALIDATED",key=item["id"],generation=item.get("intent_generation",0),payload={"reason":"SOURCE_SHA_DRIFT","replan_required":True})
+ if state=="REOPENED" and result.get("reason") in ("SOURCE_SHA_DRIFT","CONTRACT_VERIFICATION_INVALID"):
+  reason=result["reason"]
+  return append(path,project=project,typ="WORK_CONTRACT_INVALIDATED",key=item["id"],generation=item.get("intent_generation",0),payload={"reason":reason,"replan_required":True})
  payload={"reason":result.get("reason"),**({"routing":result.get("routing")} if result.get("routing") is not None else {}),**({"failure_detail":result.get("detail")} if result.get("detail") else {})} if state!="COMMITTED" else {"commit_receipt":result["commit_receipt"],"capability_evidence":result["capability_evidence"]}
  ev=append(path,project=project,typ=typ,key=item["id"],generation=item.get("intent_generation",0),payload=payload)
  if state=="COMMITTED":

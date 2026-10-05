@@ -7,6 +7,10 @@ from convergence_gate import converge
 from commit_receipt import commit_converged,CommitReceiptError
 
 def _head(repo): return subprocess.check_output(["git","-C",repo,"rev-parse","HEAD"],text=True).strip()
+def _invalid_verification_harness(result:dict)->bool:
+ v=result.get("verification") or {}
+ text=((v.get("stdout_tail") or "")+"\n"+(v.get("stderr_tail") or "")).upper()
+ return "NO TESTS RAN" in text or "RAN 0 TESTS" in text or "COLLECTED 0 ITEMS" in text
 
 def mutation_contract(item:dict)->dict|None:
  paths=item.get("allowed_paths"); argv=item.get("verification_argv")
@@ -31,7 +35,8 @@ def execute_work_item(repo:str,item:dict,providers,*,workspace_root:str,verifica
  proposal=to_mutation_proposal(task,candidate)
  verified=execute_proposal(repo,proposal,workspace_root=workspace_root,timeout=verification_timeout,keep_workspace=True)
  if verified["state"]!="READY_FOR_CONVERGENCE":
-  return {"item_id":item["id"],"state":"REOPENED","reason":"VERIFICATION_FAILED","needs_intent":False,"user_interruption":False,"routing":routing,"proposal":proposal,"verification_result":verified}
+  reason="CONTRACT_VERIFICATION_INVALID" if _invalid_verification_harness(verified) else "VERIFICATION_FAILED"
+  return {"item_id":item["id"],"state":"REOPENED","reason":reason,"needs_intent":False,"user_interruption":False,"routing":routing,"proposal":proposal,"verification_result":verified}
  conv=converge(repo,proposal,verified)
  if not conv.get("applied"):
   return {"item_id":item["id"],"state":"REOPENED","reason":conv.get("reason") or conv.get("gate",{}).get("reason","CONVERGENCE_DENIED"),"needs_intent":False,"user_interruption":False,"routing":routing,"proposal":proposal,"verification_result":verified,"convergence":conv}

@@ -11,7 +11,13 @@ def project_context(repo:str)->dict:
   if p.is_file() and ".git" not in p.parts:
    try:files.append(str(p.relative_to(root)))
    except ValueError:pass
- return {"files":sorted(files),"file_count_capped":len(files)}
+ hints={}
+ for rel in sorted(x for x in files if x.startswith("tests/") and x.endswith(".py"))[:40]:
+  try:
+   text=(root/rel).read_text()
+   hints[rel]="unittest" if ("unittest.TestCase" in text or "TestCase)" in text) else ("direct-python-invariant-script" if ("assert " in text or "raise AssertionError" in text) else "unknown-python-test-style")
+  except (OSError,UnicodeDecodeError):pass
+ return {"files":sorted(files),"file_count_capped":len(files),"verification_hints":hints}
 def plan_one(repo,runtime_root,project,providers)->dict:
  state=recover(runtime_root,project)
  candidates=[x for x in state["work_items"].values() if x.get("kind")=="CAPABILITY_PLANNING" and x.get("state") in ("DISCOVERED","REOPENED","WAITING_CONTRACT") and not x.get("allowed_paths")]

@@ -21,6 +21,7 @@ def classify(state:dict,previous:dict|None=None)->dict:
  return {"action":"OBSERVE","reason":"STATE_CHANGED_NO_MACHINE_WORK","fingerprint":fp,"should_notify":False,"failures":0,"delay_seconds":30}
 def after_execution(decision:dict,result:dict)->dict:
  rows=result.get("execution",{}).get("results",[])
- failed=any(x.get("state")=="REOPENED" and x.get("reason")!="SOURCE_SHA_DRIFT" for x in rows)
- reconciled=any(x.get("reason")=="SOURCE_SHA_DRIFT" for x in rows)
+ reconciliation_reasons={"SOURCE_SHA_DRIFT","CONTRACT_VERIFICATION_INVALID"}
+ failed=any(x.get("state")=="REOPENED" and x.get("reason") not in reconciliation_reasons for x in rows)
+ reconciled=any(x.get("reason") in reconciliation_reasons for x in rows)
  out=dict(decision);out["last_result"]="MACHINE_FAILURE" if failed else ("RECONCILE" if reconciled else "SUCCESS");return out
