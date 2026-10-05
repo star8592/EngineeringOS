@@ -13,7 +13,10 @@ def build(registry_path,runtime_root)->dict:
   name=cfg.get("name")
   if not name:continue
   display_name=cfg.get("display_name") or name
-  jp=pathlib.Path(runtime_root)/"projects"/name/"journal.jsonl"
+  project_root=pathlib.Path(runtime_root)/"projects"/name
+  jp=project_root/"journal.jsonl"
+  bp=project_root/"baseline.json"
+  baseline=json.loads(bp.read_text()) if bp.exists() else None
   evs=events(jp) if jp.exists() else []
   state=replay_project(evs) if evs else {"work_items":{}}
   items=list(state.get("work_items",{}).values())
@@ -33,10 +36,17 @@ def build(registry_path,runtime_root)->dict:
   decisions=[]
   for x in needs[:3]:
    decisions.append({"question":x.get("question") or x.get("intent_question") or "有一个产品方向需要你确认。"})
-  status="NEEDS_INTENT" if needs else ("WORKING" if active else ("HEALTHY" if cfg.get("autopilot_enabled") else "CONNECTED"))
+  baseline_state=baseline.get("state") if baseline else None
+  if needs: status="NEEDS_INTENT"
+  elif active: status="WORKING"
+  elif baseline_state=="PROTECTED_EXISTING_WORK": status="PROTECTED"
+  elif baseline_state=="CLEAN_CONNECTED" and not cfg.get("autopilot_enabled"): status="BASELINED"
+  elif cfg.get("autopilot_enabled"): status="HEALTHY"
+  else: status="CONNECTED"
   products.append({
    "id":name,"name":display_name,"connected":True,"autopilot_enabled":bool(cfg.get("autopilot_enabled")),
    "status":status,
+   "management_note":("检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。" if status=="PROTECTED" else ("安全基线已建立，可以在明确授权后开启自动管理。" if status=="BASELINED" else None)),
    "active_work":[{"text":_text(x)} for x in active[:5]],
    "recent_completed":recent,
    "decisions":decisions

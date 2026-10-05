@@ -10,6 +10,7 @@ def load(path):
  for x in body.get("projects",[]):
   if not x.get("name") or not x.get("repo"):raise RegistryError("PROJECT_IDENTITY_REQUIRED")
   if "display_name" in x and (not isinstance(x["display_name"],str) or not x["display_name"].strip()):raise RegistryError("INVALID_DISPLAY_NAME")
+  if "require_clean_baseline" in x and not isinstance(x["require_clean_baseline"],bool):raise RegistryError("INVALID_BASELINE_POLICY")
   if x["name"] in seen:raise RegistryError("DUPLICATE_PROJECT")
   seen.add(x["name"])
   if x.get("autopilot_enabled") and not x.get("workspace_root"):raise RegistryError("WORKSPACE_ROOT_REQUIRED")

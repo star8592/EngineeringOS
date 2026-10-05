@@ -17,4 +17,8 @@ with tempfile.TemporaryDirectory() as td:
  b=build(reg,runtime)['products'][0];assert b['status']=='HEALTHY' and b['recent_completed'][0]['text']=='让孩子一眼找到开始训练'
  reg.write_text(json.dumps({'schema_version':1,'projects':[{'name':'Kangaroo','display_name':'袋鼠数学','repo':'/secret/repo','workspace_root':'/secret/ws','autopilot_enabled':True,'max_assurance':'A2'},{'name':'Other','display_name':'另一个产品','repo':'/secret/other','autopilot_enabled':False}]}))
  c=build(reg,runtime)['products'][1];assert c['name']=='另一个产品' and c['status']=='CONNECTED'
- print('11 commercial-projection invariants passed')
+ op=runtime/'projects'/'Other'/'baseline.json';op.parent.mkdir(parents=True,exist_ok=True);op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'PROTECTED_EXISTING_WORK'}))
+ c2=build(reg,runtime)['products'][1];assert c2['status']=='PROTECTED' and '不会覆盖' in c2['management_note']
+ op.write_text(json.dumps({'schema_version':1,'project':'Other','state':'CLEAN_CONNECTED'}))
+ c3=build(reg,runtime)['products'][1];assert c3['status']=='BASELINED' and '安全基线' in c3['management_note']
+ print('15 commercial-projection invariants passed')

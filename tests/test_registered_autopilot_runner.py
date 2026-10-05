@@ -15,4 +15,8 @@ with tempfile.TemporaryDirectory() as td:
  a=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=100);assert a[0]["action"]=="ADVANCE"
  b=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=101);assert b[0]["action"]=="BACKOFF_WAIT"
  c=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=131);assert c[0]["action"]=="ADVANCE"
-print("5 registered-autopilot-runner invariants passed")
+ # A protected external baseline blocks planning/coding even if config is accidentally enabled.
+ bp=rr/"projects"/"P"/"baseline.json";bp.write_text(json.dumps({"schema_version":1,"project":"P","state":"PROTECTED_EXISTING_WORK"}))
+ reg.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":str(repo),"autopilot_enabled":True,"require_clean_baseline":True,"workspace_root":str(root/"ws"),"max_assurance":"A2"}]}))
+ d=run_registered_once(reg,rr,provider_factory=lambda c:[Bad()],now=1000);assert d[0]["action"]=="BASELINE_BLOCKED" and d[0]["reason"]=="PROTECTED_EXISTING_WORK" and d[0]["should_notify"] is False
+print("8 registered-autopilot-runner invariants passed")

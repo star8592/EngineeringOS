@@ -19,7 +19,14 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
  now=time.time() if now is None else now;out=[]
  for cfg in load(registry_path)["projects"]:
   if not cfg.get("autopilot_enabled"):continue
-  state=recover(runtime_root,cfg["name"]);dp=pathlib.Path(runtime_root)/"projects"/cfg["name"]/"continuous.json";prev=json.loads(dp.read_text()) if dp.exists() else {}
+  project_root=pathlib.Path(runtime_root)/"projects"/cfg["name"]
+  if cfg.get("require_clean_baseline"):
+   bp=project_root/"baseline.json"
+   baseline=json.loads(bp.read_text()) if bp.exists() else None
+   if not baseline or baseline.get("state")!="CLEAN_CONNECTED":
+    out.append({"project":cfg["name"],"action":"BASELINE_BLOCKED","reason":("BASELINE_MISSING" if not baseline else baseline.get("state","BASELINE_INVALID")),"should_notify":False})
+    continue
+  state=recover(runtime_root,cfg["name"]);dp=project_root/"continuous.json";prev=json.loads(dp.read_text()) if dp.exists() else {}
   if prev.get("next_eligible_at",0)>now:
    out.append({"project":cfg["name"],"action":"BACKOFF_WAIT","delay_seconds":round(prev["next_eligible_at"]-now)});continue
   retry_due=prev.get("last_result")=="MACHINE_FAILURE" and prev.get("next_eligible_at",0)<=now

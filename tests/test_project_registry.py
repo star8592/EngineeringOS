@@ -19,7 +19,10 @@ with tempfile.TemporaryDirectory() as td:
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","display_name":"","repo":"/r","autopilot_enabled":False}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="INVALID_DISPLAY_NAME"
+ p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":False,"require_clean_baseline":"yes"}]}))
+ try:load(p);raise AssertionError()
+ except RegistryError as e:assert str(e)=="INVALID_BASELINE_POLICY"
  p.write_text(json.dumps({"schema_version":1,"projects":[{"name":"P","repo":"/r","autopilot_enabled":True,"workspace_root":"/w","max_assurance":"A2","provider_timeouts":{"unknown":1}}]}))
  try:load(p);raise AssertionError()
  except RegistryError as e:assert str(e)=="UNKNOWN_PROVIDER_TIMEOUT"
-print("11 project-registry invariants passed")
+print("13 project-registry invariants passed")

@@ -1,6 +1,6 @@
 # Official Tool / Approval Baseline
 
-Updated: 2026-10-03
+Updated: 2026-10-05
 
 This document records the external protocol/product facts EngineeringOS relies on. It is a baseline, not a substitute for refreshing official documentation when behavior changes.
 
@@ -11,8 +11,13 @@ This document records the external protocol/product facts EngineeringOS relies o
   - approval policy can be configured with `require_approval`;
   - approval request/response are protocol-visible items, not an EngineeringOS-specific UI convention.
 - Plugin tool design: https://developers.openai.com/plugins/plan/tools
-  - tool surfaces should map to coherent user outcomes;
-  - operations should be split when permissions, safety risk, or confirmation requirements differ.
+  - tool descriptions must state actual behavior, limits, and prerequisites;
+  - `readOnlyHint`, `destructiveHint`, and `openWorldHint` must match real behavior;
+  - annotations do not replace server-side authorization, validation, or consequential-action confirmation;
+  - tool surfaces should map to coherent user outcomes and similar tools must not have overlapping descriptions that create selection ambiguity.
+- MCP server authentication/authorization: https://developers.openai.com/plugins/build/mcp-server
+  - private-data reads and user actions require authentication when applicable;
+  - authorization is enforced server-side for every request and must never be delegated to the model.
 - Agents guardrails / human review: https://developers.openai.com/api/docs/guides/agents/guardrails-approvals
   - approval pauses execution and returns resumable state;
   - the same run is resumed after approval/rejection;

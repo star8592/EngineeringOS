@@ -113,3 +113,10 @@ The same live run exposed a retry-storm bug: the runner cleared the machine-fail
 ### Registry timeout semantics
 
 Project registry policy may select explicit per-provider runtime budgets through `provider_timeouts`, keyed by provider identity. The legacy shared `provider_timeout` field is forbidden because providers have materially different latency envelopes and native defaults. Project Zero intentionally carries no provider timeout override: Codex and Claude use their provider-owned defaults. Runtime registry remains mutable activation policy, while accepted field semantics are code/schema invariants and are regression-tested.
+
+
+## EP-02 External-project safe baseline — 2026-10-05
+
+State: IMPLEMENTED_BASELINE. External projects now enter through an explicit read-only onboarding path before autonomous mutation. The Supervisor owns a separate baseline lane that records canonical repository identity, source HEAD, branch/upstream, bounded modified/untracked paths, and project-owned verification entrypoint names without reading or copying file contents. Dirty repositories become `PROTECTED_EXISTING_WORK`; the commercial surface shows that state in ordinary language. A registry project may set `require_clean_baseline=true`; if such a project is accidentally enabled for Autopilot while its baseline is missing or dirty, the registered runner returns `BASELINE_BLOCKED` before planning or coding. This is a machine safety condition and does not become `NEEDS_INTENT`.
+
+The first external project is `KangarooMath` / 袋鼠数学. Its canonical repository alias resolves to `star8592/Kangaroo-Practice-Simulator`. The initial live baseline observed pre-existing modified and untracked work, preserved the repository byte-for-byte at the Git-status/HEAD boundary, and therefore keeps the project connected/read-only until that work is independently converged. See `docs/roadmap/EXTERNAL_PROJECT_MANAGEMENT_PLAN.md`.

@@ -17,6 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 from state_paths import runtime
 from autopilot_supervision import supervisor_decision, bounded_history
 from registered_autopilot_runner import run_registered_once
+from external_project_baseline import refresh_registered_projects
 STATE = runtime()
 
 
@@ -164,6 +165,15 @@ def run_checked(args: list[str], timeout: int = 240) -> None:
     subprocess.run(args, cwd=ROOT, check=True, timeout=timeout, stdout=subprocess.DEVNULL)
 
 
+def run_project_baseline_lane() -> dict:
+    registry = STATE / 'projects/registry.json'
+    try:
+        result = refresh_registered_projects(registry, STATE)
+        counts = Counter(x.get('state','UNKNOWN') for x in result.get('projects',[]))
+        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts)}
+    except Exception as exc:
+        return {'health':'DEGRADED','error_type':type(exc).__name__,'error':str(exc)}
+
 def run_project_autopilot_lane() -> dict:
     registry = STATE / 'projects/registry.json'
     try:
@@ -177,6 +187,7 @@ def run_cycle() -> dict:
     started = time.monotonic()
     started_at = utcnow()
     status_path = STATE / 'supervisor/status.json'
+    project_baseline = run_project_baseline_lane()
     project_autopilot = run_project_autopilot_lane()
     try:
         run_checked(['python3', 'src/engineeringos/shadow_run.py'])
@@ -252,6 +263,7 @@ def run_cycle() -> dict:
             'autopilot_action': autopilot_decision.get('action'),
             'autopilot_reason': autopilot_decision.get('reason'),
             'autopilot_should_notify': autopilot_decision.get('should_notify', False),
+            'project_baseline': project_baseline,
             'project_autopilot': project_autopilot,
             'target_mutation_authorized': False,
         }
@@ -269,6 +281,7 @@ def run_cycle() -> dict:
             'error_type': type(exc).__name__,
             'error': str(exc),
             'traceback': traceback.format_exc()[-12000:],
+            'project_baseline': project_baseline,
             'project_autopilot': project_autopilot,
             'target_mutation_authorized': False,
         }
