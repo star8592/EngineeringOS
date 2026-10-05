@@ -20,10 +20,12 @@ def build(registry_path,runtime_root)->dict:
   pp=project_root/"promotion.json"
   wp=project_root/"protected-work.json"
   cp=project_root/"protected-comparison.json"
+  dp=project_root/"deferred-candidate-summary.json"
   baseline=json.loads(bp.read_text()) if bp.exists() else None
   promotion=json.loads(pp.read_text()) if pp.exists() else None
   protected_work=json.loads(wp.read_text()) if wp.exists() else None
   protected_comparison=json.loads(cp.read_text()) if cp.exists() else None
+  deferred_summary=json.loads(dp.read_text()) if dp.exists() else None
   evs=events(jp) if jp.exists() else []
   state=replay_project(evs) if evs else {"work_items":{}}
   items=list(state.get("work_items",{}).values())
@@ -63,12 +65,22 @@ def build(registry_path,runtime_root)->dict:
     "stable_path_count":sum(x.get("observation")=="STABLE" for x in pr),
     "changed_path_count":sum(x.get("observation") in {"NEW","CHANGED"} for x in pr),
    }
+  deferred_public=None
+  if deferred_summary:
+   counts=deferred_summary.get("counts") or {}
+   deferred_public={
+    "verified_candidates":int(deferred_summary.get("verified_candidates",0)),
+    "waiting_protected_work":int(counts.get("WAITING_PROTECTED_WORK",0)),
+    "stale_replan_required":int(counts.get("STALE_SOURCE_REPLAN_REQUIRED",0)),
+    "ready_for_revalidation":int(counts.get("READY_FOR_REVALIDATION",0)),
+   }
   products.append({
    "id":name,"name":display_name,"connected":True,"autopilot_enabled":effective,
    "status":status,
    "protected_work":protected_summary,
    "protected_verification":({"state":protected_comparison.get("state"),"baseline_failure_stage":protected_comparison.get("baseline_failure_stage"),"dirty_verified":bool(protected_comparison.get("dirty_verified")),"dirty_regression_proven":bool(protected_comparison.get("dirty_regression_proven"))} if protected_comparison else None),
-   "management_note":((f"检测到 {protected_summary['dirty_path_count']} 项现有未提交工作，分成 {protected_summary['candidate_package_count']} 个候选关联组；AI开发经理会保护它们，不会覆盖或自动提交。" if protected_summary else "检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。") if status=="PROTECTED" else ("自动管理条件尚未满足，系统不会越过安全门。" if status=="MANAGEMENT_BLOCKED" else ("已有需求进入队列，但自动管理尚未生效。" if status=="QUEUED" else ("安全基线已建立，当前没有自动管理授权。" if status=="BASELINED" else None)))),
+   "deferred_maintenance":deferred_public,
+   "management_note":(((f"检测到 {protected_summary['dirty_path_count']} 项现有未提交工作，分成 {protected_summary['candidate_package_count']} 个候选关联组；AI开发经理会保护它们，不会覆盖或自动提交。" if protected_summary else "检测到现有未提交工作，AI开发经理会保护它们，不会覆盖或自动提交。") + (f" 已准备 {deferred_public['verified_candidates']} 个验证通过的维护候选，等待现有工作收敛后重新验证。" if deferred_public and deferred_public['verified_candidates'] else "")) if status=="PROTECTED" else ("自动管理条件尚未满足，系统不会越过安全门。" if status=="MANAGEMENT_BLOCKED" else ("已有需求进入队列，但自动管理尚未生效。" if status=="QUEUED" else ("安全基线已建立，当前没有自动管理授权。" if status=="BASELINED" else None)))),
    "active_work":[{"text":_text(x)} for x in active[:5]],
    "recent_completed":recent,
    "decisions":decisions

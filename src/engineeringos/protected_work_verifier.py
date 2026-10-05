@@ -1,5 +1,6 @@
 from __future__ import annotations
 import hashlib,io,json,os,pathlib,re,shutil,subprocess,tarfile,tempfile,time
+from isolated_dependencies import materialize_node_modules
 
 class ProtectedVerificationError(RuntimeError):pass
 
@@ -79,9 +80,7 @@ def verify(repo_path:str|pathlib.Path,inventory:dict,command:list[str],*,timeout
   subprocess.run(["git","add","-A"],cwd=ws,check=True)
   subprocess.run(["git","commit","-qm","protected verification base"],cwd=ws,check=True)
   _overlay(repo,ws,inventory)
-  source_node_modules=repo/"node_modules"
-  if source_node_modules.is_dir() and not (ws/"node_modules").exists():
-   os.symlink(source_node_modules,ws/"node_modules",target_is_directory=True)
+  dependency_materialization=materialize_node_modules(repo,ws)
   proc=subprocess.run(command,cwd=ws,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=timeout_seconds)
   diagnostic=_diagnostic_signature(proc.stdout,proc.stderr,ws,proc.returncode)
   changed=subprocess.check_output(["git","status","--porcelain=v1","-z","--untracked-files=all"],cwd=ws)
@@ -93,7 +92,7 @@ def verify(repo_path:str|pathlib.Path,inventory:dict,command:list[str],*,timeout
  return {
   "schema_version":1,"state":state,"source_head":source_head_before,"source_unchanged":source_unchanged,
   "inventory_fingerprint":inv_fp,"command":command,"exit_code":proc.returncode,"elapsed_ms":elapsed_ms,
-  "workspace_status_sha256":changed_sha,"diagnostic_signature":diagnostic,
+  "workspace_status_sha256":changed_sha,"diagnostic_signature":diagnostic,"dependency_materialization":dependency_materialization,
   "stdout_tail":proc.stdout[-6000:],"stderr_tail":proc.stderr[-6000:],
   "authority":"ISOLATED_PROTECTED_WORK_VERIFICATION_ONLY","mutation_authorized":False,
  }

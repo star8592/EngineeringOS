@@ -23,6 +23,7 @@ from backend_surface_monitor import reconcile as reconcile_backend_surface
 from dashboard_projector import project_fast as project_fast_dashboard
 from protected_work_inventory import inspect as inspect_protected_work
 from project_registry import load as load_project_registry
+from deferred_candidate_registry import summarize as summarize_deferred_candidates
 STATE = runtime()
 
 
@@ -188,13 +189,20 @@ def run_project_baseline_lane() -> dict:
                 inv={'schema_version':1,'observed_at':utcnow(),'repo':str(pathlib.Path(cfg['repo']).resolve()),'head':row.get('head'),'branch':row.get('branch'),'state':'CLEAN','dirty_path_count':0,'paths':[],'disappeared_paths':[],'structural_edges':[],'candidate_packages':[],'safety':{'mutation_authorized':False,'auto_commit':False,'auto_delete':False,'candidate_groups_authoritative':False}}
             atomic_json(out_path,inv)
             protected_counts[name]={'dirty_path_count':inv.get('dirty_path_count',0),'candidate_packages':len(inv.get('candidate_packages',[]))}
+        deferred_counts = {}
+        for row in result.get('projects',[]):
+            name=row.get('project')
+            if not name: continue
+            summary=summarize_deferred_candidates(STATE/'projects'/name)
+            atomic_json(STATE/'projects'/name/'deferred-candidate-summary.json',summary)
+            deferred_counts[name]=summary.get('counts',{})
         promotion = assess_registered(registry, STATE)
         atomic_json(STATE / 'projects/promotion-summary.json', promotion)
         for row in promotion.get('projects', []):
             atomic_json(STATE / 'projects' / row['project'] / 'promotion.json', row)
         counts = Counter(x.get('state','UNKNOWN') for x in result.get('projects',[]))
         promotion_counts = Counter(x.get('state','UNKNOWN') for x in promotion.get('projects',[]))
-        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts),'promotion_states':dict(promotion_counts),'protected_work':protected_counts}
+        return {'health':'HEALTHY','project_count':len(result.get('projects',[])),'states':dict(counts),'promotion_states':dict(promotion_counts),'protected_work':protected_counts,'deferred_candidates':deferred_counts}
     except Exception as exc:
         return {'health':'DEGRADED','error_type':type(exc).__name__,'error':str(exc)}
 
