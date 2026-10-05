@@ -20,6 +20,7 @@ def load(path):
   if "display_name" in x and (not isinstance(x["display_name"],str) or not x["display_name"].strip()):raise RegistryError("INVALID_DISPLAY_NAME")
   if "require_clean_baseline" in x and not isinstance(x["require_clean_baseline"],bool):raise RegistryError("INVALID_BASELINE_POLICY")
   if "management_target" in x and x["management_target"] not in ("CONNECTED_READ_ONLY","A2_MANAGED"):raise RegistryError("INVALID_MANAGEMENT_TARGET")
+  if "protected_work_policy" in x and x["protected_work_policy"] not in ("PROTECT_ONLY","ADOPT_VERIFIED_QUIET"):raise RegistryError("INVALID_PROTECTED_WORK_POLICY")
   for field in ("expected_origin","managed_branch","a2_verification_entrypoint"):
    if field in x and (not isinstance(x[field],str) or not x[field].strip()):raise RegistryError("INVALID_MANAGEMENT_POLICY")
   aliases=x.get("aliases",[])

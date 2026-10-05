@@ -150,3 +150,7 @@ State: IMPLEMENTED_BASELINE. Autonomous commits now carry deterministic recovery
 ## EP-02B Protected external work reconciliation — 2026-10-05
 
 State: IMPLEMENTED_BASELINE. External dirty work is now fingerprinted, structurally grouped, quiet-window tracked and isolated-verifiable without source mutation. Candidate groups are explicitly non-authoritative. Differential verification separates pre-existing baseline debt from regressions introduced by the protected snapshot. The first KangarooMath run produced four candidate groups across 11 paths and BASELINE_RED_SAME_FAILURE against the project-owned public quality gate.
+
+## EP-04B Protected-work adoption — 2026-10-05
+
+State: GATE_IMPLEMENTED. Protected external work can transition from PROTECTED_EXISTING_WORK to ADOPTABLE only through ADR-032. Quiet time, process inactivity, exact inventory identity, selected candidate hashes, path containment, canonical Git identity and composed full verification are all required. The gate grants no mutation authority by itself.

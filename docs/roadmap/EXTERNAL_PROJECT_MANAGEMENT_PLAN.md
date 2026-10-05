@@ -199,3 +199,24 @@ Protected work can be verified without mutating the source checkout. Engineering
 Verification is differential when the canonical HEAD is already red. The same project-owned gate is run against a clean HEAD snapshot and the dirty snapshot. Results are classified as DIRTY_VERIFIED, DIRTY_REGRESSION, DIRTY_IMPROVES_BASELINE, BASELINE_RED_SAME_FAILURE, or INCONCLUSIVE_DIFFERENT_FAILURE. A baseline-red same-failure result explicitly does not mean the dirty work passed; it only proves the observed failure was not newly introduced by that dirty snapshot.
 
 Live KangarooMath acceptance observed 11 dirty paths grouped into four candidate work packages: governance (5 paths), solution materialization (1), G1-2 solution-v2 migration (1), and student card-book UI (4). The project-owned verify:public gate fails on both clean d586d84 and the dirty snapshot at the same committed MathCardReveal.tsx eslint set-state-in-effect diagnostic. The differential state is BASELINE_RED_SAME_FAILURE; source HEAD/status remained unchanged throughout both isolated runs.
+
+## EP-04B Protected-work adoption gate — 2026-10-05
+
+State: IMPLEMENTED_GATE / LIVE KANGAROOMATH ADOPTABLE.
+
+Existing dirty work no longer causes an indefinite dead-end. A project may opt into protected_work_policy=ADOPT_VERIFIED_QUIET. The gate is separate from promotion and separate from convergence.
+
+The gate requires:
+- A2 management target and explicit adoption policy;
+- canonical origin/main/upstream with no divergence;
+- protected inventory identity matching the manager-selected adoption plan;
+- all protected candidate groups QUIET;
+- zero active repository references/writable handles;
+- verified deferred baseline candidate;
+- verified protected repair candidate;
+- composed full project verification PASS;
+- repair surface contained in protected paths;
+- deferred candidate surface disjoint from protected paths;
+- no sensitive protected paths.
+
+KangarooMath live evidence at d586d84 passed all gates. The selected adoption plan contains 11 protected paths plus the verified MathCardReveal baseline fix, for 12 final adopted paths. The gate itself remains no-mutation authority; convergence is the next separate step.
