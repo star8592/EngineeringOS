@@ -131,3 +131,7 @@ Natural-language clarity is not mutation authority. New desires first create cap
 ## Durable planning boundary
 
 Planning and coding are separate durable phases. A planner never hands an in-memory contract directly to a coder. Deterministic admission binds an accepted contract to a source SHA and writes it to the project journal; only a later replayed state may enter mutation execution. Source drift invalidates the contract and requires replanning. This makes repository evolution between AI planning and AI coding an ordinary machine reconciliation problem rather than a hidden race or a human escalation.
+
+## Provider runtime is evidence, not intent
+
+Provider latency, authentication, timeout, and availability are machine facts. Each provider owns a conservative native runtime budget; project policy may explicitly override it, but orchestration must not silently replace it with a shorter generic timeout. Provider attempts record latency and deterministic failure classification. Machine failures enter bounded backoff. Repository source drift is reconciliation, not provider failure, and must invalidate the old contract before replanning. Neither condition escalates to the human as a product-intent question.

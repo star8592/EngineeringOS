@@ -18,7 +18,9 @@ def replay_project(events):
    state["work_items"][key]={**p,"id":key,"state":"DISCOVERED"}
   elif typ=="WORK_CONTRACT_INVALIDATED":
    if key not in state["work_items"]: raise ProjectReplayError("WORK_NOT_CREATED")
-   cur=dict(state["work_items"][key]);cur.pop("allowed_paths",None);cur.pop("verification_argv",None);cur.pop("source_sha",None);cur["state"]="REOPENED";cur.update(p);state["work_items"][key]=cur
+   cur=dict(state["work_items"][key])
+   for field in ("allowed_paths","verification_argv","source_sha","failure_detail","routing"):cur.pop(field,None)
+   cur["state"]="REOPENED";cur.update(p);state["work_items"][key]=cur
   elif typ=="WORK_CONTRACT_ADMITTED":
    if key not in state["work_items"]: raise ProjectReplayError("WORK_NOT_CREATED")
    cur=dict(state["work_items"][key]);cur.update(p);cur["state"]="REOPENED";state["work_items"][key]=cur

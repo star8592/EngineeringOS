@@ -19,7 +19,8 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
   state=recover(runtime_root,cfg["name"]);dp=pathlib.Path(runtime_root)/"projects"/cfg["name"]/"continuous.json";prev=json.loads(dp.read_text()) if dp.exists() else {}
   if prev.get("next_eligible_at",0)>now:
    out.append({"project":cfg["name"],"action":"BACKOFF_WAIT","delay_seconds":round(prev["next_eligible_at"]-now)});continue
-  decision=classify(state,{**prev,"last_result":None} if prev.get("last_result")=="MACHINE_FAILURE" else prev)
+  retry_due=prev.get("last_result")=="MACHINE_FAILURE" and prev.get("next_eligible_at",0)<=now
+  decision=classify(state,{**prev,"last_result":None} if retry_due else prev)
   if decision["action"]=="ADVANCE":
    planning=plan_one(cfg["repo"],runtime_root,cfg["name"],planner_factory(cfg))
    if planning["state"]=="CONTRACT_ADMITTED":
@@ -35,5 +36,7 @@ def run_registered_once(registry_path,runtime_root,*,provider_factory=None,plann
    failures=int(prev.get("failures",0))+1;decision["failures"]=failures
    from continuous_autopilot import next_delay
    delay=next_delay(failures)
+  elif decision.get("last_result") in ("SUCCESS","RECONCILE"):
+   decision["failures"]=0
   decision["next_eligible_at"]=now+delay;atomic(dp,decision)
  return out

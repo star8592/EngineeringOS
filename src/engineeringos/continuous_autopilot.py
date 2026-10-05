@@ -20,5 +20,7 @@ def classify(state:dict,previous:dict|None=None)->dict:
  if fp==previous.get("fingerprint"):return {"action":"SLEEP","reason":"STABLE_STATE","fingerprint":fp,"should_notify":False,"failures":0,"delay_seconds":300}
  return {"action":"OBSERVE","reason":"STATE_CHANGED_NO_MACHINE_WORK","fingerprint":fp,"should_notify":False,"failures":0,"delay_seconds":30}
 def after_execution(decision:dict,result:dict)->dict:
- failed=any(x.get("state")=="REOPENED" for x in result.get("execution",{}).get("results",[]))
- out=dict(decision);out["last_result"]="MACHINE_FAILURE" if failed else "SUCCESS";return out
+ rows=result.get("execution",{}).get("results",[])
+ failed=any(x.get("state")=="REOPENED" and x.get("reason")!="SOURCE_SHA_DRIFT" for x in rows)
+ reconciled=any(x.get("reason")=="SOURCE_SHA_DRIFT" for x in rows)
+ out=dict(decision);out["last_result"]="MACHINE_FAILURE" if failed else ("RECONCILE" if reconciled else "SUCCESS");return out
