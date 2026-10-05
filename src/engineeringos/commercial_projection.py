@@ -12,6 +12,7 @@ def build(registry_path,runtime_root)->dict:
  for cfg in registry.get("projects",[]):
   name=cfg.get("name")
   if not name:continue
+  display_name=cfg.get("display_name") or name
   jp=pathlib.Path(runtime_root)/"projects"/name/"journal.jsonl"
   evs=events(jp) if jp.exists() else []
   state=replay_project(evs) if evs else {"work_items":{}}
@@ -32,9 +33,9 @@ def build(registry_path,runtime_root)->dict:
   decisions=[]
   for x in needs[:3]:
    decisions.append({"question":x.get("question") or x.get("intent_question") or "有一个产品方向需要你确认。"})
-  status="NEEDS_INTENT" if needs else ("WORKING" if active else "HEALTHY")
+  status="NEEDS_INTENT" if needs else ("WORKING" if active else ("HEALTHY" if cfg.get("autopilot_enabled") else "CONNECTED"))
   products.append({
-   "id":name,"name":name,"connected":True,"autopilot_enabled":bool(cfg.get("autopilot_enabled")),
+   "id":name,"name":display_name,"connected":True,"autopilot_enabled":bool(cfg.get("autopilot_enabled")),
    "status":status,
    "active_work":[{"text":_text(x)} for x in active[:5]],
    "recent_completed":recent,

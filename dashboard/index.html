@@ -96,10 +96,10 @@ addProduct.addEventListener('click',()=>{document.querySelector('[data-view="set
 function renderProduct(p){
  projectName.textContent=p.name||'当前产品';
  const status=p.status||'HEALTHY';
- const labels={HEALTHY:'状态良好',WORKING:'正在开发',NEEDS_INTENT:'需要你的决定'};
+ const labels={HEALTHY:'状态良好',CONNECTED:'已接入',WORKING:'正在开发',NEEDS_INTENT:'需要你的决定'};
  projectBadge.textContent=p.autopilot_enabled?'自动管理中':'已接入';
  humanStatus.textContent=labels[status]||status;
- humanSummary.textContent=status==='NEEDS_INTENT'?'有一个产品方向需要你决定，系统不会替你猜。':status==='WORKING'?'系统正在自己推进明确的开发工作。':'当前没有需要你处理的工程问题。';
+ humanSummary.textContent=status==='NEEDS_INTENT'?'有一个产品方向需要你决定，系统不会替你猜。':status==='WORKING'?'系统正在自己推进明确的开发工作。':status==='CONNECTED'?'项目已经接入，自动管理将在安全基线建立后开启。':'当前没有需要你处理的工程问题。';
  const active=p.active_work||[];
  humanNow.textContent=active[0]?.text||'目前没有未完成的自动开发任务。';
  const completed=p.recent_completed||[];

@@ -41,7 +41,7 @@ def safe_product_catalog():
         for item in body.get('projects',[]):
             name=item.get('name')
             if not name: continue
-            products.append({'id':name,'name':name,'connected':True,'autopilot_enabled':bool(item.get('autopilot_enabled'))})
+            products.append({'id':name,'name':item.get('display_name') or name,'connected':True,'autopilot_enabled':bool(item.get('autopilot_enabled'))})
     out={'schema_version':1,'products':products}
     dst=pathlib.Path('dashboard/runtime/products.json');dst.parent.mkdir(parents=True,exist_ok=True)
     raw=(json.dumps(out,sort_keys=True,indent=2,ensure_ascii=False)+'\n').encode()

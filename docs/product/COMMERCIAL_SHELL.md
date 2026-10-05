@@ -38,3 +38,7 @@ This projection is the multi-project contract. Registering another real project,
 The current commercial shell is intentionally read-only. The conversation composer is visible to establish the final interaction model, but sending is disabled until the authenticated conversation-command write API is attached. The UI must never pretend a user request was accepted when no durable intent event was written.
 
 EngineeringOS Control Room remains available under Settings -> Engineering Details for advanced diagnosis and evidence inspection.
+
+## External project onboarding
+
+A real project may be visible as CONNECTED before mutation Autopilot is enabled. This is intentional. If the target repository already contains unrelated or uncommitted work, EngineeringOS must preserve it and establish a safe baseline before enabling autonomous A1/A2 mutation. A registry project may therefore have a stable technical `name` and a user-facing `display_name`; the commercial surface uses the display name while durable project identity remains stable.
