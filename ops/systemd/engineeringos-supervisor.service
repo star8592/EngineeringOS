@@ -1,0 +1,16 @@
+[Unit]
+Description=EngineeringOS Autonomous Delivery Supervisor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/mnt/disk1/Code/EngineeringOS
+ExecStart=/usr/bin/python3 /mnt/disk1/Code/EngineeringOS/src/engineeringos/supervisor.py --interval 300
+Restart=always
+RestartSec=10
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
