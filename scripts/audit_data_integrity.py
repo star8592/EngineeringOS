@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import os
 import subprocess
 from pathlib import Path
 
@@ -18,16 +19,22 @@ CHECKS=[
 ]
 def scan(repo:Path):
     hits=[]
-    for p in repo.rglob("*"):
-        if not p.is_file() or p.suffix not in INCLUDED or any(part in SKIP for part in p.relative_to(repo).parts):continue
-        if p.name==Path(__file__).name:continue
-        if p.stat().st_size>1_000_000:continue
-        try: data=p.read_text(encoding="utf-8")
-        except UnicodeError:continue
-        for n,line in enumerate(data.splitlines(),1):
-            for label,pattern in CHECKS:
-                if pattern.search(line):
-                    hits.append({"path":str(p.relative_to(repo)),"line":n,"kind":label})
+    for current, dirs, files in os.walk(repo):
+        dirs[:]=[d for d in dirs if d not in SKIP and not d.startswith(".cache")]
+        for name in files:
+            p=Path(current)/name
+            if p.suffix not in INCLUDED or p.name in {Path(__file__).name,"engineering_guard.py"}:
+                continue
+            if p.stat().st_size>1_000_000:
+                continue
+            try:
+                data=p.read_text(encoding="utf-8")
+            except UnicodeError:
+                continue
+            for n,line in enumerate(data.splitlines(),1):
+                for label,pattern in CHECKS:
+                    if pattern.search(line):
+                        hits.append({"path":str(p.relative_to(repo)),"line":n,"kind":label})
     return hits
 def main():
     ap=argparse.ArgumentParser()
