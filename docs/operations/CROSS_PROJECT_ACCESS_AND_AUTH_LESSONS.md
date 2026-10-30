@@ -134,7 +134,17 @@
 | 2026-10 Zoria 受限运行上下文 | userns 文件权限表象不是宿主机真实损坏 | 先读项目执行上下文 doctor，再决定是否允许 host 修复 |
 | Chrome 调试授权频繁出现 | 浏览器会话可能需要明确的人类授权，自动流程不能默默绕过 | 现有授权 session 优先，出现 consent 记录阻断点 |
 
-## 9. 安全、更新和覆盖范围
+## 9. CI 通过但生产一直是旧 SHA：不应归因 SSH 或缓存（2026-10-30）
+
+**SOCTHINK 真实根因与验证**：GitHub main 已更新，生产 `git ls-remote origin main` 也确认了新 SHA，但自动发布脚本仍报告 `AUTO_DEPLOY=CURRENT`，继续运行旧版本。生产使用 `git fetch origin main` 并随后读取 `origin/main`；在某些仓库 fetch refspec 配置下，显式 fetch 更新 `FETCH_HEAD`，却**不保证**远程跟踪引用 `origin/main` 同步更新。
+
+**正式规则**：在成功执行 `git fetch origin main` 后，使用 `git rev-parse --verify 'FETCH_HEAD^{commit}'` 作为此次实际 fetch 的目标 SHA，而不是直接读取可能过时的 tracking ref。继续针对该精确 SHA 验证官方 CI-green、不可变构建、smoke、回滚和公网 release 回执。不可为了“赶快上线”跳过 CI 或手工给部署元数据写一个假 SHA。
+
+**可复验回归**：SOCTHINK `scripts/test_git_fetch_head_precedence.py` 用纯本地 bare Git 复现 `origin/main` 仍旧、`FETCH_HEAD` 已新，证明错误判断源头。相关修复 [SOCTHINK PR #161](https://github.com/star8592/Kangaroo-Practice-Simulator/pull/161)。相同故障不仅影响支付，所有自动拉取发布项目都应检查此类 stale-ref 判断。
+
+**SSH 救援关联**：不得以 `-F /dev/null` 绕开上次成功的 SSH Host 配置；显式使用正确项目的 Host alias/身份。凡日常自动发布器自身需要修复，使用项目**已有规范化手动恢复发布入口**来更新正式 runner，不在生产服务器叠补丁或启动平行发布路径。记录目标 `TARGET_SHA`、运行 `deployedSha`、CI SHA 三者分别核对。
+
+## 10. 安全、更新和覆盖范围
 
 - 此中央文档**不授予**访问权、项目读写权、商户后台签约权或生产部署权；不改变用户授权、工具安全规则及项目独立性。
 - 更新须经过正常工程流程，并在本文件保持一个当前版本。不要每次事故新开重复手册，也不要让旧聊天概述覆盖经过证据核实的新结论。
