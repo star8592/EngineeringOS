@@ -4,7 +4,7 @@ AI-native software engineering control plane for continuously evolving software 
 
 EngineeringOS manages the causal chain from human intent to architecture, agent work, evidence, convergence, release, production verification, and learning. It coordinates mature engineering infrastructure instead of replacing Git, CI, merge queues, coding agents, or execution backends.
 
-**Cross-project mandatory data integrity rule:** [ADR-033 — No embedded business configuration or fabricated records](docs/decisions/ADR-033-no-hardcoded-or-fabricated-business-data.md). Every project must use real provenance-backed data and explicit configuration; scanner entrypoint: `python3 scripts/audit_data_integrity.py /path/to/repo`. A scanner result is not proof of complete remediation.
+**Cross-project access / login protocol:** Before SSH, DevControl/Zoria remote operations, OAuth, Chrome, payment credentials or deployment, read the [single canonical access and authentication lessons runbook](docs/operations/CROSS_PROJECT_ACCESS_AND_AUTH_LESSONS.md). Every project root `AGENTS.md` should link to it; audit with `python3 scripts/audit_access_runbook_links.py /path/to/code/workspace`. A link only confirms discoverability, not actual login success or authorization.\n\n**Cross-project mandatory data integrity rule:** [ADR-033 — No embedded business configuration or fabricated records](docs/decisions/ADR-033-no-hardcoded-or-fabricated-business-data.md). Every project must use real provenance-backed data and explicit configuration; scanner entrypoint: `python3 scripts/audit_data_integrity.py /path/to/repo`. A scanner result is not proof of complete remediation.
 
 ## Founding principles
 - AI reasons; deterministic systems own durable state and execution.
